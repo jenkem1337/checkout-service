@@ -38,12 +38,8 @@ describe('Money',() => {
                 expect(newMoney).toBeTruthy()
             })
             it('should throw NegativeNumberException when given making negative amount for Money constructor', () => {
-                try {
                     let money = new Money(12)
-                    let newMoney = money.subtract(50)
-                } catch (err:any) {
-                    expect(err.message).toBe('number must be greater than zero')
-                }
+                    expect(() =>money.subtract(50)).toThrow(NegativeNumberException)
             })
 
             it('should return 1 when given Money instance with 21 and subtract with 20', () => {
