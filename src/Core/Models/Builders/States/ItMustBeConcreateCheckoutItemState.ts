@@ -1,5 +1,6 @@
 import CheckoutItem from '../../Domain Models/CheckoutItem';
 import CheckoutItemInterface from '../../Domain Models/CheckoutItemInterface';
+import CheckoutID from '../../ValueObjects/CheckoutID';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import Money from '../../ValueObjects/Money';
 import ProductHeader from '../../ValueObjects/ProductHeader';
@@ -9,24 +10,27 @@ import BaseCheckoutItemBuilderState from './BaseCheckoutItemBuilderState';
 
 export default class ItMustBeConcreateCheckoutItemState extends BaseCheckoutItemBuilderState {
     
-    checkoutUuid(uuid: () => CheckoutItemID): void {
-        this.context.uuid = uuid()
+    checkoutItemUuid(itemUuid: () => CheckoutItemID): void {
+        this.context.uuid = itemUuid()
+    }
+    checkoutUuid(checkoutUuid: () => CheckoutID): void {
+        this.context._checkoutUuid = checkoutUuid()
     }
     
-    checkoutItemUuid(itemUuid: () => ProductID): void {
-        this.context.itemUuid = itemUuid()
+    checkoutProductUuid(productUuid: () => ProductID): void {
+        this.context.productUuid = productUuid()
     }
     
-    checkoutItemHeader(itemHeader: () => ProductHeader): void {
-        this.context.itemHeader = itemHeader()
+    checkoutProductHeader(itemHeader: () => ProductHeader): void {
+        this.context.productHeader = itemHeader()
     }
     
-    checkoutItemBasePrice(itemBasePrice: () => Money): void {
-        this.context.itemBasePrice = itemBasePrice()
+    checkoutProductBasePrice(itemBasePrice: () => Money): void {
+        this.context.productBasePrice = itemBasePrice()
     }
     
-    checkoutItemQuantity(itemQuantity: () => ProductQuantity): void {
-        this.context.itemQuantity = itemQuantity()
+    checkoutProductQuantity(itemQuantity: () => ProductQuantity): void {
+        this.context.productQuantity = itemQuantity()
     }
     
     checkoutCreatedAt(date: Date): void {
@@ -40,10 +44,11 @@ export default class ItMustBeConcreateCheckoutItemState extends BaseCheckoutItem
     build(): CheckoutItemInterface {
         return new CheckoutItem(
             this.context.uuid,
-            this.context.itemUuid,
-            this.context.itemHeader,
-            this.context.itemBasePrice,
-            this.context.itemQuantity,
+            this.context._checkoutUuid,
+            this.context.productUuid,
+            this.context.productHeader,
+            this.context.productBasePrice,
+            this.context.productQuantity,
             this.context.createdAt,
             this.context.updatedAt
         ) 

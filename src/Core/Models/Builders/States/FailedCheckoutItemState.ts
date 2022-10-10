@@ -7,10 +7,11 @@ import ProductID from '../../ValueObjects/ProductID';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import BaseCheckoutItemBuilderState from './BaseCheckoutItemBuilderState';
 import NullCheckoutItem from '../../Domain Models/NullCheckoutItem';
+import CheckoutID from '../../ValueObjects/CheckoutID';
 
 export default class FailedCheckoutItemState extends BaseCheckoutItemBuilderState {
     
-    checkoutUuid(uuid: () => CheckoutItemID): void {
+    checkoutUuid(uuid: () => CheckoutID): void {
         this.context.build()
     }
     
@@ -18,18 +19,20 @@ export default class FailedCheckoutItemState extends BaseCheckoutItemBuilderStat
         this.context.build()
     }
     
-    checkoutItemHeader(itemHeader: () => ProductHeader): void {
+    checkoutProductHeader(itemHeader: () => ProductHeader): void {
         this.context.build()
     }
     
-    checkoutItemBasePrice(itemBasePrice: () => Money): void {
+    checkoutProductBasePrice(itemBasePrice: () => Money): void {
         this.context.build()
     }
     
-    checkoutItemQuantity(itemQuantity: () => ProductQuantity): void {
+    checkoutProductQuantity(itemQuantity: () => ProductQuantity): void {
         this.context.build()
     }
-    
+    checkoutProductUuid(productUuid: () => ProductID): void {
+        this.context.build()
+    }
     checkoutCreatedAt(date: Date): void {
         this.context.build()
     }

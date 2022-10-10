@@ -5,8 +5,9 @@ import ProductID from '../ValueObjects/ProductID';
 import ProductQuantity from '../ValueObjects/ProductQuantity';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import NullObjectException from '../../Exceptions/NullObjectException';
+import CheckoutID from '../ValueObjects/CheckoutID';
 export default class NullCheckoutItem implements CheckoutItemInterface {
-    changeItemBasePrice(newBasePrice: number): void {
+    changeProductBasePrice(newBasePrice: number): void {
         throw new NullObjectException
     }
     incraseQuantity(quantity: number): void {
@@ -15,20 +16,23 @@ export default class NullCheckoutItem implements CheckoutItemInterface {
     decreaseQuantity(quantity: number): void {
         throw new NullObjectException
     }
-    getItemUuid(): ProductID {
+    getProductUuid(): ProductID {
         throw new NullObjectException();
     }
-    getItemBasePrice(): Money {
+    getProductBasePrice(): Money {
         throw new NullObjectException();
     }
-    getItemQuantity(): ProductQuantity {
+    getProductQuantity(): ProductQuantity {
         throw new NullObjectException();
     }
-    getItemHeader(): ProductHeader {
+    getProductHeader(): ProductHeader {
         throw new NullObjectException();
     }
     getUuid(): CheckoutItemID {
         throw new NullObjectException();
+    }
+    getCheckoutUuid(): CheckoutID {
+        throw new NullObjectException()
     }
     getCreatedAt(): Date {
         throw new NullObjectException();

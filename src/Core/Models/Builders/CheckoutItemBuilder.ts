@@ -6,16 +6,18 @@ import Builder from "./Builder"
 import CheckoutItemInterface from '../Domain Models/CheckoutItemInterface';
 import CheckoutItemID from '../ValueObjects/CheckoutItemID';
 import BaseCheckoutItemBuilderState from './States/BaseCheckoutItemBuilderState';
+import CheckoutID from '../ValueObjects/CheckoutID';
 
 export default class CheckoutItemBuilder implements Builder<CheckoutItemInterface>{
     public uuid: CheckoutItemID
-    public itemBasePrice: Money
-    public itemQuantity: ProductQuantity
-    public itemHeader: ProductHeader
-    public itemUuid: ProductID
+    public _checkoutUuid: CheckoutID
+    public productBasePrice: Money
+    public productQuantity: ProductQuantity
+    public productHeader: ProductHeader
+    public productUuid: ProductID
     public createdAt: Date
     public updatedAt: Date
-    public state: BaseCheckoutItemBuilderState
+    private state: BaseCheckoutItemBuilderState
     
     private constructor(state:BaseCheckoutItemBuilderState){
         this.setState(state)
@@ -29,24 +31,28 @@ export default class CheckoutItemBuilder implements Builder<CheckoutItemInterfac
         this.state = state
         this.state.setContext(this)
     }
-    checkoutUuid(uuid: () => CheckoutItemID):CheckoutItemBuilder {
-        this.state.checkoutUuid(uuid)
+    checkoutUuid(checkoutUuid: () => CheckoutID):CheckoutItemBuilder {
+        this.state.checkoutUuid(checkoutUuid)
         return this
     }
-    checkoutItemUuid(itemUuid: () => ProductID):CheckoutItemBuilder {
+    checkoutItemUuid(itemUuid: () => CheckoutItemID):CheckoutItemBuilder {
         this.state.checkoutItemUuid(itemUuid)
         return this
     }
-    checkoutItemHeader(itemHeader: () => ProductHeader): CheckoutItemBuilder {
-        this.state.checkoutItemHeader(itemHeader)
+    checkoutProductHeader(itemHeader: () => ProductHeader): CheckoutItemBuilder {
+        this.state.checkoutProductHeader(itemHeader)
         return this
     }
-    checkoutItemBasePrice(itemBasePrice: () => Money): CheckoutItemBuilder {
-        this.state.checkoutItemBasePrice(itemBasePrice)
+    checkoutProductBasePrice(itemBasePrice: () => Money): CheckoutItemBuilder {
+        this.state.checkoutProductBasePrice(itemBasePrice)
         return this    
     }
-    checkoutItemQuantity(itemQuantity: () => ProductQuantity): CheckoutItemBuilder {
-        this.state.checkoutItemQuantity(itemQuantity)
+    checkoutProductQuantity(itemQuantity: () => ProductQuantity): CheckoutItemBuilder {
+        this.state.checkoutProductQuantity(itemQuantity)
+        return this
+    }
+    checkoutProductUuid(productUuid:() => ProductID){
+        this.state.checkoutProductUuid(productUuid)
         return this
     }
     checkoutCreatedAt(date:Date):CheckoutItemBuilder {

@@ -7,10 +7,11 @@ import ProductID from '../../ValueObjects/ProductID';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import BaseCheckoutItemBuilderState from './BaseCheckoutItemBuilderState';
 import FailedCheckoutItemState from './FailedCheckoutItemState';
+import CheckoutID from '../../ValueObjects/CheckoutID';
 
 export default class ConcreateCheckoutItemState extends BaseCheckoutItemBuilderState {
     
-    checkoutUuid(uuid: () => CheckoutItemID): void {
+    checkoutItemUuid(uuid: () => CheckoutItemID): void {
         try {
             
             this.context.uuid = uuid()
@@ -19,29 +20,19 @@ export default class ConcreateCheckoutItemState extends BaseCheckoutItemBuilderS
         }
     }
     
-    checkoutItemUuid(itemUuid: () => ProductID): void {
+    checkoutUuid(checkoutUuid: () => CheckoutID): void {
         try {
             
-            this.context.itemUuid = itemUuid()
+            this.context._checkoutUuid = checkoutUuid()
         } catch (error) {
             this.context.setState(new FailedCheckoutItemState)
 
         }
     }
     
-    checkoutItemHeader(itemHeader: () => ProductHeader): void {
+    checkoutProductHeader(itemHeader: () => ProductHeader): void {
         try {
-            this.context.itemHeader = itemHeader()
-            
-        } catch (error) {
-            this.context.setState(new FailedCheckoutItemState)
-
-        }
-    }
-    
-    checkoutItemBasePrice(itemBasePrice: () => Money): void {
-        try {
-            this.context.itemBasePrice = itemBasePrice()
+            this.context.productHeader = itemHeader()
             
         } catch (error) {
             this.context.setState(new FailedCheckoutItemState)
@@ -49,14 +40,33 @@ export default class ConcreateCheckoutItemState extends BaseCheckoutItemBuilderS
         }
     }
     
-    checkoutItemQuantity(itemQuantity: () => ProductQuantity): void {
+    checkoutProductBasePrice(itemBasePrice: () => Money): void {
         try {
-            this.context.itemQuantity = itemQuantity()
+            this.context.productBasePrice = itemBasePrice()
             
         } catch (error) {
             this.context.setState(new FailedCheckoutItemState)
 
         }
+    }
+    
+    checkoutProductQuantity(itemQuantity: () => ProductQuantity): void {
+        try {
+            this.context.productQuantity = itemQuantity()
+            
+        } catch (error) {
+            this.context.setState(new FailedCheckoutItemState)
+
+        }
+    }
+
+    checkoutProductUuid(productUuid: () => ProductID): void {
+        try {
+            this.context.productUuid = productUuid()
+        } catch (error) {
+            this.context.setState(new FailedCheckoutItemState)
+        }
+        
     }
     
     checkoutCreatedAt(date: Date): void {
@@ -81,10 +91,11 @@ export default class ConcreateCheckoutItemState extends BaseCheckoutItemBuilderS
     build(): CheckoutItemInterface {
         return new CheckoutItem(
             this.context.uuid,
-            this.context.itemUuid,
-            this.context.itemHeader,
-            this.context.itemBasePrice,
-            this.context.itemQuantity,
+            this.context._checkoutUuid,
+            this.context.productUuid,
+            this.context.productHeader,
+            this.context.productBasePrice,
+            this.context.productQuantity,
             this.context.createdAt,
             this.context.updatedAt
         ) 
