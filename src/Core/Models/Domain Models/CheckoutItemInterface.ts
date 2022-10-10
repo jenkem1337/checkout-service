@@ -4,12 +4,14 @@ import ProductID from '../ValueObjects/ProductID';
 import Money from '../ValueObjects/Money';
 import ProductQuantity from '../ValueObjects/ProductQuantity';
 import ProductHeader from '../ValueObjects/ProductHeader';
+import CheckoutID from '../ValueObjects/CheckoutID';
 export default interface CheckoutItemInterface extends EntityInterface<CheckoutItemID> {
-    changeItemBasePrice(newBasePrice:number):void;
+    changeProductBasePrice(newBasePrice:number):void;
     incraseQuantity(quantity:number):void;
     decreaseQuantity(quantity:number):void
-    getItemUuid():ProductID
-    getItemBasePrice():Money
-    getItemQuantity():ProductQuantity
-    getItemHeader():ProductHeader
+    getProductUuid():ProductID
+    getProductBasePrice():Money
+    getProductQuantity():ProductQuantity
+    getProductHeader():ProductHeader
+    getCheckoutUuid():CheckoutID
 }

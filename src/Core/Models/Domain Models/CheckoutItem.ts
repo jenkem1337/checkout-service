@@ -5,14 +5,17 @@ import ProductQuantity from '../ValueObjects/ProductQuantity';
 import ProductHeader from '../ValueObjects/ProductHeader';
 import ProductID from '../ValueObjects/ProductID';
 import CheckoutItemInterface from './CheckoutItemInterface';
+import CheckoutID from '../ValueObjects/CheckoutID';
 export default class CheckoutItem extends Entity<CheckoutItemID> implements CheckoutItemInterface{
-    private itemBasePrice: Money
-    private itemQuantity: ProductQuantity
-    private itemHeader: ProductHeader
-    private itemUuid: ProductID
+    private productBasePrice: Money
+    private productQuantity: ProductQuantity
+    private productHeader: ProductHeader
+    private checkoutUuid: CheckoutID
+    private productUuid: ProductID
 
     constructor(
         uuid:CheckoutItemID, 
+        checkoutUuid: CheckoutID,
         productUuid: ProductID,
         productHeader:ProductHeader, 
         productBasePrice:Money,
@@ -20,22 +23,24 @@ export default class CheckoutItem extends Entity<CheckoutItemID> implements Chec
         createdAt:Date,
         updatedAt:Date){
             super(uuid, createdAt, updatedAt)
-            this.itemUuid = productUuid
-            this.itemHeader = productHeader
-            this.itemBasePrice = productBasePrice
-            this.itemQuantity = productQuantity
+            this.checkoutUuid = checkoutUuid
+            this.productUuid = productUuid
+            this.productHeader = productHeader
+            this.productBasePrice = productBasePrice
+            this.productQuantity = productQuantity
     }   
-    changeItemBasePrice(newBasePrice:number){
-        this.itemBasePrice = new Money(newBasePrice);
+    changeProductBasePrice(newBasePrice:number){
+        this.productBasePrice = new Money(newBasePrice);
     }
     incraseQuantity(quantity: number): void {
-        this.itemQuantity = this.itemQuantity.incrementQuantity(quantity)
+        this.productQuantity = this.productQuantity.incrementQuantity(quantity)
     }
     decreaseQuantity(quantity: number): void {
-        this.itemQuantity = this.itemQuantity.decrementQuantity(quantity)
+        this.productQuantity = this.productQuantity.decrementQuantity(quantity)
     }
-    getItemUuid      = (): ProductID       => this.itemUuid
-    getItemHeader    = (): ProductHeader   => this.itemHeader
-    getItemBasePrice = (): Money           => this.itemBasePrice
-    getItemQuantity  = (): ProductQuantity => this.itemQuantity
+    getProductUuid      = (): ProductID       => this.productUuid
+    getCheckoutUuid     = (): CheckoutID      => this.checkoutUuid
+    getProductHeader    = (): ProductHeader   => this.productHeader
+    getProductBasePrice = (): Money           => this.productBasePrice
+    getProductQuantity  = (): ProductQuantity => this.productQuantity
 }
