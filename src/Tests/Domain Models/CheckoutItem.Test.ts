@@ -1,14 +1,14 @@
 import CheckoutItemID from '../../Core/Models/ValueObjects/CheckoutItemID';
-import CheckoutItem from '../../Core/Models/Domain Models/CheckoutItem';
+import CheckoutItem from '../../Core/Models/Domain Models/Checkout/CheckoutItem';
 import { randomUUID } from 'crypto';
 import ProductID from '../../Core/Models/ValueObjects/ProductID';
 import ProductHeader from '../../Core/Models/ValueObjects/ProductHeader';
 import Money from '../../Core/Models/ValueObjects/Money';
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
 import CheckoutItemBuilder from '../../Core/Models/Builders/CheckoutItemBuilder';
-import CheckoutItemInterface from '../../Core/Models/Domain Models/CheckoutItemInterface';
+import CheckoutItemInterface from '../../Core/Models/Domain Models/Checkout/CheckoutItemInterface';
 import ItMustBeConcreateCheckoutItemState from '../../Core/Models/Builders/States/ItMustBeConcreateCheckoutItemState';
-import NullCheckoutItem from '../../Core/Models/Domain Models/NullCheckoutItem';
+import NullCheckoutItem from '../../Core/Models/Domain Models/Checkout/NullCheckoutItem';
 import ConcreateCheckoutItemState from '../../Core/Models/Builders/States/ConcreateCheckoutItemState';
 import CheckoutID from '../../Core/Models/ValueObjects/CheckoutID';
 import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';

@@ -1,5 +1,5 @@
 import CheckoutItemBuilder from '../CheckoutItemBuilder';
-import CheckoutItemInterface from '../../Domain Models/CheckoutItemInterface';
+import CheckoutItemInterface from '../../Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import ProductID from '../../ValueObjects/ProductID';
 import ProductHeader from '../../ValueObjects/ProductHeader';

@@ -1,5 +1,5 @@
-import CheckoutItem from '../../Domain Models/CheckoutItem';
-import CheckoutItemInterface from '../../Domain Models/CheckoutItemInterface';
+import CheckoutItem from '../../Domain Models/Checkout/CheckoutItem';
+import CheckoutItemInterface from '../../Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutID from '../../ValueObjects/CheckoutID';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import Money from '../../ValueObjects/Money';

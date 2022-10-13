@@ -3,7 +3,7 @@ import ProductHeader from "../ValueObjects/ProductHeader"
 import ProductID from "../ValueObjects/ProductID"
 import ProductQuantity from "../ValueObjects/ProductQuantity"
 import Builder from "./Builder"
-import CheckoutItemInterface from '../Domain Models/CheckoutItemInterface';
+import CheckoutItemInterface from '../Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemID from '../ValueObjects/CheckoutItemID';
 import BaseCheckoutItemBuilderState from './States/BaseCheckoutItemBuilderState';
 import CheckoutID from '../ValueObjects/CheckoutID';
