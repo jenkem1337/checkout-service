@@ -6,14 +6,10 @@ import Money from '../../ValueObjects/Money';
 import PeymentMethod from '../../ValueObjects/PeymentMethod';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import ItemAdded from "./Events/ItemAdded";
-import PaymentContext from './PeymentContext/PeymentContext';
-import PaymentStrategy from './PeymentContext/PeymentStrategy';
-import CreditCart from './PeymentContext/CreditCard';
-import RemotePaySystem from './PeymentContext/RemotePaySystem';
-import IBAN from './PeymentContext/IBAN';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import CheckoutItemNotFoundException from '../../../Exceptions/CheckoutItemNotFoundException';
 import ItemDeleted from "./Events/ItemDeleted";
+import AnItemDeleted from "./Events/AnItemDeleted";
 
 export default class Checkout extends AggregateRootEntity<CheckoutID> {
     private userUuid: CustomerID
@@ -21,7 +17,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> {
     private subTotal: Money
     private shippingPrice: Money
     private paymentMethod: PeymentMethod
-    private paymentContext: PaymentContext
     private checkoutItems: Map<string, CheckoutItemInterface>
 
     constructor(
@@ -29,6 +24,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> {
         userUuid: CustomerID,
         address: Address,
         subTotal: Money,
+        shippingPrice: Money,
         paymentMethod: PeymentMethod,
         createdAt: Date,
         updatedAt: Date
@@ -37,15 +33,9 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> {
             this.userUuid = userUuid
             this.address  = address
             this.subTotal = subTotal
+            this.shippingPrice = shippingPrice
             this.paymentMethod = paymentMethod
             this.checkoutItems = new Map<string, CheckoutItemInterface>()
-            this.paymentContext = new PaymentContext(new Map<string, PaymentStrategy>(
-                [
-                    ['CREDIT_CART', new CreditCart()],
-                    ['REMOTE_PAY_SYSTEM', new RemotePaySystem()],
-                    ['IBAN', new IBAN()]
-                ]
-            ))
         }
     addAnItem(item:CheckoutItemInterface): void{
         this.increaseItemQuantityIfExist(item)
@@ -61,12 +51,27 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> {
             return;
         }
     }
-    removeAnItem(checkoutItemEntityUuid: CheckoutItemID) {
-        if(!this.checkoutItems.has(checkoutItemEntityUuid.getUuid())){
+    takeOutAnItemFromList(checkoutItemEntityUuid: CheckoutItemID) {
+        if(this.isNotItemExistInList(checkoutItemEntityUuid)){
             throw new CheckoutItemNotFoundException()
-        } 
+        }
+        if(this.isOneMoreThanItemExistInList(checkoutItemEntityUuid)) {
+            const checkoutItem = this.checkoutItems.get(checkoutItemEntityUuid.getUuid())
+            checkoutItem.decreaseQuantity(1)
+            this.checkoutItems.set(checkoutItemEntityUuid.getUuid(), checkoutItem)
+            this.apply(new AnItemDeleted(checkoutItemEntityUuid))
+            return;
+        }
         this.checkoutItems.delete(checkoutItemEntityUuid.getUuid())
         this.apply(new ItemDeleted(checkoutItemEntityUuid))
+    }
+    private isNotItemExistInList(checkoutItemEntityUuid: CheckoutItemID){
+        return this.checkoutItems.has(checkoutItemEntityUuid.getUuid()) === false
+    }
+    private isOneMoreThanItemExistInList(checkoutItemEntityUuid: CheckoutItemID){
+        const checkoutItem = this.checkoutItems.get(checkoutItemEntityUuid.getUuid())
+        const checkoutItemQuantity = checkoutItem.getProductQuantity()
+        return checkoutItemQuantity.getQuantity() > 1
     }
     getCheckoutItems = ():Map<string, CheckoutItemInterface> => this.checkoutItems
     getCheckoutItemsSize = ():number => this.checkoutItems.size
