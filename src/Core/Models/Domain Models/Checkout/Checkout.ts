@@ -72,7 +72,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         }
 
         this.checkoutItems.delete(checkoutItemEntityUuid.getUuid())
-        this.subTotal = new Money(0)
+        this.calculateSubTotal()
         this.apply(new ItemDeleted(checkoutItemEntityUuid, this.getUuid()))
     }
     private isNotItemExistInList(checkoutItemEntityUuid: CheckoutItemID){
@@ -86,7 +86,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
 
     calculateSubTotal(){
         this.subTotal = new Money(0)
-        
+        if(this.checkoutItems.size === 0) return;
         this.checkoutItems.forEach((item:CheckoutItemInterface, uuid:string) => {
 
             let itemQuantity: ProductQuantity = item.getProductQuantity()
