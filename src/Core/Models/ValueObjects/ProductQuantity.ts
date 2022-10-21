@@ -4,7 +4,10 @@ export default class ProductQuantity extends ValueObject {
     private readonly quantity: number
     constructor (quantity:number){
         super() 
-        if(quantity < 0) throw new NegativeNumberException();
+        if(quantity < 0) {
+            this.quantity = 0
+            return;
+        }
         this.quantity = quantity
     }
 
