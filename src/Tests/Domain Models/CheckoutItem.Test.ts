@@ -116,9 +116,10 @@ describe('CheckoutItem', () => {
                     expect(checkoutItem.getProductQuantity().getQuantity()).toBe(0)
                 })
 
-                it('(product quantity) should throw NegativeNumberException when given making negative number (2) to ProductQuantity instance', () => {
+                it('(product quantity) should return zero when given making negative number (2) to ProductQuantity instance', () => {
                     const decrementAmountOfItem = 2
-                    expect(() => checkoutItem.decreaseQuantity(decrementAmountOfItem)).toThrow(NegativeNumberException)
+                    checkoutItem.decreaseQuantity(decrementAmountOfItem)
+                    expect(checkoutItem.getProductQuantity().getQuantity()).toBe(0)
 
                 })
             })

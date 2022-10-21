@@ -1,12 +1,12 @@
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
-import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';
 describe('ProductQuantity', () => {
     describe('ProductQuantity Constructor', () => {
         it('should return true when given valid property', () => {
             expect(() => new ProductQuantity(15)).toBeTruthy()
         })
-        it('should throw NegativeNumberException when given negative number', () =>{
-            expect(() => new ProductQuantity(-9)).toThrow(NegativeNumberException)
+        it('should return zero when given negative number', () =>{
+            let productQuantity =new ProductQuantity(-9)
+            expect(productQuantity.getQuantity()).toBe(0)
         })
     })
 
@@ -37,9 +37,10 @@ describe('ProductQuantity', () => {
                 expect(newProductInstance.getQuantity()).toBe(6)
             })
 
-            it('should throw NegativeNumberException when given making negative number for amount', () => {
-                const productQuantity = new ProductQuantity(13)
-                expect(() => productQuantity.decrementQuantity(15)).toThrow(NegativeNumberException)
+            it('should return zero when given making negative number for amount', () => {
+                let productQuantity = new ProductQuantity(13)
+                let _productQuantity = productQuantity.decrementQuantity(15)
+                expect(_productQuantity.getQuantity()).toBe(0)
             })
         })
     })
