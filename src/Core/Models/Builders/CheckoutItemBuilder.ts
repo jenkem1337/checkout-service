@@ -5,7 +5,7 @@ import ProductQuantity from "../ValueObjects/ProductQuantity"
 import Builder from "./Builder"
 import CheckoutItemInterface from '../Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemID from '../ValueObjects/CheckoutItemID';
-import BaseCheckoutItemBuilderState from './States/BaseCheckoutItemBuilderState';
+import BaseCheckoutItemBuilderState from './States/CheckoutItemStates/BaseCheckoutItemBuilderState';
 import CheckoutID from '../ValueObjects/CheckoutID';
 
 export default class CheckoutItemBuilder implements Builder<CheckoutItemInterface>{
