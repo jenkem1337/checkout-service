@@ -13,6 +13,7 @@ export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
     addItemOneMoreThan(itemUuid: CheckoutItemID,itemQuantity:ProductQuantity):void
     takeOutAnItem(uuid:CheckoutItemID):void
     takeOutOneMoreThanItem(itemUuid:CheckoutItemID, itemQuantity:ProductQuantity):void
+    takeOutTheItem(itemUuid:CheckoutItemID):void
     updateItemPrices(itemUuid: ProductID,newPrices: Money):void
     calculateSubTotal():void
     getSubTotal():Money
