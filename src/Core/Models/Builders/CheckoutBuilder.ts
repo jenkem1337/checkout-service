@@ -5,8 +5,9 @@ import Money from '../ValueObjects/Money';
 import PeymentMethod from '../ValueObjects/PeymentMethod';
 import BaseCheckoutBuilderState from './States/CheckoutAggregateStates/BaseCheckoutBuilderState';
 import Builder from './Builder';
-import Checkout from '../Domain Models/Checkout/Checkout';
 import CheckoutInterface from '../Domain Models/Checkout/CheckoutInterface';
+import CheckoutState from '../ValueObjects/CheckoutState';
+import CheckoutItemInterface from '../Domain Models/Checkout/CheckoutItemInterface';
 export default class CheckoutBuilder implements Builder<CheckoutInterface>{
     public  _uuid:CheckoutID
     public _userUuid: CustomerID
@@ -14,6 +15,10 @@ export default class CheckoutBuilder implements Builder<CheckoutInterface>{
     public _subTotal: Money
     public _shippingPrice: Money
     public _paymentMethod: PeymentMethod
+    public _checkoutState: CheckoutState
+    public _checkoutItemsMap: Map<string, CheckoutItemInterface>
+    public _createdAt:Date
+    public _updatedAt:Date
     private state: BaseCheckoutBuilderState
     
     private constructor(initialState: BaseCheckoutBuilderState) {
@@ -49,6 +54,22 @@ export default class CheckoutBuilder implements Builder<CheckoutInterface>{
     }
     peymentMethod(peymentMethod: () => PeymentMethod) {
         this.state.peymentMethod(peymentMethod)
+        return this
+    }
+    checkoutState(state:() =>CheckoutState){
+        this.state.checkoutState(state)
+        return this
+    }
+    checkoutItemsMap(map: Map<string, CheckoutItemInterface>){
+        this.state.checkoutItemsMap(map)
+        return this
+    }
+    createdAt(date:Date){
+        this.state.createdAt(date)
+        return this
+    }
+    updatedAt(date:Date) {
+        this.state.updatedAt(date)
         return this
     }
     build(): CheckoutInterface {
