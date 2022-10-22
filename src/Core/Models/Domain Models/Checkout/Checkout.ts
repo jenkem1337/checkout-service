@@ -106,6 +106,15 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
         this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), itemQuantity))
     }
+
+    takeOutTheItem(itemUuid:CheckoutItemID){
+        if(this.isNotItemExistInList(itemUuid)){
+            throw new CheckoutItemNotFoundException()
+        }
+        this.checkoutItems.delete(itemUuid.getUuid())
+        this.apply(new ItemDeleted(itemUuid, this.getUuid()))
+    }
+
     private isCheckoutItemQuantityEqualToZero(checkoutItem:CheckoutItemInterface) {
         return checkoutItem.getProductQuantity().getQuantity() === 0
     }
