@@ -8,17 +8,22 @@ import Address from '../../ValueObjects/Address';
 import PeymentMethod from '../../ValueObjects/PeymentMethod';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import ProductID from '../../ValueObjects/ProductID';
+import CheckoutState from '../../ValueObjects/CheckoutState';
 export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
     addAnItem(item: CheckoutItemInterface):void
     addItemOneMoreThan(itemUuid: CheckoutItemID,itemQuantity:ProductQuantity):void
     takeOutAnItem(uuid:CheckoutItemID):void
     takeOutOneMoreThanItem(itemUuid:CheckoutItemID, itemQuantity:ProductQuantity):void
-    takeOutTheItem(itemUuid:CheckoutItemID):void
+    takeOutSameItems(itemUuid:CheckoutItemID):void
     updateItemPrices(itemUuid: ProductID,newPrices: Money):void
     calculateSubTotal():void
+    cancelThisCheckout():void
+    completeThisCheckout():void
     getSubTotal():Money
     getUserUuid():CustomerID
     getAddress():Address
+    getShippingPrice():Money
     getPeymentMethod():PeymentMethod
+    getCheckoutState(): CheckoutState
     getCheckoutItems(): Map<string, CheckoutItemInterface>
 }
