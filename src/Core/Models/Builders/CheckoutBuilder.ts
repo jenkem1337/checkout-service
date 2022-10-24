@@ -25,11 +25,11 @@ export default class CheckoutBuilder implements Builder<CheckoutInterface>{
         this.setState(initialState)
     }
 
-    private setState(state: BaseCheckoutBuilderState){
+    setState(state: BaseCheckoutBuilderState){
         this.state = state
         this.state.setContext(this)
     }
-    initBuilder(initialState:BaseCheckoutBuilderState):CheckoutBuilder {
+    static initBuilder(initialState:BaseCheckoutBuilderState):CheckoutBuilder {
         return new CheckoutBuilder(initialState)
     }
     checkoutUuid(uuid:() => CheckoutID):CheckoutBuilder{
