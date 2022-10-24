@@ -58,7 +58,11 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         checkoutDomainModel.apply(new CheckoutCreated(checkoutDomainModel.getUuid(), checkoutDomainModel.getUserUuid(), checkoutDomainModel.getAddress(), checkoutDomainModel.getSubTotal(), checkoutDomainModel.getShippingPrice(), checkoutDomainModel.getPeymentMethod(), checkoutDomainModel.getCheckoutState(), checkoutDomainModel.getCreatedAt(), checkoutDomainModel.getUpdatedAt()))
         return checkoutDomainModel
     }
-    
+    static fromCheckoutCreatedEvent(event: CheckoutCreated){
+        const checkoutDomainModel: Checkout =  new Checkout(event.checkoutUuid, event.userUuid, event.address, event.subTotal, event.shippingPrice, event.paymentMethod, event.checkoutState, event.createdAt, event.updatedAt)
+        return checkoutDomainModel
+
+    }
     addAnItem(item:CheckoutItemInterface): void{
         if(this.isItemExistInList(item)) {
             const itemDomainModel:CheckoutItemInterface = this.checkoutItems.get(item.getUuid().getUuid()) 
@@ -81,9 +85,12 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         if(this.isNotItemExistInList(itemUuid)){
             throw new CheckoutItemNotFoundException()
         }
+        
         const checkoutItemDomainModel = this.checkoutItems.get(itemUuid.getUuid())
         checkoutItemDomainModel.incraseQuantity(quantity.getQuantity()) 
+        
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
+        this.calculateSubTotal()
         this.apply(new ItemQuantityIncreased(this.getUuid(), itemUuid, quantity))
     }
 
@@ -115,10 +122,12 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         
         if(this.isCheckoutItemQuantityEqualToZero){
             this.checkoutItems.delete(itemUuid.getUuid())
+            this.calculateSubTotal()
             this.apply(new ItemDeleted(itemUuid, this.getUuid()))
             return;
         }
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
+        this.calculateSubTotal()
         this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), itemQuantity))
     }
 
@@ -127,6 +136,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             throw new CheckoutItemNotFoundException()
         }
         this.checkoutItems.delete(itemUuid.getUuid())
+        this.calculateSubTotal()
         this.apply(new ItemDeleted(itemUuid, this.getUuid()))
     }
 
