@@ -7,9 +7,9 @@ import Money from '../../Core/Models/ValueObjects/Money';
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
 import CheckoutItemBuilder from '../../Core/Models/Builders/CheckoutItemBuilder';
 import CheckoutItemInterface from '../../Core/Models/Domain Models/Checkout/CheckoutItemInterface';
-import ItMustBeConcreateCheckoutItemState from '../../Core/Models/Builders/States/ItMustBeConcreateCheckoutItemState';
+import ItMustBeConcreateCheckoutItemState from '../../Core/Models/Builders/States/CheckoutItemStates/ItMustBeConcreateCheckoutItemState';
 import NullCheckoutItem from '../../Core/Models/Domain Models/Checkout/NullCheckoutItem';
-import ConcreateCheckoutItemState from '../../Core/Models/Builders/States/ConcreateCheckoutItemState';
+import CreateInstanceOfCheckoutItemState from '../../Core/Models/Builders/States/CheckoutItemStates/CreateInstanceOfCheckoutItemState';
 import CheckoutID from '../../Core/Models/ValueObjects/CheckoutID';
 import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';
 
@@ -62,7 +62,7 @@ describe('CheckoutItem', () => {
         })
         
          it('should return NullCheckoutItem when given invalid property in CheckoutItemBuilder', () => {
-            const checkoutItem:CheckoutItemInterface = CheckoutItemBuilder.initBuilder(new ConcreateCheckoutItemState)
+            const checkoutItem:CheckoutItemInterface = CheckoutItemBuilder.initBuilder(new CreateInstanceOfCheckoutItemState)
                                                         .checkoutUuid(() => new CheckoutID(randomUUID()))
                                                         .checkoutItemUuid(() => new CheckoutItemID(randomUUID()))
                                                         .checkoutProductUuid(() => new ProductID(randomUUID()))
