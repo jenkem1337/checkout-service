@@ -1,13 +1,13 @@
-import CheckoutItem from '../../Domain Models/Checkout/CheckoutItem';
-import CheckoutItemInterface from '../../Domain Models/Checkout/CheckoutItemInterface';
-import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
-import Money from '../../ValueObjects/Money';
-import ProductHeader from '../../ValueObjects/ProductHeader';
-import ProductID from '../../ValueObjects/ProductID';
-import ProductQuantity from '../../ValueObjects/ProductQuantity';
+import CheckoutItem from '../../../Domain Models/Checkout/CheckoutItem';
+import CheckoutItemInterface from '../../../Domain Models/Checkout/CheckoutItemInterface';
+import CheckoutItemID from '../../../ValueObjects/CheckoutItemID';
+import Money from '../../../ValueObjects/Money';
+import ProductHeader from '../../../ValueObjects/ProductHeader';
+import ProductID from '../../../ValueObjects/ProductID';
+import ProductQuantity from '../../../ValueObjects/ProductQuantity';
 import BaseCheckoutItemBuilderState from './BaseCheckoutItemBuilderState';
-import NullCheckoutItem from '../../Domain Models/Checkout/NullCheckoutItem';
-import CheckoutID from '../../ValueObjects/CheckoutID';
+import NullCheckoutItem from '../../../Domain Models/Checkout/NullCheckoutItem';
+import CheckoutID from '../../../ValueObjects/CheckoutID';
 
 export default class FailedCheckoutItemState extends BaseCheckoutItemBuilderState {
     

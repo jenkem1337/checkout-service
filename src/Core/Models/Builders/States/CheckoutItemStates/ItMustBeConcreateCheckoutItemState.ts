@@ -1,11 +1,11 @@
-import CheckoutItem from '../../Domain Models/Checkout/CheckoutItem';
-import CheckoutItemInterface from '../../Domain Models/Checkout/CheckoutItemInterface';
-import CheckoutID from '../../ValueObjects/CheckoutID';
-import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
-import Money from '../../ValueObjects/Money';
-import ProductHeader from '../../ValueObjects/ProductHeader';
-import ProductID from '../../ValueObjects/ProductID';
-import ProductQuantity from '../../ValueObjects/ProductQuantity';
+import CheckoutItem from '../../../Domain Models/Checkout/CheckoutItem';
+import CheckoutItemInterface from '../../../Domain Models/Checkout/CheckoutItemInterface';
+import CheckoutID from '../../../ValueObjects/CheckoutID';
+import CheckoutItemID from '../../../ValueObjects/CheckoutItemID';
+import Money from '../../../ValueObjects/Money';
+import ProductHeader from '../../../ValueObjects/ProductHeader';
+import ProductID from '../../../ValueObjects/ProductID';
+import ProductQuantity from '../../../ValueObjects/ProductQuantity';
 import BaseCheckoutItemBuilderState from './BaseCheckoutItemBuilderState';
 
 export default class ItMustBeConcreateCheckoutItemState extends BaseCheckoutItemBuilderState {
