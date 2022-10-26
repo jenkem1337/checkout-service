@@ -2,6 +2,11 @@ import ValueObject from '../ValueObject';
 import NullPropertyException from '../../Exceptions/NullPropertyException';
 import ChracterDoesntMatchException from '../../Exceptions/CharacterDoesntMatchException';
 
+export const enum PeymentMethodEnum {
+    CREDIT_CART = 'CREDIT_CART',
+    REMOTE_PAY_SYSTEM = 'REMOTE_PAY_SYSTEM',
+    IBAN = "IBAN"
+}
 export default class PeymentMethod extends ValueObject {
     private readonly peymentMethod: string
     constructor(peymentMethod:string){
