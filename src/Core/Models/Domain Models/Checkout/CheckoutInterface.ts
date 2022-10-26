@@ -10,6 +10,9 @@ import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import ProductID from '../../ValueObjects/ProductID';
 import CheckoutState from '../../ValueObjects/CheckoutState';
 export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
+    setShippingAddress(address:() => Address):void
+    setPeymentMethod(peymentMethod: () => PeymentMethod):void
+    setShippingPrice(shippingPrice: () => Money):void
     addAnItem(item: CheckoutItemInterface):void
     addItemOneMoreThan(itemUuid: CheckoutItemID,itemQuantity:ProductQuantity):void
     takeOutAnItem(uuid:CheckoutItemID):void

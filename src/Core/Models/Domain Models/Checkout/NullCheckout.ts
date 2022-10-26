@@ -11,6 +11,15 @@ import CheckoutInterface from './CheckoutInterface';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import NullObjectException from '../../../Exceptions/NullObjectException';
 export default class NullCheckout implements CheckoutInterface {
+    setPeymentMethod(peymentMethod: () => PeymentMethod): void {
+        throw new NullObjectException
+    }
+    setShippingPrice(shippingPrice: () => Money): void {
+        throw new NullObjectException
+    }
+    setShippingAddress(address: () => Address): void {
+        throw new NullObjectException
+    }
     addAnItem(item: CheckoutItemInterface): void {
         throw new NullObjectException
     }
