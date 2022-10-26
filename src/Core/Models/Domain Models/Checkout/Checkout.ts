@@ -21,6 +21,9 @@ import CheckoutState, { CheckoutStates } from '../../ValueObjects/CheckoutState'
 import CheckoutCancelled from './Events/CheckoutCancelled';
 import CheckoutCompleted from './Events/CheckoutCompleted';
 import CheckoutCreated from './Events/CheckoutCreated';
+import ShippingAddressAdded from './Events/ShippingAddressAdded';
+import PeymentMethodAdded from "./Events/PeymentMehodAdded";
+import ShippingPriceAdded from "./Events/ShippingPriceAdded";
 
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
@@ -34,34 +37,54 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     constructor(
         uuid: CheckoutID,
         userUuid: CustomerID,
-        address: Address,
         subTotal: Money,
-        shippingPrice: Money,
-        paymentMethod: PeymentMethod,
         checkoutState:CheckoutState,
         createdAt: Date,
         updatedAt: Date,
-        checkoutItems?:Map<string, CheckoutItemInterface>
+        checkoutItems?:Map<string, CheckoutItemInterface>,
+        shippingAddress?: Address,
+        paymentMethod?: PeymentMethod,
+        shippingPrice?: Money,
+
+
         ){
             super(uuid, createdAt, updatedAt)
             this.userUuid = userUuid
-            this.address  = address
             this.subTotal = subTotal
-            this.shippingPrice = shippingPrice
-            this.paymentMethod = paymentMethod
             this.checkoutState = checkoutState
-            this.checkoutItems = checkoutItems ?? new Map<string, CheckoutItemInterface>()
+            this.checkoutItems = checkoutItems ?? new Map<string, CheckoutItemInterface>(),
+            this.address = shippingAddress
+            this.paymentMethod = paymentMethod
+            this.shippingPrice = shippingPrice
+
         }
     
-    static fromCreationalCommand(uuid: CheckoutID,userUuid: CustomerID,address: Address,subTotal: Money,shippingPrice: Money,paymentMethod: PeymentMethod,checkoutState:CheckoutState,createdAt: Date,updatedAt: Date):CheckoutInterface {
-        const checkoutDomainModel: Checkout =  new Checkout(uuid, userUuid, address, subTotal, shippingPrice, paymentMethod, checkoutState, createdAt, updatedAt)
-        checkoutDomainModel.apply(new CheckoutCreated(checkoutDomainModel.getUuid(), checkoutDomainModel.getUserUuid(), checkoutDomainModel.getAddress(), checkoutDomainModel.getSubTotal(), checkoutDomainModel.getShippingPrice(), checkoutDomainModel.getPeymentMethod(), checkoutDomainModel.getCheckoutState(), checkoutDomainModel.getCreatedAt(), checkoutDomainModel.getUpdatedAt()))
+    static fromCreationalCommand(uuid: CheckoutID,userUuid: CustomerID,subTotal: Money,checkoutState:CheckoutState,createdAt: Date,updatedAt: Date):Checkout {
+        const checkoutDomainModel: Checkout =  new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
+        checkoutDomainModel.apply(new CheckoutCreated(checkoutDomainModel.getUuid(), checkoutDomainModel.getUserUuid(), checkoutDomainModel.getSubTotal(), checkoutDomainModel.getCheckoutState(), checkoutDomainModel.getCreatedAt(), checkoutDomainModel.getUpdatedAt()))
         return checkoutDomainModel
     }
     static fromCheckoutCreatedEvent(event: CheckoutCreated){
-        const checkoutDomainModel: Checkout =  new Checkout(event.checkoutUuid, event.userUuid, event.address, event.subTotal, event.shippingPrice, event.paymentMethod, event.checkoutState, event.createdAt, event.updatedAt)
+        const checkoutDomainModel: Checkout =  new Checkout(event.checkoutUuid, event.userUuid, event.subTotal, event.checkoutState, event.createdAt, event.updatedAt)
         return checkoutDomainModel
 
+    }
+    setShippingAddress(address: () => Address) {
+        this.address = address()
+        this.apply(new ShippingAddressAdded(this.getUuid(), this.address))
+    }
+    setPeymentMethod(peymentMethod: () => PeymentMethod){
+        this.paymentMethod = peymentMethod()
+        this.apply(new PeymentMethodAdded(this.getUuid(), this.paymentMethod))
+    }
+    setShippingPrice(shippingPrice: () => Money) {
+        this.shippingPrice = shippingPrice()
+        
+        if(this.isSubTotalPriceNotEqualOrMoreThan100()) {
+            this.subTotal = this.subTotal.plus(this.shippingPrice.getAmount())
+        }
+
+        this.apply(new ShippingPriceAdded(this.getUuid(), this.shippingPrice))
     }
     addAnItem(item:CheckoutItemInterface): void{
         if(this.isItemExistInList(item)) {
@@ -85,7 +108,10 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         if(this.isNotItemExistInList(itemUuid)){
             throw new CheckoutItemNotFoundException()
         }
-        
+        if(quantity.getQuantity() === 1 ){
+            this.addAnItem(this.checkoutItems.get(itemUuid.getUuid()))
+            return;
+        }
         const checkoutItemDomainModel = this.checkoutItems.get(itemUuid.getUuid())
         checkoutItemDomainModel.incraseQuantity(quantity.getQuantity()) 
         
@@ -120,7 +146,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         let checkoutItemDomainModel = this.checkoutItems.get(itemUuid.getUuid())
         checkoutItemDomainModel.decreaseQuantity(itemQuantity.getQuantity())
         
-        if(this.isCheckoutItemQuantityEqualToZero){
+        if(this.isCheckoutItemQuantityEqualToZero(checkoutItemDomainModel)){
             this.checkoutItems.delete(itemUuid.getUuid())
             this.calculateSubTotal()
             this.apply(new ItemDeleted(itemUuid, this.getUuid()))
@@ -163,7 +189,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
                         
             this.checkoutItems.set(itemKey, item)
         })
-        
+        this.calculateSubTotal()
         this.apply(new CheckoutItemPricesUpdated(itemUuid))
     }
 
@@ -181,9 +207,11 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         })
         
         if(this.isSubTotalPriceNotEqualOrMoreThan100()) {
-            this.subTotal = this.subTotal.plus(this.shippingPrice.getAmount())
+            if(this.shippingPrice){
+                this.subTotal = this.subTotal.plus(this.shippingPrice.getAmount())
+            }
         }
-        
+
     }
     
     private isSubTotalPriceNotEqualOrMoreThan100():boolean{
