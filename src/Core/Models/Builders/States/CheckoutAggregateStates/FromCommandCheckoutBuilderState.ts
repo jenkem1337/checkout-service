@@ -45,10 +45,7 @@ export default class FromCreationalCommandCheckoutBuilderState extends BaseCheck
         return  Checkout.fromCreationalCommand(
             this.context._uuid,
             this.context._userUuid,
-            this.context._address,
             this.context._subTotal,
-            this.context._shippingPrice,
-            this.context._paymentMethod,
             this.context._checkoutState,
             this.context._createdAt,
             this.context._updatedAt,

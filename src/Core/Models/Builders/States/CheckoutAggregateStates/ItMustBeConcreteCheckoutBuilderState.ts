@@ -43,14 +43,14 @@ export default class ItMustBeConcreteCheckoutBuilderState extends BaseCheckoutBu
         return new Checkout(
             this.context._uuid,
             this.context._userUuid,
-            this.context._address,
             this.context._subTotal,
-            this.context._shippingPrice,
-            this.context._paymentMethod,
             this.context._checkoutState,
             this.context._createdAt,
             this.context._updatedAt,
-            this.context._checkoutItemsMap
+            this.context._checkoutItemsMap,
+            this.context._address,
+            this.context._paymentMethod,
+            this.context._shippingPrice
         )
     }
     

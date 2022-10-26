@@ -43,6 +43,7 @@ export default class Address extends ValueObject {
         this.fullAddressInformation = fullAddressInformation
         this.addressCountry = addressCountry
         this.addressProvince = addressProvince
+        this.addressDistrict = addressDistrict
         this.addressZipCode = addressZipCode
     }
     getAddressName = () => this.addressName
