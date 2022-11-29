@@ -15,10 +15,10 @@ export default abstract class BaseCheckoutBuilderState {
     }
     abstract checkoutUuid(uuid: () => CheckoutID):void
     abstract userUuid(userUuid: () => CustomerID):void
-    abstract address(shippingAddress: () => Address):void
+    abstract address(shippingAddress: Address):void
     abstract subTotal(subTotal: () => Money):void
-    abstract shippingPrice(shippingPrice: () => Money):void
-    abstract peymentMethod(peymentMethod: () => PeymentMethod):void
+    abstract shippingPrice(shippingPrice: Money):void
+    abstract peymentMethod(peymentMethod: PeymentMethod):void
     abstract checkoutState(checkoutState: () => CheckoutState):void
     abstract checkoutItemsMap(checkoutItems:Map<string, CheckoutItemInterface>):void
     abstract createdAt(date: Date):void

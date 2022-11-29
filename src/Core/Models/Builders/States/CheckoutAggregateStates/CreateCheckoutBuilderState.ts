@@ -25,9 +25,9 @@ export default class CreateInstanceOfCheckoutBuilderState extends BaseCheckoutBu
             this.context.setState(new FailedCheckoutBuilderState)
         }
     }
-    address(shippingAddress: () => Address): void {
+    address(shippingAddress: Address): void {
         try {
-            this.context._address = shippingAddress()
+            this.context._address = shippingAddress
         } catch (error) {
             this.context.setState(new FailedCheckoutBuilderState)
         }
@@ -39,16 +39,16 @@ export default class CreateInstanceOfCheckoutBuilderState extends BaseCheckoutBu
             this.context.setState(new FailedCheckoutBuilderState)
         }
     }
-    shippingPrice(shippingPrice: () => Money): void {
+    shippingPrice(shippingPrice: Money): void {
         try {
-            this.context._shippingPrice = shippingPrice()
+            this.context._shippingPrice = shippingPrice
         } catch (error) {
             this.context.setState(new FailedCheckoutBuilderState)
         }
     }
-    peymentMethod(peymentMethod: () => PeymentMethod): void {
+    peymentMethod(peymentMethod: PeymentMethod): void {
         try {
-            this.context._paymentMethod = peymentMethod()
+            this.context._paymentMethod = peymentMethod
         } catch (error) {
             this.context.setState(new FailedCheckoutBuilderState)
         }

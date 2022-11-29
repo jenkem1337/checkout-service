@@ -40,7 +40,7 @@ export default class CheckoutBuilder implements Builder<CheckoutInterface>{
         this.state.userUuid(userUuid)
         return this
     }
-    address(shippingAddress: () => Address){
+    address(shippingAddress: Address){
         this.state.address(shippingAddress)
         return this
     }
@@ -48,11 +48,11 @@ export default class CheckoutBuilder implements Builder<CheckoutInterface>{
         this.state.subTotal(subTotal)
         return this
     }
-    shippingPrice(shippingPrice: () => Money){
+    shippingPrice(shippingPrice: Money){
         this.state.shippingPrice(shippingPrice)
         return this
     }
-    peymentMethod(peymentMethod: () => PeymentMethod) {
+    peymentMethod(peymentMethod: PeymentMethod) {
         this.state.peymentMethod(peymentMethod)
         return this
     }

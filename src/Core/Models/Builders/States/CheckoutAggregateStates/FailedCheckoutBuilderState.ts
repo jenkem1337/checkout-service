@@ -15,16 +15,16 @@ export default class FailedCheckoutBuilderState extends BaseCheckoutBuilderState
     userUuid(userUuid: () => CustomerID): void {
         this.context.build()
     }
-    address(shippingAddress: () => Address): void {
+    address(shippingAddress: Address): void {
         this.context.build()
     }
     subTotal(subTotal: () => Money): void {
         this.context.build()
     }
-    shippingPrice(shippingPrice: () => Money): void {
+    shippingPrice(shippingPrice: Money): void {
         this.context.build()
     }
-    peymentMethod(peymentMethod: () => PeymentMethod): void {
+    peymentMethod(peymentMethod: PeymentMethod): void {
         this.context.build()
     }
     checkoutState(checkoutState: () => CheckoutState): void {

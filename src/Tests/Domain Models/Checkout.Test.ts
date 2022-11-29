@@ -50,7 +50,7 @@ describe('Checkout', () => {
                 new Date,
                 new Map<string, CheckoutItemInterface>,
                 new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734'),
-                new PeymentMethod('CREDIT_CART'),
+                PeymentMethod.notNullableConstruct('CREDIT_CART'),
                 new Money(18),
 
                 )
@@ -86,7 +86,7 @@ describe('Checkout', () => {
                                                     .checkoutUuid(() => new CheckoutID(randomUUID()))
                                                     .userUuid(() => new CustomerID(randomUUID()))
                                                     .subTotal(() => new Money(0))
-                                                    .shippingPrice(()=> new Money(18))
+                                                    .shippingPrice(new Money(18))
                                                     .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
                                                     .createdAt(new Date)
                                                     .updatedAt(new Date)
@@ -100,10 +100,10 @@ describe('Checkout', () => {
                                                     .checkoutUuid(() => new CheckoutID(randomUUID()))
                                                     .userUuid(() => new CustomerID(randomUUID()))
                                                     .subTotal(() => new Money(0))
-                                                    .shippingPrice(()=> new Money(18))
-                                                    .peymentMethod(() => new PeymentMethod('CREDIT_CART'))
+                                                    .shippingPrice(new Money(18))
+                                                    .peymentMethod(PeymentMethod.notNullableConstruct('CREDIT_CART'))
                                                     .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                                                    .address(() => new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
+                                                    .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
                                                     .createdAt(new Date)
                                                     .updatedAt(new Date)
                                                     .build()
@@ -113,20 +113,18 @@ describe('Checkout', () => {
             })
 
             it('should return NullCheckout when given any ValueObject with null property', () => {
-                let checkout: NullCheckout = CheckoutBuilder.initBuilder(new CreateInstanceOfCheckoutBuilderState)
+                expect(() => CheckoutBuilder.initBuilder(new CreateInstanceOfCheckoutBuilderState)
                 .checkoutUuid(() => new CheckoutID(randomUUID()))
                 .userUuid(() => new CustomerID(randomUUID()))
                 .subTotal(() => new Money(0))
-                .shippingPrice(()=> new Money(18))
-                .peymentMethod(() => new PeymentMethod(null))
+                .shippingPrice(new Money(18))
+                .peymentMethod( PeymentMethod.notNullableConstruct(null))
                 .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(() => new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
+                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
                 .createdAt(new Date)
                 .updatedAt(new Date)
-                .build()
+                .build()).toThrow(NullPropertyException)
 
-                expect(checkout).toBeInstanceOf(NullCheckout)
-                expect(checkout.isNotNull()).toBe(false)
             })
         })
         describe('CheckoutBuilder::ItMustBeConcreateCheckoutState', () => {
@@ -135,9 +133,9 @@ describe('Checkout', () => {
                 .checkoutUuid(() => new CheckoutID(randomUUID()))
                 .userUuid(() => new CustomerID(randomUUID()))
                 .subTotal(() => new Money(0))
-                .shippingPrice(()=> new Money(18))
+                .shippingPrice(new Money(18))
                 .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(() => new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
+                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
                 .createdAt(new Date)
                 .updatedAt(new Date)
                 .build()
@@ -150,10 +148,10 @@ describe('Checkout', () => {
                 .checkoutUuid(() => new CheckoutID(randomUUID()))
                 .userUuid(() => new CustomerID(randomUUID()))
                 .subTotal(() => new Money(0))
-                .shippingPrice(()=> new Money(18))
-                .peymentMethod(() => new PeymentMethod(null))
+                .shippingPrice(new Money(18))
+                .peymentMethod(PeymentMethod.notNullableConstruct(null))
                 .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(() => new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
+                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
                 .createdAt(new Date)
                 .updatedAt(new Date)
                 .build()).toThrow(NullPropertyException)
@@ -165,7 +163,7 @@ describe('Checkout', () => {
                 .checkoutUuid(() => new CheckoutID(randomUUID()))
                 .userUuid(() => new CustomerID(randomUUID()))
                 .subTotal(() => new Money(0))
-                .shippingPrice(()=> new Money(18))
+                .shippingPrice( new Money(18))
                 .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
                 .createdAt(new Date)
                 .updatedAt(new Date)
@@ -179,7 +177,7 @@ describe('Checkout', () => {
                 .checkoutUuid(() => new CheckoutID(randomUUID()))
                 .userUuid(() => new CustomerID(null))
                 .subTotal(() => new Money(0))
-                .shippingPrice(()=> new Money(18))
+                .shippingPrice( new Money(18))
                 .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
                 .createdAt(new Date)
                 .updatedAt(new Date)
@@ -403,7 +401,7 @@ describe('Checkout', () => {
             })
             describe('Checkout::setPeymentMethod', () => {
                 it('should return valid values about peyment method when given peyment method value object instance', () => {
-                    checkoutDomainModel.setPeymentMethod(() => new PeymentMethod(PeymentMethodEnum.CREDIT_CART))
+                    checkoutDomainModel.setPeymentMethod(() => PeymentMethod.notNullableConstruct(PeymentMethodEnum.CREDIT_CART))
                     let peymentMethod = checkoutDomainModel.getPeymentMethod()
                     expect(peymentMethod.getPeymentMethod()).toBe('CREDIT_CART')
                 })

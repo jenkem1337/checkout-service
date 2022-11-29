@@ -17,17 +17,17 @@ export default class FromCreationalCommandCheckoutBuilderState extends BaseCheck
     userUuid(userUuid: () => CustomerID): void {
         this.context._userUuid = userUuid()
     }
-    address(shippingAddress: () => Address): void {
-        this.context._address = shippingAddress()
+    address(shippingAddress: Address): void {
+        this.context._address = shippingAddress
     }
     subTotal(subTotal: () => Money): void {
         this.context._subTotal = subTotal()
     }
-    shippingPrice(shippingPrice: () => Money): void {
-        this.context._shippingPrice = shippingPrice()
+    shippingPrice(shippingPrice: Money): void {
+        this.context._shippingPrice = shippingPrice
     }
-    peymentMethod(peymentMethod: () => PeymentMethod): void {
-        this.context._paymentMethod = peymentMethod()
+    peymentMethod(peymentMethod: PeymentMethod): void {
+        this.context._paymentMethod = peymentMethod
     }
     checkoutState(checkoutState: () => CheckoutState): void {
         this.context._checkoutState = checkoutState()
