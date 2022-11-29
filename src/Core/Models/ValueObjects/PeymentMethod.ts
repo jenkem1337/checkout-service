@@ -9,13 +9,21 @@ export const enum PeymentMethodEnum {
 }
 export default class PeymentMethod extends ValueObject {
     private readonly peymentMethod: string
-    constructor(peymentMethod:string){
+    private constructor(peymentMethod:string){
         super()
-        if(!peymentMethod) throw new NullPropertyException('peyment method')
-        if(!peymentMethod.match('([a-zA-Z])')) throw new ChracterDoesntMatchException('peyment method')
         this.peymentMethod = peymentMethod
     }
-    
+    static nullableConstruct(peymentMethod:string): PeymentMethod {
+        return new PeymentMethod(peymentMethod??null)
+    }
+
+
+    static notNullableConstruct(peymentMethod:string){
+        if(!peymentMethod) throw new NullPropertyException('peyment method')
+        if(!peymentMethod.match('([a-zA-Z])')) throw new ChracterDoesntMatchException('peyment method')
+        return new PeymentMethod(peymentMethod)
+
+    }
     getPeymentMethod = () => this.peymentMethod
     equals(obj: Object): boolean {
         if(obj === this) return true
