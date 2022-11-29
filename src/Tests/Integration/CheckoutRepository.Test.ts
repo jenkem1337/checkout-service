@@ -101,4 +101,28 @@ describe('Checkout Repository', () => {
 
         expect(item.getProductHeader().getHeader()).toBe("Product 1")
     })
+
+    it('should return correct sub total when shipping price added and actual sub total under 100', async () => {
+        const uuid = randomUUID()
+        const itemUuid = randomUUID()
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
+        _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(50), new ProductQuantity(1), new Date, new Date))
+        _checkout.setShippingPrice(() => new Money(20))
+        await checkoutRepository.saveChanges(_checkout)
+        
+        let checkout_= await checkoutRepository.findOneByUuid(uuid)
+        expect(checkout_.getSubTotal().getAmount()).toBe(70)
+    })
+    it('should return correct sub total when shipping price added and sub total amount more than 100', async () => {
+        const uuid = randomUUID()
+        const itemUuid = randomUUID()
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
+        _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(101), new ProductQuantity(1), new Date, new Date))
+        _checkout.setShippingPrice(() => new Money(20))
+        await checkoutRepository.saveChanges(_checkout)
+        
+        let checkout_= await checkoutRepository.findOneByUuid(uuid)
+        expect(checkout_.getSubTotal().getAmount()).toBe(101)
+
+    })
 })
