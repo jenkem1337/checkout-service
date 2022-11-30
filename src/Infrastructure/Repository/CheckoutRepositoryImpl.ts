@@ -33,14 +33,13 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
         return CheckoutAggregateMapper.fromDataMapperToAggregate(_checkoutDataMapper)
 
     }
-    async findManyByUuidAndCustomerUuid(uuid: string, custormerUuid: string): Promise<CheckoutInterface[]> {
+    async findManyByCustomerUuid(custormerUuid: string): Promise<CheckoutInterface[]> {
         
         const _checkoutDataMapper = await this.dataSoruce.manager.find(CheckoutDataMapper, {
             relations: {
                 checkoutItems:true
             },
             where: {
-                uuid: uuid,
                 customerUuid: custormerUuid
             }
         })
