@@ -3,5 +3,5 @@ import CheckoutInterface from '../Models/Domain Models/Checkout/CheckoutInterfac
 import Checkout from '../Models/Domain Models/Checkout/Checkout';
 export default interface CheckoutRepository extends Repository<Promise<CheckoutInterface>, Promise<CheckoutInterface[]>, Checkout>{
     findOneByUuidAndCustomerUuid(uuid:string, customerUuid:string): Promise<CheckoutInterface>
-    findManyByUuidAndCustomerUuid(uuid:string, custormerUuid:string): Promise<CheckoutInterface[]>
+    findManyByCustomerUuid(custormerUuid:string): Promise<CheckoutInterface[]>
 }
