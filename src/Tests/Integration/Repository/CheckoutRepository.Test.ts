@@ -1,8 +1,6 @@
 import { Test } from '@nestjs/testing';
 import Checkout from '../../../Core/Models/Domain Models/Checkout/Checkout';
-import { testORMProvider } from '../../../Application/Modules/ORMModule/OrmProvider';
 import CheckoutRepository from '../../../Core/Interfaces/CheckoutRepository';
-import InMemoryCheckoutRepositoryImpl from '../../../Infrastructure/Repository/InMemoryCheckoutRepositoryImpl';
 import CheckoutID from '../../../Core/Models/ValueObjects/CheckoutID';
 import { randomUUID } from 'crypto';
 import CustomerID from '../../../Core/Models/ValueObjects/CustomerID';
@@ -14,14 +12,50 @@ import CheckoutItemID from '../../../Core/Models/ValueObjects/CheckoutItemID';
 import ProductID from '../../../Core/Models/ValueObjects/ProductID';
 import ProductHeader from '../../../Core/Models/ValueObjects/ProductHeader';
 import ProductQuantity from '../../../Core/Models/ValueObjects/ProductQuantity';
+import CheckoutAggregateMapperContext from '../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
+import WriteCheckoutAggregateMapper from '../../../Infrastructure/Repository/Mapper/WriteCheckoutAggregateMapper';
+import CheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutRepositoryImpl';
+import { DataSource } from 'typeorm';
+import CheckoutDataMapper from '../../../Infrastructure/Entity/CheckoutDataMapper';
+import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemDataMapper';
+
+
+
+
 describe('Checkout Repository', () => {
     let checkoutRepository: CheckoutRepository = null
+    
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
-            providers: [InMemoryCheckoutRepositoryImpl, ...testORMProvider]
+            providers: [CheckoutRepositoryImpl,
+                {
+                provide: CheckoutAggregateMapperContext.name,
+                useFactory: () => {
+                    const context = new CheckoutAggregateMapperContext
+                    context.setStrategy(new WriteCheckoutAggregateMapper)
+                    return context;
+                    }
+                },
+                {
+                    provide: "DataSource",
+                    useFactory: () => {
+                        const dataSource = new DataSource({
+                            type: 'sqlite',
+                            database:':memory:',
+                            entities: [
+                                CheckoutDataMapper, CheckoutItemDataMapper
+                            ],
+                            synchronize: true,
+                          });
+                      
+                          return dataSource.initialize();
+                    }
+                },
+
+        ]
         }).compile()
 
-        checkoutRepository = moduleRef.get<InMemoryCheckoutRepositoryImpl>(InMemoryCheckoutRepositoryImpl)
+        checkoutRepository = await moduleRef.resolve<CheckoutRepositoryImpl>(CheckoutRepositoryImpl)
     })
 
     afterEach(() => {

@@ -1,27 +1,57 @@
-import StubAddAnItemToCartCommandHandler from '../../../Stubs/Handlers/Commands/StubAddAnItemToCartCommandHandler';
-import CheckoutRepository from '../../../../Core/Interfaces/CheckoutRepository';
+
 import { Test } from '@nestjs/testing';
-import InMemoryCheckoutRepositoryImpl from '../../../../Infrastructure/Repository/InMemoryCheckoutRepositoryImpl';
-import { testORMProvider } from '../../../../Application/Modules/ORMModule/OrmProvider';
 import { CqrsModule } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import AddAnItemCommand from '../../../../Core/Services/Commands/Command/AddAnItemCommand';
 import { CheckoutStates } from '../../../../Core/Models/ValueObjects/CheckoutState';
+import CheckoutAggregateMapperContext from '../../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
+import WriteCheckoutAggregateMapper from '../../../../Infrastructure/Repository/Mapper/WriteCheckoutAggregateMapper';
+import AddAnItemToCartCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/AddAnItemToCartCommandHandler';
+import CheckoutRepositoryImpl from '../../../../Infrastructure/Repository/CheckoutRepositoryImpl';
+import { DataSource } from 'typeorm';
+import CheckoutDataMapper from '../../../../Infrastructure/Entity/CheckoutDataMapper';
+import CheckoutItemDataMapper from '../../../../Infrastructure/Entity/CheckoutItemDataMapper';
 describe("AddAnItemToCartCommandHandler", () => {
-    let commandHandler: StubAddAnItemToCartCommandHandler
-    let repository: InMemoryCheckoutRepositoryImpl
+    let commandHandler: AddAnItemToCartCommandHandler
+    let repository: CheckoutRepositoryImpl
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [CqrsModule],
-            providers: [StubAddAnItemToCartCommandHandler, {
-                provide: InMemoryCheckoutRepositoryImpl.name,
-                useClass: InMemoryCheckoutRepositoryImpl
-            }, ...testORMProvider]
+            providers: [
+                AddAnItemToCartCommandHandler,
+                {
+                    provide:"CheckoutRepository",
+                    useClass: CheckoutRepositoryImpl
+                },
+                {
+                    provide: "DataSource",
+                    useFactory: () => {
+                        const dataSource = new DataSource({
+                            type: 'sqlite',
+                            database:':memory:',
+                            entities: [
+                                CheckoutDataMapper, CheckoutItemDataMapper
+                            ],
+                            synchronize: true,
+                          });
+                      
+                          return dataSource.initialize();
+                    }
+                },
+                {
+                    provide: CheckoutAggregateMapperContext.name,
+                    useFactory: () => {
+                        const context = new CheckoutAggregateMapperContext
+                        context.setStrategy( new WriteCheckoutAggregateMapper)
+                        return context;
+                    }
+                }
+            ]
         }).compile()
 
-        commandHandler = moduleRef.get(StubAddAnItemToCartCommandHandler)
-        repository = moduleRef.get(InMemoryCheckoutRepositoryImpl.name)
+        commandHandler = moduleRef.get(AddAnItemToCartCommandHandler)
+        repository = moduleRef.get("CheckoutRepository")
     })
 
     afterEach(() => {
