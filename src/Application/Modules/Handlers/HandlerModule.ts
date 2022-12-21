@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import CreateNewCheckoutCommandHandler from '../../../Core/Services/Commands/CommandHandlers/CreateNewCheckoutCommandHandler';
 import WriteRepositoryModule from '../RepositoryModule/WriteRepositoryModule';
-const CommandHandlers = [CreateNewCheckoutCommandHandler]
+import AddAnItemToCartCommadHandler from '../../../Core/Services/Commands/CommandHandlers/AddAnItemToCartCommandHandler';
+import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
+const CommandHandlers = [AddAnItemToCartCommadHandler, AddItemOneMoreThanCommandHandler]
 
 @Module({
     imports: [WriteRepositoryModule, CqrsModule],
