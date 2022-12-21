@@ -1,9 +1,11 @@
-import Checkout from "../../../Infrastructure/Entity/Checkout";
-import CheckoutItem from "../../../Infrastructure/Entity/CheckoutItem";
 import { DataSource } from "typeorm";
 import { Scope } from "@nestjs/common";
+import CheckoutDataMapper from '../../../Infrastructure/Entity/CheckoutDataMapper';
+import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemDataMapper';
+import CheckoutDocument from '../../../Infrastructure/Documents/CheckoutDocument';
+import CheckoutItemDocument from '../../../Infrastructure/Documents/CheckoutItemDocument';
 
-const ORMProviders = [
+const postGresProvider = [
     {
         provide: 'DataSource',
         useFactory: async () => {
@@ -15,9 +17,8 @@ const ORMProviders = [
             password: 'admin',
             database: 'checkout_service_write_db',
             entities: [
-                Checkout, CheckoutItem
+              CheckoutDataMapper, CheckoutItemDataMapper
             ],
-            synchronize: true,
           });
     
           return dataSource.initialize();
@@ -26,20 +27,21 @@ const ORMProviders = [
     }
 ]
 
-const testORMProvider =  [    {
-  provide: 'TestDataSource',
+const mongoORMProvider = [{
+  provide: 'MongoDataSource',
   useFactory: async () => {
     const dataSource = new DataSource({
-      type: 'sqlite',
-      database:':memory:',
+      type: "mongodb",
+      host: "localhost",
+      port: 27017,
+      database: "checkout_service_read_db",
       entities: [
-          Checkout, CheckoutItem
-      ],
-      synchronize: true,
-    });
-
-    return dataSource.initialize();
+        CheckoutDocument, CheckoutItemDocument
+      ]
+    })
+    return dataSource.initialize()
   },
-},
-]
-export { ORMProviders, testORMProvider }
+}]
+
+
+export { postGresProvider, mongoORMProvider }
