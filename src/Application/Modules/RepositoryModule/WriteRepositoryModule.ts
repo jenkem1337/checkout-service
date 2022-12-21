@@ -1,13 +1,21 @@
 import { Module } from "@nestjs/common";
 import CheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutRepositoryImpl';
-import ORMModule from "../ORMModule/ORMModule";
-import InMemoryCheckoutRepositoryImpl from '../../../Infrastructure/Repository/InMemoryCheckoutRepositoryImpl';
+import PostGreDataSourceModule from "../ORMModule/PostGreDataSourceModule";
+import CheckoutAggregateMapperContext from '../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
+import WriteCheckoutAggregateMapper from '../../../Infrastructure/Repository/Mapper/WriteCheckoutAggregateMapper';
 
 @Module({
     providers: [{
         provide:"CheckoutRepository",
         useClass: CheckoutRepositoryImpl
+    }, {
+        provide: CheckoutAggregateMapperContext.name,
+        useFactory: () => {
+            const context = new CheckoutAggregateMapperContext
+            context.setStrategy( new WriteCheckoutAggregateMapper)
+            return context;
+        }
     }],
-    imports: [ORMModule]
+    imports: [PostGreDataSourceModule]
 })
 export default class WriteRepositoryModule {}
