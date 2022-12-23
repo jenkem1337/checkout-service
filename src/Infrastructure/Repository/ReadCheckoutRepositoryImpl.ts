@@ -23,12 +23,13 @@ export default class ReadCheckoutRepositoryImpl implements ReadCheckoutRepositor
     }
 
     async updateCheckoutItemDocument(checkout: Checkout){
+        const checkoutDataMapper = this.objectMapper.fromAggregateToDataMapper(checkout)
         await this.dataSoruce.mongoManager.updateOne(
             CheckoutDocument, 
-            {"_id":checkout.getUuid().getUuid()},
+            {"_id":checkoutDataMapper._id},
             {$set: {
-                "checkoutItemDocument": [...checkout.getCheckoutItems().values()],
-                "subTotal": checkout.getSubTotal().getAmount()
+                "checkoutItemDocument": checkoutDataMapper.checkoutItemDocument,
+                "subTotal": checkoutDataMapper.subTotal
             }}
         )
 
