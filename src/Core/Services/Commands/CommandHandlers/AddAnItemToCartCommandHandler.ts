@@ -17,6 +17,7 @@ import ProductQuantity from '../../../Models/ValueObjects/ProductQuantity';
 import Checkout from '../../../Models/Domain Models/Checkout/Checkout';
 import ProductID from '../../../Models/ValueObjects/ProductID';
 import CheckoutInterface from '../../../Models/Domain Models/Checkout/CheckoutInterface';
+import { check } from 'prettier';
 
 @CommandHandler(AddAnItemCommand)
 export default class AddAnItemToCartCommadHandler implements ICommandHandler<AddAnItemCommand> {
@@ -32,14 +33,13 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
     async execute(command: AddAnItemCommand): Promise<any> {
         const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         if(checkoutDomainModel.isNull()) {
-            await this.ifDomainModelNotExistExecuteThis(command)
+            await this.createCheckoutAndAddAnCheckoutItem(command)
         }
         if(checkoutDomainModel.isNotNull()) {
-            await this.ifDomainModelExistExecuteThis(checkoutDomainModel, command)
+            await this.addAnCheckoutItem(checkoutDomainModel, command)
         }
-
     }
-    private async ifDomainModelExistExecuteThis(checkoutDomainModel: CheckoutInterface, command: AddAnItemCommand){
+    private async addAnCheckoutItem(checkoutDomainModel: CheckoutInterface, command: AddAnItemCommand){
         checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState)
                                                     .checkoutItemUuid(() => new CheckoutItemID(command.checkoutItemUuid))
                                                     .checkoutUuid(() => new CheckoutID(command.checkoutUuid))
@@ -51,9 +51,9 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
                                                     .checkoutUpdatedAt(command.itemUpdatedDate)
                                                     .build())
         await this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
-
+        this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
     }
-    private async ifDomainModelNotExistExecuteThis(command: AddAnItemCommand){
+    private async createCheckoutAndAddAnCheckoutItem(command: AddAnItemCommand){
         const newCheckoutDomainModel = CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
         .checkoutUuid(() => new CheckoutID(command.checkoutUuid))
         .userUuid(() => new CustomerID(command.customerUuid))
@@ -74,6 +74,8 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
                                                     .checkoutUpdatedAt(command.itemUpdatedDate)
                                                     .build())
         await this.checkoutWriteRepository.saveChanges(newCheckoutDomainModel as Checkout)
+        
+        this.eventPublisher.mergeObjectContext(newCheckoutDomainModel as Checkout).commit()
 
     }
 

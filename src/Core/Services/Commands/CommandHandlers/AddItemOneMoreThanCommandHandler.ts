@@ -28,30 +28,32 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
         ){
     }
     async execute(command: AddItemOneMoreThanCommand): Promise<any> {
-        const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
+        const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
+        
         if(checkoutDomainModel.isNull()) {
-            await this.ifDomainModelNotExistExecuteThis(command)
+            await this.createCheckoutAndAddCheckoutItems(command)
         }
+        
         if(checkoutDomainModel.isNotNull()) {
-            await this.ifDomainModelExistExecuteThis(checkoutDomainModel as Checkout, command)
+            await this.addCheckoutItems(checkoutDomainModel as Checkout, command)
         }
-
     }
     
     
     
     
     
-    private async ifDomainModelExistExecuteThis(checkoutDomainModel: Checkout, command: AddItemOneMoreThanCommand){
+    private async addCheckoutItems(checkoutDomainModel: Checkout, command: AddItemOneMoreThanCommand){
         checkoutDomainModel.addItemOneMoreThan(
             new CheckoutItemID(command.checkoutItemUuid), 
             new ProductQuantity(command.quantity)
         )
         
         await this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        this.eventPublisher.mergeObjectContext(checkoutDomainModel).commit()
 
     }
-    private async ifDomainModelNotExistExecuteThis(command: AddItemOneMoreThanCommand){
+    private async createCheckoutAndAddCheckoutItems(command: AddItemOneMoreThanCommand){
         const newCheckoutDomainModel = CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
                                                     .checkoutUuid(() => new CheckoutID(command.checkoutUuid))
                                                     .userUuid(() => new CustomerID(command.customerUuid))
@@ -79,7 +81,8 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
             new ProductQuantity(command.quantity - 1)
         )               
         await this.checkoutWriteRepository.saveChanges(newCheckoutDomainModel as Checkout)
-
+        
+        this.eventPublisher.mergeObjectContext(newCheckoutDomainModel as Checkout).commit()
     }
 
 }
