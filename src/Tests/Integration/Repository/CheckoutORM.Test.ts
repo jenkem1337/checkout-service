@@ -1,16 +1,33 @@
+import { CheckoutStates } from './../../../Core/Models/ValueObjects/CheckoutState';
 import {Test} from '@nestjs/testing'
 import { randomUUID } from 'crypto';
-import { testORMProvider } from '../../Application/Modules/ORMModule/OrmProvider';
-import { PeymentMethodEnum } from '../../Core/Models/ValueObjects/PeymentMethod';
 import { DataSource } from 'typeorm';
-import { CheckoutStates } from '../../Core/Models/ValueObjects/CheckoutState';
-import CheckoutItemDataMapper from '../../Infrastructure/Entity/CheckoutItem';
-import CheckoutDataMapper from '../../Infrastructure/Entity/Checkout';
+import CheckoutDataMapper from '../../../Infrastructure/Entity/CheckoutDataMapper';
+import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemDataMapper';
+import { Scope } from '@nestjs/common';
+import { PeymentMethodEnum } from '../../../Core/Models/ValueObjects/PeymentMethod';
 describe('Checkout ORM Test', () => {
     let testDataSource: DataSource
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
-            providers: [...testORMProvider]
+            providers: [{
+                provide: 'TestDataSource',
+                useFactory: async () => {
+                  const dataSource = new DataSource({
+                    type: 'sqlite',
+                    database:":memory:",
+                    dropSchema:true,
+                    entities: [
+                      CheckoutDataMapper, CheckoutItemDataMapper
+                    ],
+                    synchronize:true
+                  });
+              
+                  return dataSource.initialize();
+                },
+                scope:Scope.DEFAULT,
+              
+              }]
         }).compile()
 
         testDataSource = moduleRef.get<DataSource>("TestDataSource");

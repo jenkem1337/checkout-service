@@ -3,24 +3,20 @@ import CheckoutItemDataMapper from "../../Entity/CheckoutItemDataMapper";
 import Checkout from "../../../Core/Models/Domain Models/Checkout/Checkout";
 import CheckoutDataMapper from '../../Entity/CheckoutDataMapper';
 import CheckoutInterface from '../../../Core/Models/Domain Models/Checkout/CheckoutInterface';
-import CheckoutItemBuilder from "../../../Core/Models/Builders/CheckoutItemBuilder";
-import CheckoutBuilder from "../../../Core/Models/Builders/CheckoutBuilder";
-import CreateInstanceOfCheckoutItemState from "../../../Core/Models/Builders/States/CheckoutItemStates/CreateInstanceOfCheckoutItemState";
-import CheckoutID from "../../../Core/Models/ValueObjects/CheckoutID";
-import CheckoutItemID from "../../../Core/Models/ValueObjects/CheckoutItemID";
-import CheckoutState from "../../../Core/Models/ValueObjects/CheckoutState";
-import CustomerID from "../../../Core/Models/ValueObjects/CustomerID";
-import Money from "../../../Core/Models/ValueObjects/Money";
-import PeymentMethod from "../../../Core/Models/ValueObjects/PeymentMethod";
-import ProductHeader from "../../../Core/Models/ValueObjects/ProductHeader";
-import ProductID from "../../../Core/Models/ValueObjects/ProductID";
-import ProductQuantity from "../../../Core/Models/ValueObjects/ProductQuantity";
 import NullCheckout from '../../../Core/Models/Domain Models/Checkout/NullCheckout';
-import ItMustBeConcreteCheckoutBuilderState from '../../../Core/Models/Builders/States/CheckoutAggregateStates/ItMustBeConcreteCheckoutBuilderState';
-import CheckoutDocument from '../../Documents/CheckoutDocument';
 import CheckoutAggregateMapperStrategy from './CheckoutAggregateStrategy';
+import { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
+import NullableAllArgumentCheckoutFactory from "../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory";
+import CheckoutConstructorParamaters from "../../../Core/Models/Factories/Checkout/CheckoutConstructorParameters";
+import NullableCheckoutItemFactory from '../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import CheckoutItemConstructorParameters from "src/Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters";
 
 export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMapperStrategy<CheckoutDataMapper>{
+    
+    constructor(
+        private readonly domainModelFactoryCtx: IDomainModelFactoryContext
+    ){}
+    
     fromAggregateToDataMapper(checkout:Checkout):CheckoutDataMapper{
         let checkoutItems: CheckoutItemInterface[] = [...checkout.getCheckoutItems().values()]
         let checkoutItemDataMapper = checkoutItems.map(item => {
@@ -46,32 +42,35 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
 
     fromDataMapperToAggregate(_checkoutDataMapper: CheckoutDataMapper):CheckoutInterface {
         if(!_checkoutDataMapper) return new NullCheckout
-        const checkoutDomainObject: CheckoutInterface = CheckoutBuilder.initBuilder(new ItMustBeConcreteCheckoutBuilderState())
-                                                                    .checkoutUuid(() => new CheckoutID(_checkoutDataMapper.uuid))
-                                                                    .userUuid(() => new CustomerID(_checkoutDataMapper.customerUuid))
-                                                                    .subTotal(() => new Money(_checkoutDataMapper.subTotal))
-                                                                    .peymentMethod(PeymentMethod.nullableConstruct(_checkoutDataMapper.peymentMethod))
-                                                                    .shippingPrice(new Money(_checkoutDataMapper.shippingPrice))
-                                                                    .checkoutState(() => new CheckoutState(_checkoutDataMapper.checkoutState))
-                                                                    .checkoutItemsMap( new Map<string, CheckoutItemInterface>(_checkoutDataMapper.checkoutItems.map(item => {
-                                                                        return [
-                                                                            item.uuid, 
-                                                                            CheckoutItemBuilder.initBuilder(new CreateInstanceOfCheckoutItemState)
-                                                                                            .checkoutItemUuid(() => new CheckoutItemID(item.uuid))
-                                                                                            .checkoutUuid(() => new CheckoutID(_checkoutDataMapper.uuid))
-                                                                                            .checkoutProductHeader(() => new ProductHeader(item.productHeader))
-                                                                                            .checkoutProductBasePrice(() => new Money(item.productBasePrice))
-                                                                                            .checkoutProductQuantity(() => new ProductQuantity(item.productQuantity))
-                                                                                            .checkoutProductUuid(() => new ProductID(item.productUuid))
-                                                                                            .checkoutCreatedAt(item.createdDate)
-                                                                                            .checkoutUpdatedAt(item.updatedDate)
-                                                                                            .build()
-                                                                        ]
-                                                                    }))
-                                                            )
-                                                                    .createdAt(_checkoutDataMapper.createdDate)
-                                                                    .updatedAt(_checkoutDataMapper.updatedDate)    
-                                                                    .build()
+        let checkoutItemFactory = this.domainModelFactoryCtx.directlyGetFactoryMethod<CheckoutItemInterface, CheckoutItemConstructorParameters>(NullableCheckoutItemFactory.name)
+        let checkoutDomainObject: CheckoutInterface = this.domainModelFactoryCtx.setFactoryMethod(NullableAllArgumentCheckoutFactory.name)
+                                                                            .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                                                                checkoutState: _checkoutDataMapper.checkoutState,
+                                                                                checkoutUuid: _checkoutDataMapper.uuid,
+                                                                                createdAt: _checkoutDataMapper.createdDate,
+                                                                                subTotal: _checkoutDataMapper.subTotal,
+                                                                                updatedAt: _checkoutDataMapper.updatedDate,
+                                                                                userUuid: _checkoutDataMapper.customerUuid,
+                                                                                peymentMethod: _checkoutDataMapper.peymentMethod,
+                                                                                shippingPrice: _checkoutDataMapper.shippingPrice,
+                                                                                checkoutItems: new Map<string, CheckoutItemInterface>(_checkoutDataMapper.checkoutItems.map(item => {
+                                                                                    return [
+                                                                                        item.uuid,
+                                                                                        checkoutItemFactory.createInstance({
+                                                                                            checkoutItemUuid: item.uuid,
+                                                                                            checkoutUuid: _checkoutDataMapper.uuid,
+                                                                                            createdAt: item.createdDate,
+                                                                                            productBasePrice: item.productBasePrice,
+                                                                                            productHeader: item.productHeader,
+                                                                                            productQuantity: item.productQuantity,
+                                                                                            productUuid: item.productUuid,
+                                                                                            updatedAt: item.updatedDate
+                                                                                        })
+                                                                                    ]
+                                                                                }))
+
+                                                                            })
+        
         return checkoutDomainObject
 
     }
@@ -81,32 +80,36 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
             
             if(!_checkout) return new NullCheckout
 
-            const checkoutDomainObject: CheckoutInterface = CheckoutBuilder.initBuilder(new ItMustBeConcreteCheckoutBuilderState())
-                                                                        .checkoutUuid(() => new CheckoutID(_checkout.uuid))
-                                                                        .userUuid(() => new CustomerID(_checkout.customerUuid))
-                                                                        .subTotal(() => new Money(_checkout.subTotal))
-                                                                        .peymentMethod(PeymentMethod.nullableConstruct(_checkout.peymentMethod))
-                                                                        .shippingPrice(new Money(_checkout.shippingPrice))
-                                                                        .checkoutState(() => new CheckoutState(_checkout.checkoutState))
-                                                                        .checkoutItemsMap(new Map<string, CheckoutItemInterface>(_checkout.checkoutItems.map(item => {
-                                                                            return [
-                                                                                item.uuid, 
-                                                                                CheckoutItemBuilder.initBuilder(new CreateInstanceOfCheckoutItemState)
-                                                                                                .checkoutItemUuid(() => new CheckoutItemID(item.uuid))
-                                                                                                .checkoutUuid(() => new CheckoutID(_checkout.uuid))
-                                                                                                .checkoutProductHeader(() => new ProductHeader(item.productHeader))
-                                                                                                .checkoutProductBasePrice(() => new Money(item.productBasePrice))
-                                                                                                .checkoutProductQuantity(() => new ProductQuantity(item.productQuantity))
-                                                                                                .checkoutProductUuid(() => new ProductID(item.productUuid))
-                                                                                                .checkoutCreatedAt(item.createdDate)
-                                                                                                .checkoutUpdatedAt(item.updatedDate)
-                                                                                                .build()
-                                                                            ]
-                                                                        })))
-                                                                        .createdAt(_checkout.createdDate)
-                                                                        .updatedAt(_checkout.updatedDate)    
-                                                                        .build()
-            return checkoutDomainObject
+            let checkoutItemFactory = this.domainModelFactoryCtx.directlyGetFactoryMethod<CheckoutItemInterface, CheckoutItemConstructorParameters>(NullableCheckoutItemFactory.name)
+            let checkoutDomainObject: CheckoutInterface = this.domainModelFactoryCtx.setFactoryMethod(NullableAllArgumentCheckoutFactory.name)
+                                                                                .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                                                                    checkoutState: _checkout.checkoutState,
+                                                                                    checkoutUuid: _checkout.uuid,
+                                                                                    createdAt: _checkout.createdDate,
+                                                                                    subTotal: _checkout.subTotal,
+                                                                                    updatedAt: _checkout.updatedDate,
+                                                                                    userUuid: _checkout.customerUuid,
+                                                                                    peymentMethod: _checkout.peymentMethod,
+                                                                                    shippingPrice: _checkout.shippingPrice,
+                                                                                    checkoutItems: new Map<string, CheckoutItemInterface>(_checkout.checkoutItems.map(item => {
+                                                                                        return [
+                                                                                            item.uuid,
+                                                                                            checkoutItemFactory.createInstance({
+                                                                                                checkoutItemUuid: item.uuid,
+                                                                                                checkoutUuid: _checkout.uuid,
+                                                                                                createdAt: item.createdDate,
+                                                                                                productBasePrice: item.productBasePrice,
+                                                                                                productHeader: item.productHeader,
+                                                                                                productQuantity: item.productQuantity,
+                                                                                                productUuid: item.productUuid,
+                                                                                                updatedAt: item.updatedDate
+                                                                                            })
+                                                                                        ]
+                                                                                    }))
+    
+                                                                                })
+            
+                return checkoutDomainObject
     
         })
     }

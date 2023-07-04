@@ -1,3 +1,7 @@
+import  NullableCheckoutItemFactory  from '../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import  NullableAllArgumentCheckoutFactory from '../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
+import  DomainModelFactoryContext  from '../../../Core/Models/Factories/DomainModelFactoryContext';
+import { IDomainModelFactoryContext } from './../../../Core/Models/Factories/DomainModelFactoryContext';
 import { Test } from '@nestjs/testing';
 import Checkout from '../../../Core/Models/Domain Models/Checkout/Checkout';
 import CheckoutID from '../../../Core/Models/ValueObjects/CheckoutID';
@@ -42,12 +46,23 @@ describe('Read Checkout Repository', () => {
                 },
               }, {
                 provide: CheckoutAggregateMapperContext.name,
-                useFactory: () => {
+                useFactory: (domainModelfactoryCtx: IDomainModelFactoryContext) => {
                     const context = new CheckoutAggregateMapperContext
-                    context.setStrategy(new ReadCheckoutAggregateMapper)
+                    context.setStrategy(new ReadCheckoutAggregateMapper(domainModelfactoryCtx))
                     return context;
+                },
+                inject: [{token: "DomainModelFactoryContext", optional:false}]
+
+            },                {
+                provide:"DomainModelFactoryContext",
+                useFactory: () => {
+                    const factoryCtx: IDomainModelFactoryContext = new DomainModelFactoryContext()
+                    factoryCtx.addFactoryClass(NullableAllArgumentCheckoutFactory.name, new NullableAllArgumentCheckoutFactory)
+                            .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
+                    return factoryCtx
                 }
-            }]
+            },
+]
         }).compile()
 
         checkoutRepository = await moduleRef.resolve<ReadCheckoutRepositoryImpl>(ReadCheckoutRepositoryImpl)

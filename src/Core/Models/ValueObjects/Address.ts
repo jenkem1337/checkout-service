@@ -24,6 +24,20 @@ export default class Address extends ValueObject {
         addressZipCode:string
     ){
         super()
+
+        this.addressName = addressName
+        this.addressOwnerName = addressOwnerName
+        this.addressOwnerSurname = addressOwnerSurname
+        this.fullAddressInformation = fullAddressInformation
+        this.addressCountry = addressCountry
+        this.addressProvince = addressProvince
+        this.addressDistrict = addressDistrict
+        this.addressZipCode = addressZipCode
+    }
+    static nullableConstruct(addressName?:string, addressOwnerName?:string, addressOwnerSurname?:string, fullAddressInformation?:string, addressCountry?:string, addressProvince?:string, addressDistrict?:string, addressZipCode?:string){
+        return new Address(addressName ?? null, addressOwnerName ?? null, addressOwnerSurname ?? null, fullAddressInformation ?? null, addressCountry ?? null, addressProvince ?? null, addressDistrict ?? null, addressZipCode ?? null)
+    }
+    static notNullableConstruct(addressName:string, addressOwnerName:string, addressOwnerSurname:string, fullAddressInformation:string, addressCountry:string, addressProvince:string, addressDistrict:string, addressZipCode:string){
         if(!addressName)            throw new NullPropertyException('address name');
         if(!addressOwnerName)       throw new NullPropertyException('address owner name');
         if(!addressOwnerSurname)    throw new NullPropertyException('address owner surname');
@@ -36,15 +50,8 @@ export default class Address extends ValueObject {
         if(!addressOwnerName.match('([a-zA-Z])') || !addressOwnerSurname.match('([a-zA-Z])')){
             throw new ChracterDoesntMatchException('address owner name or/and surname');
         }
+        return new Address(addressName, addressOwnerName, addressOwnerSurname, fullAddressInformation, addressCountry, addressProvince, addressDistrict, addressZipCode)
 
-        this.addressName = addressName
-        this.addressOwnerName = addressOwnerName
-        this.addressOwnerSurname = addressOwnerSurname
-        this.fullAddressInformation = fullAddressInformation
-        this.addressCountry = addressCountry
-        this.addressProvince = addressProvince
-        this.addressDistrict = addressDistrict
-        this.addressZipCode = addressZipCode
     }
     getAddressName = () => this.addressName
     getAddressOwnerName = () => this.addressOwnerName

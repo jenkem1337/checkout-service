@@ -9,34 +9,44 @@ import CheckoutState from '../../Core/Models/ValueObjects/CheckoutState';
 import { CheckoutStates } from '../../Core/Models/ValueObjects/CheckoutState';
 import CheckoutItemInterface from '../../Core/Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
-import CheckoutBuilder from '../../Core/Models/Builders/CheckoutBuilder';
-import CreateInstanceOfCheckoutBuilderState from '../../Core/Models/Builders/States/CheckoutAggregateStates/CreateCheckoutBuilderState';
-import NullCheckout from '../../Core/Models/Domain Models/Checkout/NullCheckout';
 import NullPropertyException from '../../Core/Exceptions/NullPropertyException';
-import FromCreationalCommandCheckoutBuilderState from '../../Core/Models/Builders/States/CheckoutAggregateStates/FromCommandCheckoutBuilderState';
-import NullIdException from '../../Core/Exceptions/NullIdException';
-import ItMustBeConcreteCheckoutBuilderState from '../../Core/Models/Builders/States/CheckoutAggregateStates/ItMustBeConcreteCheckoutBuilderState';
-import CheckoutItemBuilder from '../../Core/Models/Builders/CheckoutItemBuilder';
-import ItMustBeConcreateCheckoutItemState from '../../Core/Models/Builders/States/CheckoutItemStates/ItMustBeConcreateCheckoutItemState';
 import CheckoutItemID from '../../Core/Models/ValueObjects/CheckoutItemID';
 import ProductID from '../../Core/Models/ValueObjects/ProductID';
-import ProductHeader from '../../Core/Models/ValueObjects/ProductHeader';
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
 import CheckoutItemNotFoundException from '../../Core/Exceptions/CheckoutItemNotFoundException';
 import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';
+import ConcreteCheckoutFactory from '../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
+import CheckoutConstructorParamaters from '../../Core/Models/Factories/Checkout/CheckoutConstructorParameters';
+import NullableCheckoutFactory from '../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
+import NullCheckout from '../../Core/Models/Domain Models/Checkout/NullCheckout';
+import FromCheckoutCreatedFactory from '../../Core/Models/Factories/Checkout/FromCheckoutCreatedFactory';
+import CheckoutItemConstructorParameters from '../../Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
+import ConcreateCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
+import NullableCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import DomainModelFactoryContext, { IDomainModelFactoryContext } from '../../Core/Models/Factories/DomainModelFactoryContext';
 describe('Checkout', () => {
-    let checkoutDomainModel: Checkout = null
+    let checkoutDomainModel: CheckoutInterface = null
+    let factoryCtx: IDomainModelFactoryContext
     beforeEach(() => {
-        checkoutDomainModel = <Checkout> CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
-        .checkoutUuid(() => new CheckoutID(randomUUID()))
-        .userUuid(() => new CustomerID(randomUUID()))
-        .subTotal(() => new Money(0))
-        .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-        .createdAt(new Date)
-        .updatedAt(new Date)
-        .build()
+        factoryCtx = new DomainModelFactoryContext()
+        factoryCtx.addFactoryClass(NullableCheckoutFactory.name, new NullableCheckoutFactory())
+                .addFactoryClass(ConcreteCheckoutFactory.name, new ConcreteCheckoutFactory)
+                .addFactoryClass(FromCheckoutCreatedFactory.name, new FromCheckoutCreatedFactory)
+                .addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory)
+                .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
+        
+        checkoutDomainModel = factoryCtx.setFactoryMethod(ConcreteCheckoutFactory.name)
+                                        .createInstance({
+                                                    checkoutUuid: randomUUID(),
+                                                    userUuid: randomUUID(),
+                                                    checkoutState: CheckoutStates.CHECKOUT_CREATED,
+                                                    createdAt: new Date,
+                                                    subTotal: 0,
+                                                    updatedAt: new Date
+                                                })
     })
     afterEach(()=> {
+        factoryCtx = null
         checkoutDomainModel = null
     })
     describe('Checkout Constructor', () => {
@@ -49,11 +59,10 @@ describe('Checkout', () => {
                 new Date,
                 new Date,
                 new Map<string, CheckoutItemInterface>,
-                new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734'),
+                Address.notNullableConstruct('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734'),
                 PeymentMethod.notNullableConstruct('CREDIT_CART'),
                 new Money(18),
-
-                )
+            )
             expect(checkout).toBeTruthy()
             expect(checkout.getAddress().getAddressCountry()).toBe('Turkey')
             expect(checkout.getCheckoutItems()).toBeInstanceOf(Map<string, CheckoutItemInterface>)
@@ -79,147 +88,121 @@ describe('Checkout', () => {
         
     })
     
-    describe('Checkout Builders', () => {
-        describe('CheckoutBuilder::CreateInstanceOfCheckoutState', () => {
-            it('should return concreate Chekout instance when initialize without optional parameters', () => {
-                let checkout = CheckoutBuilder.initBuilder(new CreateInstanceOfCheckoutBuilderState)
-                                                    .checkoutUuid(() => new CheckoutID(randomUUID()))
-                                                    .userUuid(() => new CustomerID(randomUUID()))
-                                                    .subTotal(() => new Money(0))
-                                                    .shippingPrice(new Money(18))
-                                                    .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                                                    .createdAt(new Date)
-                                                    .updatedAt(new Date)
-                                                    .build()
+    describe('Checkout Factories', () => {
+        describe('NullableCheckoutFactory', () => {
+            it('should return concreate Chekout instance', () => {
+                let checkout = factoryCtx.setFactoryMethod(NullableCheckoutFactory.name)
+                                        .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                    checkoutUuid: randomUUID(),
+                    userUuid: randomUUID(),
+                    checkoutState: CheckoutStates.CHECKOUT_CREATED,
+                    createdAt: new Date,
+                    subTotal: 0,
+                    updatedAt: new Date
+                })
                 expect(checkout).toBeInstanceOf(Checkout)
                 expect(checkout).toBeTruthy()
             })
             
-            it('should return concreate Checkout instance when initialize with address, peyment method and shipping price but without Map', () => {
-                let checkout = CheckoutBuilder.initBuilder(new CreateInstanceOfCheckoutBuilderState)
-                                                    .checkoutUuid(() => new CheckoutID(randomUUID()))
-                                                    .userUuid(() => new CustomerID(randomUUID()))
-                                                    .subTotal(() => new Money(0))
-                                                    .shippingPrice(new Money(18))
-                                                    .peymentMethod(PeymentMethod.notNullableConstruct('CREDIT_CART'))
-                                                    .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                                                    .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
-                                                    .createdAt(new Date)
-                                                    .updatedAt(new Date)
-                                                    .build()
-                expect(checkout).toBeTruthy()
-                expect(checkout).toBeInstanceOf(Checkout)
-                expect(checkout.getCheckoutItems().size).toBe(0)
-            })
-
-            it('should return NullCheckout when given any ValueObject with null property', () => {
-                expect(() => CheckoutBuilder.initBuilder(new CreateInstanceOfCheckoutBuilderState)
-                .checkoutUuid(() => new CheckoutID(randomUUID()))
-                .userUuid(() => new CustomerID(randomUUID()))
-                .subTotal(() => new Money(0))
-                .shippingPrice(new Money(18))
-                .peymentMethod( PeymentMethod.notNullableConstruct(null))
-                .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
-                .createdAt(new Date)
-                .updatedAt(new Date)
-                .build()).toThrow(NullPropertyException)
-
+            it('should return NullCheckout when given null to any property', () => {
+                const checkout = factoryCtx.setFactoryMethod(NullableCheckoutFactory.name)
+                                        .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                            checkoutUuid: randomUUID(),
+                                            userUuid: randomUUID(),
+                                            checkoutState: null,
+                                            createdAt: new Date,
+                                            subTotal: 0,
+                                            updatedAt: new Date
+                                        })
+                expect(checkout).toBeInstanceOf(NullCheckout)
             })
         })
-        describe('CheckoutBuilder::ItMustBeConcreateCheckoutState', () => {
-            it('should return concreate Checkout instance when given optional address and shipping price parameter', () => {
-                let checkout = CheckoutBuilder.initBuilder(new ItMustBeConcreteCheckoutBuilderState)
-                .checkoutUuid(() => new CheckoutID(randomUUID()))
-                .userUuid(() => new CustomerID(randomUUID()))
-                .subTotal(() => new Money(0))
-                .shippingPrice(new Money(18))
-                .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
-                .createdAt(new Date)
-                .updatedAt(new Date)
-                .build()
+        describe('ConcreateCheckoutFactory', () => {
+            it('should return concreate Checkout instance', () => {
+                let checkout = factoryCtx.setFactoryMethod(ConcreteCheckoutFactory.name)
+                                        .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                            checkoutUuid: randomUUID(),
+                                            userUuid: randomUUID(),
+                                            checkoutState: CheckoutStates.CHECKOUT_CREATED,
+                                            createdAt: new Date,
+                                            subTotal: 0,
+                                            updatedAt: new Date
+                                        })
                 
                 expect(checkout).toBeTruthy()
                 expect(checkout.getCheckoutItems().size).toBe(0)
             })
-            it('should throw any about ValueObject exception when given null any ValueObject construtor', () => {
-                expect( () => CheckoutBuilder.initBuilder(new ItMustBeConcreteCheckoutBuilderState)
-                .checkoutUuid(() => new CheckoutID(randomUUID()))
-                .userUuid(() => new CustomerID(randomUUID()))
-                .subTotal(() => new Money(0))
-                .shippingPrice(new Money(18))
-                .peymentMethod(PeymentMethod.notNullableConstruct(null))
-                .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .address(new Address('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734')                                                    )
-                .createdAt(new Date)
-                .updatedAt(new Date)
-                .build()).toThrow(NullPropertyException)
+            it('should throw NullPropertyException exception when given null', () => {
+                expect(() => factoryCtx.setFactoryMethod(ConcreteCheckoutFactory.name)
+                                    .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                        checkoutUuid: randomUUID(),
+                                        userUuid: randomUUID(),
+                                        checkoutState: null,
+                                        createdAt: new Date,
+                                        subTotal: 0,
+                                        updatedAt: new Date
+                })).toThrow(NullPropertyException)
             })
         })
-        describe('CheckoutBuilder::FromCreationalCommandCheckoutBuilderState', () => {
+        describe('FromCheckoutCreatedFactory', () => {
             it('should return concreate Checkout instance when given valid parameters', () => {
-                let checkout = CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
-                .checkoutUuid(() => new CheckoutID(randomUUID()))
-                .userUuid(() => new CustomerID(randomUUID()))
-                .subTotal(() => new Money(0))
-                .shippingPrice( new Money(18))
-                .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .createdAt(new Date)
-                .updatedAt(new Date)
-                .build()
+                let checkout = factoryCtx.setFactoryMethod(FromCheckoutCreatedFactory.name)
+                                        .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                            checkoutUuid: randomUUID(),
+                                            userUuid: randomUUID(),
+                                            checkoutState: CheckoutStates.CHECKOUT_CREATED,
+                                            createdAt: new Date,
+                                            subTotal: 0,
+                                            updatedAt: new Date
+                                        })
                 
                 expect(checkout).toBeInstanceOf(Checkout)
                 expect(checkout).toBeTruthy()
-            })
-            it('should throw exception when any ValueObject constructor parameter given with null property', () => {
-                expect(() => CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
-                .checkoutUuid(() => new CheckoutID(randomUUID()))
-                .userUuid(() => new CustomerID(null))
-                .subTotal(() => new Money(0))
-                .shippingPrice( new Money(18))
-                .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                .createdAt(new Date)
-                .updatedAt(new Date)
-                .build()).toThrow(NullIdException)
             })
         })
 
         describe('Checkout Methods', () => {
             describe('Checkout::addAnItem', () => {
                 it('should return correct sub total and Map size when given an concreate item to parameter', () => {
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState)
-                    .checkoutItemUuid(() => new CheckoutItemID(randomUUID()))
-                    .checkoutUuid(() => checkoutDomainModel.getUuid())
-                    .checkoutProductUuid(() => new ProductID(randomUUID()))
-                    .checkoutProductHeader(() => new ProductHeader('Deneme'))
-                    .checkoutProductBasePrice(() => new Money(123))
-                    .checkoutProductQuantity(() => new ProductQuantity(1))
-                    .checkoutCreatedAt(new Date)
-                    .checkoutUpdatedAt(new Date)
-                    .build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name)
+                                                .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
+                                                    checkoutItemUuid: randomUUID(),
+                                                    checkoutUuid: randomUUID(),
+                                                    createdAt: new Date,
+                                                    productBasePrice: 123,
+                                                    productHeader: "Deneme",
+                                                    productQuantity: 1,
+                                                    productUuid: randomUUID(),
+                                                    updatedAt: new Date
+                                                })
+                    checkoutDomainModel.addAnItem(checkoutItem)
 
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(123)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
                 })
                 it('should return correct sub total, quantity and Map size when given same three concreate item to parameter', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem  = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+                    const checkoutItem2 = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+                    const checkoutItem3 = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem2)
+                    checkoutDomainModel.addAnItem(checkoutItem3)
+                    
                     let checkoutItems = checkoutDomainModel.getCheckoutItems()
                     let item = checkoutItems.get(checkoutItemUuid)
 
                     expect(item.getProductQuantity().getQuantity()).toBe(3)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(369)
                 })
             })
             describe('Checkout::addItemOneMoreThan', () => {
                 it('should return correct sub total, quantity and Map size when given same item uuid and quantity', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     checkoutDomainModel.addItemOneMoreThan(new CheckoutItemID(checkoutItemUuid), new ProductQuantity(3))
                     
                     let checkoutItems = checkoutDomainModel.getCheckoutItems()
@@ -238,7 +221,9 @@ describe('Checkout', () => {
 
                 it('should return correct sub total, quantity and Map size when given same item uuid and just one quantity', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     checkoutDomainModel.addItemOneMoreThan(new CheckoutItemID(checkoutItemUuid), new ProductQuantity(1))
                     
                     let checkoutItems = checkoutDomainModel.getCheckoutItems()
@@ -253,20 +238,21 @@ describe('Checkout', () => {
             describe('Checkout::takeOutAnItem', () => {
                 it('should return correct sub total and Map size when given an item uuid', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+                    
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     checkoutDomainModel.takeOutAnItem(new CheckoutItemID(checkoutItemUuid))
-
 
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(0)
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(0)
-
                 })
                 it('should return correct sub total, quantity and Map size when given same items uuid', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     
                     checkoutDomainModel.takeOutAnItem(new CheckoutItemID(checkoutItemUuid))
 
@@ -287,9 +273,11 @@ describe('Checkout', () => {
             describe('Checkout::takeOutOneMoreThanItem', () => {
                 it('should return correct sub total, quantity and Map size when given same items uuid and quantity', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     
                     checkoutDomainModel.takeOutOneMoreThanItem(new CheckoutItemID(checkoutItemUuid), new ProductQuantity(2))
 
@@ -303,9 +291,11 @@ describe('Checkout', () => {
 
                 it('should return correct sub total and Map size when given same items uuid and more than actual quantity', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     
                     checkoutDomainModel.takeOutOneMoreThanItem(new CheckoutItemID(checkoutItemUuid), new ProductQuantity(10))
 
@@ -322,9 +312,11 @@ describe('Checkout', () => {
             describe('Checkout::takeOutSameItems', () => {
                 it('should return correct sub total and Map size when given same items uuid', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     
                     checkoutDomainModel.takeOutSameItems(new CheckoutItemID(checkoutItemUuid))
 
@@ -344,9 +336,11 @@ describe('Checkout', () => {
                     let checkoutItemUuid = randomUUID()
                     let productUuid = randomUUID()
                     
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: productUuid,    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
 
                     checkoutDomainModel.updateItemPrices(new ProductID(productUuid), new Money(100))
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
@@ -357,9 +351,11 @@ describe('Checkout', () => {
                     let checkoutItemUuid = randomUUID()
                     let productUuid = randomUUID()
                     
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(productUuid)).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(123)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 123,    productHeader: "Deneme",    productQuantity: 1,    productUuid: productUuid,    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
 
                    expect(() => checkoutDomainModel.updateItemPrices(new ProductID(productUuid), new Money(-100)))
                         .toThrow(NegativeNumberException)
@@ -386,7 +382,7 @@ describe('Checkout', () => {
             describe('Checkout::setShippingAddress', () => {
                 it('should return valid values about address when given address value object instance', () => {
                     checkoutDomainModel.setShippingAddress(
-                        () => new Address('Home', 'John','Doe','Example Example Example', 'Turkey', 'Istanbul', 'Bakirkoy', '34147')
+                        () => Address.notNullableConstruct('Home', 'John','Doe','Example Example Example', 'Turkey', 'Istanbul', 'Bakirkoy', '34147')
                     )
                     let shippingAddress = checkoutDomainModel.getAddress()
                     expect(shippingAddress.getAddressName()).toBe('Home')
@@ -417,8 +413,10 @@ describe('Checkout', () => {
                 it('should return sub total + shipping price if sub total less than 100', () => {
 
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(20)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(20)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 20,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     //before
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(40)
                     
@@ -430,8 +428,10 @@ describe('Checkout', () => {
 
                 it('should return sub total without shipping price if sub total equal 100', () =>  {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(50)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(50)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 50,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     //before
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(100)
 
@@ -443,8 +443,10 @@ describe('Checkout', () => {
 
                 it('should return sub total without shipping price if sub total more than 100', () => {
                     let checkoutItemUuid = randomUUID()
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(150)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
-                    checkoutDomainModel.addAnItem(CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState).checkoutItemUuid(() => new CheckoutItemID(checkoutItemUuid)).checkoutUuid(() => checkoutDomainModel.getUuid()).checkoutProductUuid(() => new ProductID(randomUUID())).checkoutProductHeader(() => new ProductHeader('Deneme')).checkoutProductBasePrice(() => new Money(150)).checkoutProductQuantity(() => new ProductQuantity(1)).checkoutCreatedAt(new Date).checkoutUpdatedAt(new Date).build())
+                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 150,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
+
+                    checkoutDomainModel.addAnItem(checkoutItem)
+                    checkoutDomainModel.addAnItem(checkoutItem)
                     //before
                     expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(300)
 

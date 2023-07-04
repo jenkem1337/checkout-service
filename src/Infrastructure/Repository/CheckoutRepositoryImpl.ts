@@ -4,7 +4,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import CheckoutRepository from '../../Core/Interfaces/CheckoutRepository';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import CheckoutDataMapper from '../Entity/CheckoutDataMapper';
-import WriteCheckoutAggregateMapper from './Mapper/WriteCheckoutAggregateMapper';
 import CheckoutAggregateMapperContext from './Mapper/CheckoutAggregateMapperContext';
 import CheckoutAggregateMapperStrategy from './Mapper/CheckoutAggregateStrategy';
 
@@ -18,7 +17,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
     private readonly dataSoruce:DataSource
     constructor(
         @Inject("DataSource") dataSource:DataSource,
-        @Inject(CheckoutAggregateMapperContext.name) objectMapperContext
+        @Inject(CheckoutAggregateMapperContext.name) objectMapperContext:CheckoutAggregateMapperContext
     ){
         this.dataSoruce = dataSource
         this.objectMapperContext = objectMapperContext

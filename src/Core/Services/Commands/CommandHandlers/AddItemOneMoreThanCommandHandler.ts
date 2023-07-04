@@ -1,22 +1,21 @@
-import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
 import AddItemOneMoreThanCommand from '../Command/AddItemOneMoreThanCommand';
 import CheckoutRepository from '../../../Interfaces/CheckoutRepository';
 import { Inject } from '@nestjs/common';
-import CheckoutBuilder from '../../../../Core/Models/Builders/CheckoutBuilder';
-import CheckoutItemBuilder from '../../../../Core/Models/Builders/CheckoutItemBuilder';
-import FromCreationalCommandCheckoutBuilderState from '../../../../Core/Models/Builders/States/CheckoutAggregateStates/FromCommandCheckoutBuilderState';
-import ItMustBeConcreateCheckoutItemState from '../../../../Core/Models/Builders/States/CheckoutItemStates/ItMustBeConcreateCheckoutItemState';
 import CheckoutInterface from '../../../../Core/Models/Domain Models/Checkout/CheckoutInterface';
-import CheckoutID from '../../../../Core/Models/ValueObjects/CheckoutID';
 import CheckoutItemID from '../../../../Core/Models/ValueObjects/CheckoutItemID';
-import CheckoutState, { CheckoutStates } from '../../../../Core/Models/ValueObjects/CheckoutState';
-import CustomerID from '../../../../Core/Models/ValueObjects/CustomerID';
-import Money from '../../../../Core/Models/ValueObjects/Money';
-import ProductHeader from '../../../../Core/Models/ValueObjects/ProductHeader';
-import ProductID from '../../../../Core/Models/ValueObjects/ProductID';
+import { CheckoutStates } from '../../../../Core/Models/ValueObjects/CheckoutState';
 import ProductQuantity from '../../../../Core/Models/ValueObjects/ProductQuantity';
-import AddAnItemCommand from '../Command/AddAnItemCommand';
 import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
+import FromCheckoutCreatedFactory from '../../../Models/Factories/Checkout/FromCheckoutCreatedFactory';
+import CheckoutConstructorParamaters from '../../../Models/Factories/Checkout/CheckoutConstructorParameters';
+import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainModelFactoryContext';
+import CheckoutItemInterface from '../../../Models/Domain Models/Checkout/CheckoutItemInterface';
+import CheckoutItemConstructorParameters from '../../../Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
+import ConcreateCheckoutItemFactory from '../../../Models/Factories/CheckoutItem/ConcreateCheckoutItem';
+import CreateNewCheckoutAndAddNewCheckoutItemEvent from '../../Events/CheckoutCreatedAndOneCheckoutItemAddedEvent';
+import { check } from 'prettier';
+import CheckoutCreatedAndItemAddedOneMoreThanEvent from '../../Events/CheckoutCreatedAndItemAddedOneMoreThanEvent';
 
 @CommandHandler(AddItemOneMoreThanCommand)
 export default class AddItemOneMoreThanCommandHandler implements ICommandHandler<AddItemOneMoreThanCommand> {
@@ -24,7 +23,10 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
     constructor(
         @Inject("CheckoutRepository") 
         private readonly checkoutWriteRepository: CheckoutRepository,
-        private eventPublisher: EventPublisher
+        @Inject("DomainModelFactoryContext")
+        private readonly domainModelFactoryContext: IDomainModelFactoryContext,
+        private readonly eventPublisher: EventPublisher,
+        private readonly eventBus: EventBus
         ){
     }
     async execute(command: AddItemOneMoreThanCommand): Promise<any> {
@@ -54,35 +56,51 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
 
     }
     private async createCheckoutAndAddCheckoutItems(command: AddItemOneMoreThanCommand){
-        const newCheckoutDomainModel = CheckoutBuilder.initBuilder(new FromCreationalCommandCheckoutBuilderState)
-                                                    .checkoutUuid(() => new CheckoutID(command.checkoutUuid))
-                                                    .userUuid(() => new CustomerID(command.customerUuid))
-                                                    .checkoutState(() => new CheckoutState(CheckoutStates.CHECKOUT_CREATED))
-                                                    .subTotal(() => new Money(command.productBasePrice))
-                                                    .createdAt(new Date)
-                                                    .updatedAt(new Date)
-                                                    .build()
-
-        const checkoutItemDomainModel = CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState)
-                                                    .checkoutItemUuid(() => new CheckoutItemID(command.checkoutItemUuid))
-                                                    .checkoutUuid(() => new CheckoutID(command.checkoutUuid))
-                                                    .checkoutProductUuid(() => new ProductID(command.productUuid))
-                                                    .checkoutProductBasePrice(() => new Money(command.productBasePrice))
-                                                    .checkoutProductHeader(() => new ProductHeader(command.productHeader))
-                                                    .checkoutProductQuantity(() => new ProductQuantity(1))
-                                                    .checkoutCreatedAt(new Date)
-                                                    .checkoutUpdatedAt(new Date)
-                                                    .build()
+        const newCheckoutDomainModel = this.domainModelFactoryContext.setFactoryMethod(FromCheckoutCreatedFactory.name)
+                                                                    .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
+                                                                        checkoutState:CheckoutStates.CHECKOUT_CREATED,
+                                                                        checkoutUuid:command.checkoutUuid,
+                                                                        createdAt:new Date,
+                                                                        updatedAt:new Date,
+                                                                        subTotal: 0,
+                                                                        userUuid: command.customerUuid,
+                                                                    })   
+        const checkoutItem = this.domainModelFactoryContext.setFactoryMethod(ConcreateCheckoutItemFactory.name)
+                                                          .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
+                                                              checkoutItemUuid: command.checkoutItemUuid,
+                                                              checkoutUuid: command.checkoutUuid,
+                                                              createdAt: new Date,
+                                                              productBasePrice:command.productBasePrice,
+                                                              productHeader:command.productHeader,
+                                                              productQuantity: 1,
+                                                              productUuid: command.productUuid,
+                                                              updatedAt: new Date
+                                                          })
+            
         
-        newCheckoutDomainModel.addAnItem(checkoutItemDomainModel)
+        newCheckoutDomainModel.addAnItem(checkoutItem)
 
         newCheckoutDomainModel.addItemOneMoreThan(
-            new CheckoutItemID(checkoutItemDomainModel.getUuid().getUuid()),
+            new CheckoutItemID(checkoutItem.getUuid().getUuid()),
             new ProductQuantity(command.quantity - 1)
         )               
         await this.checkoutWriteRepository.saveChanges(newCheckoutDomainModel as Checkout)
         
-        this.eventPublisher.mergeObjectContext(newCheckoutDomainModel as Checkout).commit()
+        this.eventBus.publish(new CheckoutCreatedAndItemAddedOneMoreThanEvent ({
+            checkoutCreatedDate:newCheckoutDomainModel.getCreatedAt(),
+            checkoutItemUuid:checkoutItem.getUuid().getUuid(),
+            checkoutState: newCheckoutDomainModel.getCheckoutState().getState(),
+            checkoutSubTotal: newCheckoutDomainModel.getSubTotal().getAmount(),
+            checkoutUpdatedDate: newCheckoutDomainModel.getUpdatedAt(),
+            checkoutUuid: newCheckoutDomainModel.getUuid().getUuid(),
+            customerUuid: newCheckoutDomainModel.getUserUuid().getUuid(),
+            itemCreatedDate:checkoutItem.getCreatedAt(),
+            itemUpdatedDate:checkoutItem.getUpdatedAt(),
+            productBasePrice:checkoutItem.getProductBasePrice().getAmount(),
+            productHeader: checkoutItem.getProductHeader().getHeader(),
+            productUuid: checkoutItem.getProductUuid().getUuid(),
+            quantity: checkoutItem.getProductQuantity().getQuantity()
+        }))
     }
 
 }
