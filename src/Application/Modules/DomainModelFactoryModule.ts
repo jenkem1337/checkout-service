@@ -3,9 +3,9 @@ import DomainModelFactoryContext, { IDomainModelFactoryContext } from '../../Cor
 import NullableCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
 import NullableCheckoutFactory from '../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
 import ConcreteCheckoutFactory from '../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
-import FromCheckoutCreatedFactory from '../../Core/Models/Factories/Checkout/FromCheckoutCreatedFactory';
 import ConcreateCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
 import ConcreateAllArgumentCheckoutFactory from '../../Core/Models/Factories/Checkout/ConcreateAllArgumentCheckoutFactory';
+import NullableAllArgumentCheckoutFactory from '../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
 
 @Module({
     providers: [{
@@ -15,10 +15,11 @@ import ConcreateAllArgumentCheckoutFactory from '../../Core/Models/Factories/Che
             
             factoryCtx.addFactoryClass(NullableCheckoutFactory.name, new NullableCheckoutFactory())
                     .addFactoryClass(ConcreteCheckoutFactory.name, new ConcreteCheckoutFactory())
-                    .addFactoryClass(FromCheckoutCreatedFactory.name, new FromCheckoutCreatedFactory())
                     .addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory())
                     .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory())
                     .addFactoryClass(ConcreateAllArgumentCheckoutFactory.name, new ConcreateAllArgumentCheckoutFactory())
+                    .addFactoryClass(NullableAllArgumentCheckoutFactory.name, new NullableAllArgumentCheckoutFactory())
+
             return factoryCtx
         }
     }],
