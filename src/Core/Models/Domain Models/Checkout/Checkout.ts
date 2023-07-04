@@ -58,10 +58,30 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             this.shippingPrice = shippingPrice
 
         }
+
+    static valueOfAllConstructorArguments(uuid: CheckoutID, userUuid: CustomerID, subTotal: Money, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date, checkoutItems?:Map<string, CheckoutItemInterface>, shippingAddress?: Address, paymentMethod?: PeymentMethod, shippingPrice?: Money,){
+        return new Checkout(uuid, userUuid,subTotal,checkoutState,createdAt,updatedAt,checkoutItems, shippingAddress, paymentMethod, shippingPrice)
+    }
     
+    static valueOfOnlyRequiredArguments(uuid: CheckoutID, userUuid: CustomerID, subTotal: Money, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date,){
+        return new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
+    }
     static fromCreationalCommand(uuid: CheckoutID,userUuid: CustomerID,subTotal: Money,checkoutState:CheckoutState,createdAt: Date,updatedAt: Date):Checkout {
         const checkoutDomainModel: Checkout =  new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
         checkoutDomainModel.apply(new CheckoutCreated(checkoutDomainModel.getUuid(), checkoutDomainModel.getUserUuid(), checkoutDomainModel.getSubTotal(), checkoutDomainModel.getCheckoutState(), checkoutDomainModel.getCreatedAt(), checkoutDomainModel.getUpdatedAt()))
+        return checkoutDomainModel
+    }
+    static valueOfCreateCheckoutWithReason(reason:string,uuid: CheckoutID,userUuid: CustomerID,subTotal: Money,checkoutState:CheckoutState,createdAt: Date,updatedAt: Date):Checkout{
+        const checkoutDomainModel: Checkout =  new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
+
+        switch(reason){
+            case "CheckoutCreated": {
+                checkoutDomainModel.apply(new CheckoutCreated(checkoutDomainModel.getUuid(), checkoutDomainModel.getUserUuid(), checkoutDomainModel.getSubTotal(), checkoutDomainModel.getCheckoutState(), checkoutDomainModel.getCreatedAt(), checkoutDomainModel.getUpdatedAt()))
+                break
+            }
+            case "CheckoutCreatedAndItemAddedOneMoreThan":
+            default: throw new Error("Invalid reason")
+        }
         return checkoutDomainModel
     }
     static fromCheckoutCreatedEvent(event: CheckoutCreated){

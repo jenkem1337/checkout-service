@@ -3,19 +3,28 @@ import CheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutR
 import PostGreDataSourceModule from "../ORMModule/PostGreDataSourceModule";
 import CheckoutAggregateMapperContext from '../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
 import WriteCheckoutAggregateMapper from '../../../Infrastructure/Repository/Mapper/WriteCheckoutAggregateMapper';
+import { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
+import DomainModelFactoryModule from "../DomainModelFactoryModule";
 
 @Module({
-    providers: [{
+    providers: [
+        DomainModelFactoryModule,
+    {
+        
         provide:"CheckoutRepository",
         useClass: CheckoutRepositoryImpl
-    }, {
+    }, 
+    {
         provide: CheckoutAggregateMapperContext.name,
-        useFactory: () => {
+        useFactory: (domainModelFactoryCtx: IDomainModelFactoryContext) => {
             const context = new CheckoutAggregateMapperContext
-            context.setStrategy( new WriteCheckoutAggregateMapper)
+            context.setStrategy(new WriteCheckoutAggregateMapper(domainModelFactoryCtx))
             return context;
-        }
+        },
+        inject: [{token: "DomainModelFactoryContext", optional:false}]
     }],
-    imports: [PostGreDataSourceModule]
+    imports: [PostGreDataSourceModule, DomainModelFactoryModule],
+    exports:["CheckoutRepository"]
+    
 })
 export default class WriteRepositoryModule {}

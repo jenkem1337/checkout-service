@@ -18,6 +18,9 @@ import CheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutR
 import { DataSource } from 'typeorm';
 import CheckoutDataMapper from '../../../Infrastructure/Entity/CheckoutDataMapper';
 import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemDataMapper';
+import DomainModelFactoryContext, { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
+import NullableAllArgumentCheckoutFactory from '../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
+import NullableCheckoutItemFactory from '../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
 
 
 
@@ -29,11 +32,22 @@ describe('Checkout Repository', () => {
         const moduleRef = await Test.createTestingModule({
             providers: [CheckoutRepositoryImpl,
                 {
-                provide: CheckoutAggregateMapperContext.name,
-                useFactory: () => {
-                    const context = new CheckoutAggregateMapperContext
-                    context.setStrategy(new WriteCheckoutAggregateMapper)
-                    return context;
+                    provide: CheckoutAggregateMapperContext.name,
+                    useFactory: (domainModelFactoryCtx: IDomainModelFactoryContext) => {
+                        const context = new CheckoutAggregateMapperContext
+                        context.setStrategy(new WriteCheckoutAggregateMapper(domainModelFactoryCtx))
+                        return context;
+                    },
+                    inject: [{token: "DomainModelFactoryContext", optional:false}]
+                
+                },
+                {
+                    provide:"DomainModelFactoryContext",
+                    useFactory: () => {
+                        const factoryCtx: IDomainModelFactoryContext = new DomainModelFactoryContext()
+                        factoryCtx.addFactoryClass(NullableAllArgumentCheckoutFactory.name, new NullableAllArgumentCheckoutFactory)
+                                .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
+                        return factoryCtx
                     }
                 },
                 {

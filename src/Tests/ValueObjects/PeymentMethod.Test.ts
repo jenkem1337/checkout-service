@@ -4,13 +4,13 @@ import ChracterDoesntMatchException from '../../Core/Exceptions/CharacterDoesntM
 describe('PeymentMethod', () => {
     describe('PeymentMethod Constructor', () => {
         it('should true when given valid property', () =>{
-            expect(() => new PeymentMethod('Credit-Cart')).toBeTruthy()
+            expect(() => PeymentMethod.notNullableConstruct('Credit-Cart')).toBeTruthy()
         })
         it('should throw NullPropertyException when empty string', () =>{
-            expect(() => new PeymentMethod('')).toThrow(NullPropertyException)
+            expect(() => PeymentMethod.notNullableConstruct('')).toThrow(NullPropertyException)
         })
         it('should throw ChracterDoesntMatchException when blank string', () =>{
-            expect(() => new PeymentMethod('      ')).toThrow(ChracterDoesntMatchException)
+            expect(() => PeymentMethod.notNullableConstruct('      ')).toThrow(ChracterDoesntMatchException)
         })
 
     })

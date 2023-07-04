@@ -1,7 +1,7 @@
 import Checkout from '../../Core/Models/Domain Models/Checkout/Checkout';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import ReadCheckoutRepository from '../../Core/Interfaces/ReadCheckoutRepository';
-import { DataSource } from 'typeorm';
+import { DataSource, ObjectId } from 'typeorm';
 import { Inject } from '@nestjs/common';
 import CheckoutDocument from '../Documents/CheckoutDocument';
 import CheckoutAggregateMapperContext from './Mapper/CheckoutAggregateMapperContext';
@@ -17,6 +17,27 @@ export default class ReadCheckoutRepositoryImpl implements ReadCheckoutRepositor
         this.dataSoruce = dataSource
         this.objectMapper = objectMapperContext.getMapperStrategy()
     }
+    async findOneByUuidAndCustomerUuid(uuid: string, customerUuid: string): Promise<CheckoutInterface> {
+        const _checkoutDataMapper = await this.dataSoruce.mongoManager.findOne(CheckoutDocument, {
+            where: {
+                customerUuid: customerUuid,
+                _id: uuid
+            }
+        })
+
+        return this.objectMapper.fromDataMapperToAggregate(_checkoutDataMapper)
+
+    }
+    async findManyByCustomerUuid(custormerUuid: string): Promise<CheckoutInterface[]> {
+        const _checkoutDataMapper = await this.dataSoruce.mongoManager.find(CheckoutDocument, {
+            where: {
+                customerUuid: custormerUuid,
+            }
+        })
+
+        return this.objectMapper.fromDataMapperArrayToAggrageteArray(_checkoutDataMapper)
+
+    }
     async saveChanges(checkout: Checkout): Promise<void> {
         const checkoutDataMapper = this.objectMapper.fromAggregateToDataMapper(checkout)
         await this.dataSoruce.mongoManager.save(checkoutDataMapper)
@@ -26,7 +47,7 @@ export default class ReadCheckoutRepositoryImpl implements ReadCheckoutRepositor
         const checkoutDataMapper = this.objectMapper.fromAggregateToDataMapper(checkout)
         await this.dataSoruce.mongoManager.updateOne(
             CheckoutDocument, 
-            {"_id":checkoutDataMapper._id},
+            {"_id":new ObjectId(checkoutDataMapper._id)},
             {$set: {
                 "checkoutItemDocument": checkoutDataMapper.checkoutItemDocument,
                 "subTotal": checkoutDataMapper.subTotal

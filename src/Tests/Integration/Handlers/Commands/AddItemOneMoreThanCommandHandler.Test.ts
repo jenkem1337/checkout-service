@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { CqrsModule } from '@nestjs/cqrs';
+import { CommandBus, CqrsModule } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import AddItemOneMoreThanCommand from '../../../../Core/Services/Commands/Command/AddItemOneMoreThanCommand';
 import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
@@ -21,16 +21,43 @@ import CheckoutItemDataMapper from '../../../../Infrastructure/Entity/CheckoutIt
 import { DataSource } from 'typeorm';
 import CheckoutRepositoryImpl from '../../../../Infrastructure/Repository/CheckoutRepositoryImpl';
 import AddItemOneMoreThanCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
+import NullableCheckoutFactory from '../../../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
+import ConcreteCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
+import FromCheckoutCreatedFactory from '../../../../Core/Models/Factories/Checkout/FromCheckoutCreatedFactory';
+import ConcreateCheckoutItemFactory from '../../../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
+import NullableCheckoutItemFactory from '../../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import ConcreateAllArgumentCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreateAllArgumentCheckoutFactory';
+import NullableAllArgumentCheckoutFactory from '../../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
+import DomainModelFactoryContext from '../../../../Core/Models/Factories/DomainModelFactoryContext';
+import { IDomainModelFactoryContext } from '../../../../Core/Models/Factories/DomainModelFactoryContext';
+import TransactionalCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
+import TransactionalCommand from '../../../../Core/Services/Commands/Command/TransactionalCommand';
 
 describe("AddItemOneMoreThanCommandHandler", () => {
-    let commandHandler: AddItemOneMoreThanCommandHandler
+    let commandBus: CommandBus
     let repository: CheckoutRepositoryImpl
 
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
             imports: [CqrsModule],
             providers: [
+                TransactionalCommandHandler,
                 AddItemOneMoreThanCommandHandler,
+                {
+                    provide:"DomainModelFactoryContext",
+                    useFactory: () => {
+                        const factoryCtx: IDomainModelFactoryContext = new DomainModelFactoryContext()
+                        factoryCtx.addFactoryClass(NullableCheckoutFactory.name, new NullableCheckoutFactory())
+                                .addFactoryClass(ConcreteCheckoutFactory.name, new ConcreteCheckoutFactory)
+                                .addFactoryClass(FromCheckoutCreatedFactory.name, new FromCheckoutCreatedFactory)
+                                .addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory)
+                                .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
+                                .addFactoryClass(ConcreateAllArgumentCheckoutFactory.name, new ConcreateAllArgumentCheckoutFactory())
+                                .addFactoryClass(NullableAllArgumentCheckoutFactory.name, new NullableAllArgumentCheckoutFactory)
+                            return factoryCtx
+                    }
+                },
+
                 {
                     provide:"CheckoutRepository",
                     useClass: CheckoutRepositoryImpl
@@ -52,16 +79,20 @@ describe("AddItemOneMoreThanCommandHandler", () => {
                 },
                 {
                     provide: CheckoutAggregateMapperContext.name,
-                    useFactory: () => {
+                    useFactory: (domainModelFactoryCtx: IDomainModelFactoryContext) => {
                         const context = new CheckoutAggregateMapperContext
-                        context.setStrategy( new WriteCheckoutAggregateMapper)
+                        context.setStrategy(new WriteCheckoutAggregateMapper(domainModelFactoryCtx))
                         return context;
-                    }
+                    },
+                    inject: [{token: "DomainModelFactoryContext", optional:false}]
                 }
             ]
         }).compile()
         repository = moduleRef.get("CheckoutRepository")
-        commandHandler = moduleRef.get(AddItemOneMoreThanCommandHandler)
+        commandBus = moduleRef.get(CommandBus)
+        commandBus.register([
+            AddItemOneMoreThanCommandHandler, TransactionalCommandHandler
+        ])
     })
 
     it("should persist one more than item", async () => {
@@ -70,7 +101,7 @@ describe("AddItemOneMoreThanCommandHandler", () => {
         const checkoutItemUuid = randomUUID()
         await repository.saveChanges(new Checkout(new CheckoutID(checkoutUuid),new CustomerID(customerUuid),new Money(100),new CheckoutState(CheckoutStates.CHECKOUT_CREATED),new Date,new Date,new Map<string, CheckoutItemInterface>([[checkoutItemUuid, new CheckoutItem(new CheckoutItemID(checkoutItemUuid), new CheckoutID(checkoutUuid), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(100), new ProductQuantity(1), new Date, new Date)]])))
         
-        await commandHandler.execute(new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, checkoutItemUuid, randomUUID(), "Product 1", 100, 4, new Date))
+        await commandBus.execute(new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, checkoutItemUuid, randomUUID(), "Product 1", 100, 4, new Date))
         let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
         expect(_checkout.getSubTotal().getAmount()).toBe(500)
     })
@@ -78,9 +109,21 @@ describe("AddItemOneMoreThanCommandHandler", () => {
     it("should persist not exist checkout item", async () => {
         const checkoutUuid = randomUUID()
         const customerUuid = randomUUID()
-        await commandHandler.execute(new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, randomUUID(), randomUUID(), "Product 1", 100, 4, new Date))
+        await commandBus.execute(new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, randomUUID(), randomUUID(), "Product 1", 100, 4, new Date))
         let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
 
         expect(_checkout.getSubTotal().getAmount()).toBe(400)
+    })
+
+    it("should persist Checkout Item with TransactionalCommandHandler", async () => {
+        const checkoutUuid = randomUUID()
+        const customerUuid = randomUUID()
+        const checkoutItemUuid = randomUUID()
+        await repository.saveChanges(new Checkout(new CheckoutID(checkoutUuid),new CustomerID(customerUuid),new Money(100),new CheckoutState(CheckoutStates.CHECKOUT_CREATED),new Date,new Date,new Map<string, CheckoutItemInterface>([[checkoutItemUuid, new CheckoutItem(new CheckoutItemID(checkoutItemUuid), new CheckoutID(checkoutUuid), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(100), new ProductQuantity(1), new Date, new Date)]])))
+        await commandBus.execute(new TransactionalCommand(
+            new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, checkoutItemUuid, randomUUID(), "Product 1", 100, 4, new Date)))
+        let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
+        expect(_checkout.getSubTotal().getAmount()).toBe(500)
+
     })
 })

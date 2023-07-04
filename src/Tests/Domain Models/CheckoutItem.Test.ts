@@ -1,3 +1,4 @@
+import DomainModelFactoryContext, { IDomainModelFactoryContext } from './../../Core/Models/Factories/DomainModelFactoryContext';
 import CheckoutItemID from '../../Core/Models/ValueObjects/CheckoutItemID';
 import CheckoutItem from '../../Core/Models/Domain Models/Checkout/CheckoutItem';
 import { randomUUID } from 'crypto';
@@ -5,30 +6,40 @@ import ProductID from '../../Core/Models/ValueObjects/ProductID';
 import ProductHeader from '../../Core/Models/ValueObjects/ProductHeader';
 import Money from '../../Core/Models/ValueObjects/Money';
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
-import CheckoutItemBuilder from '../../Core/Models/Builders/CheckoutItemBuilder';
 import CheckoutItemInterface from '../../Core/Models/Domain Models/Checkout/CheckoutItemInterface';
-import ItMustBeConcreateCheckoutItemState from '../../Core/Models/Builders/States/CheckoutItemStates/ItMustBeConcreateCheckoutItemState';
 import NullCheckoutItem from '../../Core/Models/Domain Models/Checkout/NullCheckoutItem';
-import CreateInstanceOfCheckoutItemState from '../../Core/Models/Builders/States/CheckoutItemStates/CreateInstanceOfCheckoutItemState';
 import CheckoutID from '../../Core/Models/ValueObjects/CheckoutID';
 import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';
+import ConcreateCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
+import NullableCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import CheckoutItemConstructorParameters from '../../Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
 
 describe('CheckoutItem', () => {
     var checkoutItem: CheckoutItemInterface = null
+    let factoryCtx: IDomainModelFactoryContext
+
     beforeEach(() => {
-        checkoutItem = CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState)
-                                                    .checkoutUuid(() => new CheckoutID(randomUUID()))
-                                                    .checkoutItemUuid(() => new CheckoutItemID(randomUUID()))
-                                                    .checkoutProductUuid(() => new ProductID(randomUUID()))
-                                                    .checkoutProductHeader(() => new ProductHeader('Rolex Datejust 36mm Blue Dial Ref:126200'))
-                                                    .checkoutProductBasePrice(() => new Money(169554))
-                                                    .checkoutProductQuantity(() => new ProductQuantity(1))
-                                                    .checkoutCreatedAt(new Date)
-                                                    .checkoutUpdatedAt(new Date)
-                                                    .build()
+        factoryCtx = new DomainModelFactoryContext
+        factoryCtx.addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory)
+                .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
+        
+        checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name)
+                                .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
+                                    checkoutItemUuid: randomUUID(),
+                                    checkoutUuid: randomUUID(),
+                                    createdAt: new Date,
+                                    productBasePrice:169554,
+                                    productHeader:"Rolex Datejust 36mm Blue Dial Ref:126200",
+                                    productQuantity:1,
+                                    productUuid:randomUUID(),
+                                    updatedAt:new Date
+                                })
     })
 
-    afterEach(() => checkoutItem = null)
+    afterEach(() => {
+        checkoutItem = null
+        factoryCtx = null
+    })
     
     
     describe('CheckoutItem Constructor', () => {
@@ -46,32 +57,34 @@ describe('CheckoutItem', () => {
             expect(checkoutItem).toBeTruthy()
         })
 
-        it('should return true when given valid property with CheckoutItemBuilder', () =>{
-            const checkoutItem:CheckoutItemInterface = CheckoutItemBuilder.initBuilder(new ItMustBeConcreateCheckoutItemState)
-                                                    .checkoutUuid(() => new CheckoutID(randomUUID()))
-                                                    .checkoutItemUuid(() => new CheckoutItemID(randomUUID()))
-                                                    .checkoutProductUuid(() => new ProductID(randomUUID()))
-                                                    .checkoutProductHeader(() => new ProductHeader('Rolex Datejust 36mm Blue Dial Ref:126200'))
-                                                    .checkoutProductBasePrice(() => new Money(169554))
-                                                    .checkoutProductQuantity(() => new ProductQuantity(1))
-                                                    .checkoutCreatedAt(new Date)
-                                                    .checkoutUpdatedAt(new Date)
-                                                    .build()
+        it('should return true when given valid property with Factory', () =>{
+            const checkoutItem:CheckoutItemInterface = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name)
+                                                                .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
+                                                                    checkoutItemUuid: randomUUID(),
+                                                                    checkoutUuid: randomUUID(),
+                                                                    createdAt: new Date,
+                                                                    productBasePrice:169554,
+                                                                    productHeader:"Rolex Datejust 36mm Blue Dial Ref:126200",
+                                                                    productQuantity:1,
+                                                                    productUuid:randomUUID(),
+                                                                    updatedAt:new Date
+                                                                })
             expect(checkoutItem).toBeTruthy()
             expect(checkoutItem.getProductQuantity().getQuantity()).toBe(1)
         })
         
-         it('should return NullCheckoutItem when given invalid property in CheckoutItemBuilder', () => {
-            const checkoutItem:CheckoutItemInterface = CheckoutItemBuilder.initBuilder(new CreateInstanceOfCheckoutItemState)
-                                                        .checkoutUuid(() => new CheckoutID(randomUUID()))
-                                                        .checkoutItemUuid(() => new CheckoutItemID(randomUUID()))
-                                                        .checkoutProductUuid(() => new ProductID(randomUUID()))
-                                                        .checkoutProductHeader(() => new ProductHeader('Rolex Datejust 36mm Blue Dial Ref:126200'))
-                                                        .checkoutProductBasePrice(() => new Money(-169554))
-                                                        .checkoutProductQuantity(() => new ProductQuantity(-1))
-                                                        .checkoutCreatedAt(new Date)
-                                                        .checkoutUpdatedAt(new Date)
-                                                        .build()
+         it('should return NullCheckoutItem when given invalid property in Factory', () => {
+            const checkoutItem:CheckoutItemInterface = factoryCtx.setFactoryMethod(NullableCheckoutItemFactory.name)
+                                                                .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
+                                                                    checkoutItemUuid: randomUUID(),
+                                                                    checkoutUuid: randomUUID(),
+                                                                    createdAt: new Date,
+                                                                    productBasePrice:169554,
+                                                                    productHeader:"Rolex Datejust 36mm Blue Dial Ref",
+                                                                    productQuantity:1,
+                                                                    productUuid:null,
+                                                                    updatedAt:new Date
+                                                                })
             expect(checkoutItem).toBeInstanceOf(NullCheckoutItem)
             expect(checkoutItem.isNull()).toBe(true)})
         
