@@ -19,6 +19,7 @@ import MongoORMModule from '../ORMModule/MongoOrmModule';
         },
         inject: [{token: "DomainModelFactoryContext", optional:false}]
 }],
-    imports: [MongoORMModule, DomainModelFactoryModule]
+    imports: [MongoORMModule, DomainModelFactoryModule],
+    exports: ["ReadCheckoutReposityory"]
 })
 export default class ReadRepositoryModule {}
