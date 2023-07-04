@@ -10,9 +10,9 @@ import ConcreateCheckoutItemFactory from '../../../Models/Factories/CheckoutItem
 import CheckoutItemInterface from '../../../Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemConstructorParameters from 'src/Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
 import CheckoutConstructorParamaters from '../../../Models/Factories/Checkout/CheckoutConstructorParameters';
-import FromCheckoutCreatedFactory from '../../../Models/Factories/Checkout/FromCheckoutCreatedFactory';
 import { randomUUID } from 'crypto';
 import CheckoutCreatedAndOneCheckoutItemAddedEvent from '../../Events/CheckoutCreatedAndOneCheckoutItemAddedEvent';
+import ConcreteCheckoutFactory from '../../../Models/Factories/Checkout/ConcreteCheckoutFactory';
 
 @CommandHandler(AddAnItemCommand)
 export default class AddAnItemToCartCommadHandler implements ICommandHandler<AddAnItemCommand> {
@@ -63,7 +63,7 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
         this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
     }
     private async createCheckoutAndAddAnCheckoutItem(command: AddAnItemCommand){
-        const newCheckoutDomainModel = this.domainModelFactoryContext.setFactoryMethod(FromCheckoutCreatedFactory.name)
+        const newCheckoutDomainModel = this.domainModelFactoryContext.setFactoryMethod(ConcreteCheckoutFactory.name)
                                                                 .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
                                                                     checkoutState:CheckoutStates.CHECKOUT_CREATED,
                                                                     checkoutUuid:randomUUID(),
@@ -88,19 +88,19 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
         await this.checkoutWriteRepository.saveChanges(newCheckoutDomainModel as Checkout)
         
         this.eventBus.publish(new CheckoutCreatedAndOneCheckoutItemAddedEvent({
-            checkoutCreatedDate:newCheckoutDomainModel.getCreatedAt(),
-            checkoutItemUuid:checkoutItem.getUuid().getUuid(),
-            checkoutState: newCheckoutDomainModel.getCheckoutState().getState(),
-            checkoutSubTotal: newCheckoutDomainModel.getSubTotal().getAmount(),
-            checkoutUpdatedDate: newCheckoutDomainModel.getUpdatedAt(),
-            checkoutUuid: newCheckoutDomainModel.getUuid().getUuid(),
-            customerUuid: newCheckoutDomainModel.getUserUuid().getUuid(),
-            itemCreatedDate:checkoutItem.getCreatedAt(),
-            itemUpdatedDate:checkoutItem.getUpdatedAt(),
-            productBasePrice:checkoutItem.getProductBasePrice().getAmount(),
-            productHeader: checkoutItem.getProductHeader().getHeader(),
-            productUuid: checkoutItem.getProductUuid().getUuid(),
-            quantity: checkoutItem.getProductQuantity().getQuantity()
+            checkoutCreatedDate : newCheckoutDomainModel.getCreatedAt(),
+            checkoutItemUuid    : checkoutItem.getUuid().getUuid(),
+            checkoutState       : newCheckoutDomainModel.getCheckoutState().getState(),
+            checkoutSubTotal    : newCheckoutDomainModel.getSubTotal().getAmount(),
+            checkoutUpdatedDate : newCheckoutDomainModel.getUpdatedAt(),
+            checkoutUuid        : newCheckoutDomainModel.getUuid().getUuid(),
+            customerUuid        : newCheckoutDomainModel.getUserUuid().getUuid(),
+            itemCreatedDate     :checkoutItem.getCreatedAt(),
+            itemUpdatedDate     :checkoutItem.getUpdatedAt(),
+            productBasePrice    :checkoutItem.getProductBasePrice().getAmount(),
+            productHeader       : checkoutItem.getProductHeader().getHeader(),
+            productUuid         : checkoutItem.getProductUuid().getUuid(),
+            quantity            : checkoutItem.getProductQuantity().getQuantity()
         }))
     }
 
