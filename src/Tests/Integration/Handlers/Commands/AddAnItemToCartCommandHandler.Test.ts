@@ -14,7 +14,6 @@ import CheckoutItemDataMapper from '../../../../Infrastructure/Entity/CheckoutIt
 import DomainModelFactoryContext, { IDomainModelFactoryContext } from '../../../../Core/Models/Factories/DomainModelFactoryContext';
 import NullableCheckoutFactory from '../../../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
 import ConcreteCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
-import FromCheckoutCreatedFactory from '../../../../Core/Models/Factories/Checkout/FromCheckoutCreatedFactory';
 import ConcreateCheckoutItemFactory from '../../../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
 import NullableCheckoutItemFactory from '../../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
 import ConcreateAllArgumentCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreateAllArgumentCheckoutFactory';
@@ -38,7 +37,6 @@ describe("AddAnItemToCartCommandHandler", () => {
                         const factoryCtx: IDomainModelFactoryContext = new DomainModelFactoryContext()
                         factoryCtx.addFactoryClass(NullableCheckoutFactory.name, new NullableCheckoutFactory())
                                 .addFactoryClass(ConcreteCheckoutFactory.name, new ConcreteCheckoutFactory)
-                                .addFactoryClass(FromCheckoutCreatedFactory.name, new FromCheckoutCreatedFactory)
                                 .addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory)
                                 .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
                                 .addFactoryClass(ConcreateAllArgumentCheckoutFactory.name, new ConcreateAllArgumentCheckoutFactory())
