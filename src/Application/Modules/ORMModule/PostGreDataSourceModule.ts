@@ -1,8 +1,28 @@
 import { Module } from "@nestjs/common";
-import { postGresProvider } from "./OrmProvider";
+import CheckoutDataMapper from "../../../Infrastructure/Entity/CheckoutDataMapper";
+import CheckoutItemDataMapper from "src/Infrastructure/Entity/CheckoutItemDataMapper";
+import { DataSource } from "typeorm";
 
 @Module({
-    providers: [...postGresProvider],
-    exports:   [...postGresProvider]
+    providers: [{
+        provide: 'DataSource',
+        useFactory: async () => {
+          const dataSource = new DataSource({
+            type: 'postgres',
+            host: 'localhost',
+            port: 5432,
+            username: 'postgres',
+            password: 'admin',
+            database: 'checkout_service_write_db',
+            entities: [
+              CheckoutDataMapper, CheckoutItemDataMapper
+            ],
+            synchronize:true
+          });
+    
+          return dataSource.initialize();
+        },
+    }],
+    exports:["DataSource"]
 })
 export default class PostGreDataSourceModule{}
