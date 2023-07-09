@@ -192,7 +192,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             this.checkoutItems.set(itemKey, item)
         })
         this.calculateSubTotal()
-        this.apply(new CheckoutItemPricesUpdated(itemUuid))
+        this.apply(new CheckoutItemPricesUpdated(itemUuid, newPrice))
     }
 
     calculateSubTotal(){
