@@ -2,21 +2,16 @@ import { Module } from "@nestjs/common";
 import { DataSource } from "typeorm";
 import CheckoutDocument from "src/Infrastructure/Documents/CheckoutDocument";
 import CheckoutItemDocument from "src/Infrastructure/Documents/CheckoutItemDocument";
+import { MongoClient } from 'mongodb';
 
 @Module({
     providers: [{
         provide: 'MongoDataSource',
         useFactory: async () => {
-          const dataSource = new DataSource({
-            type: "mongodb",
-            host: "localhost",
-            port: 27017,
-            database: "checkout_service_read_db",
-            entities: [
-              CheckoutDocument, CheckoutItemDocument
-            ]
-          })
-          return dataSource.initialize()
+          const client = new MongoClient("mongodb://127.0.0.1:27017")
+          await client.connect()
+          const db = client.db("checkout_db")
+          return db
         },
       }],
     exports: ["MongoDataSource"]
