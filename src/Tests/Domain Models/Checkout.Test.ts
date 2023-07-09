@@ -19,7 +19,6 @@ import ConcreteCheckoutFactory from '../../Core/Models/Factories/Checkout/Concre
 import CheckoutConstructorParamaters from '../../Core/Models/Factories/Checkout/CheckoutConstructorParameters';
 import NullableCheckoutFactory from '../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
 import NullCheckout from '../../Core/Models/Domain Models/Checkout/NullCheckout';
-import FromCheckoutCreatedFactory from '../../Core/Models/Factories/Checkout/FromCheckoutCreatedFactory';
 import CheckoutItemConstructorParameters from '../../Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
 import ConcreateCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/ConcreateCheckoutItem';
 import NullableCheckoutItemFactory from '../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
@@ -31,7 +30,6 @@ describe('Checkout', () => {
         factoryCtx = new DomainModelFactoryContext()
         factoryCtx.addFactoryClass(NullableCheckoutFactory.name, new NullableCheckoutFactory())
                 .addFactoryClass(ConcreteCheckoutFactory.name, new ConcreteCheckoutFactory)
-                .addFactoryClass(FromCheckoutCreatedFactory.name, new FromCheckoutCreatedFactory)
                 .addFactoryClass(ConcreateCheckoutItemFactory.name, new ConcreateCheckoutItemFactory)
                 .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
         
@@ -142,22 +140,6 @@ describe('Checkout', () => {
                                         subTotal: 0,
                                         updatedAt: new Date
                 })).toThrow(NullPropertyException)
-            })
-        })
-        describe('FromCheckoutCreatedFactory', () => {
-            it('should return concreate Checkout instance when given valid parameters', () => {
-                let checkout = factoryCtx.setFactoryMethod(FromCheckoutCreatedFactory.name)
-                                        .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
-                                            checkoutUuid: randomUUID(),
-                                            userUuid: randomUUID(),
-                                            checkoutState: CheckoutStates.CHECKOUT_CREATED,
-                                            createdAt: new Date,
-                                            subTotal: 0,
-                                            updatedAt: new Date
-                                        })
-                
-                expect(checkout).toBeInstanceOf(Checkout)
-                expect(checkout).toBeTruthy()
             })
         })
 
