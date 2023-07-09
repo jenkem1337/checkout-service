@@ -13,7 +13,7 @@ export default class CheckoutClientController {
     async addItemOneMoreThan(){}
 
     @Post()
-    async getCheckoutUuidOrCreateCheckout(){}
+    async getCheckoutUuid(){}
 
     @Get()
     async getCheckoutByUuid(){}
