@@ -1,7 +1,9 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {MongoClient } from 'mongodb';
 import CheckoutQueryModel from '../../Core/Models/QueryModels/CheckoutQueryModel';
 import CheckoutReadRepository from '../../Core/Interfaces/CheckoutReadRepository';
+
+@Injectable()
 export default class CheckoutReadRepositoryImpl implements CheckoutReadRepository{
     
     protected readonly checkoutDatabase:MongoClient 
