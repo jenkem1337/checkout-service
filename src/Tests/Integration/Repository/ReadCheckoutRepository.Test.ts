@@ -15,57 +15,29 @@ import CheckoutItemID from '../../../Core/Models/ValueObjects/CheckoutItemID';
 import ProductID from '../../../Core/Models/ValueObjects/ProductID';
 import ProductHeader from '../../../Core/Models/ValueObjects/ProductHeader';
 import ProductQuantity from '../../../Core/Models/ValueObjects/ProductQuantity';
-import CheckoutAggregateMapperContext from '../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
-import ReadCheckoutAggregateMapper from '../../../Infrastructure/Repository/Mapper/ReadCheckoutAggregateMapper';
-import CheckoutDocument from '../../../Infrastructure/Documents/CheckoutDocument';
-import CheckoutItemDocument from '../../../Infrastructure/Documents/CheckoutItemDocument';
-import { DataSource } from 'typeorm';
-import ReadCheckoutRepositoryImpl from '../../../Infrastructure/Repository/ReadCheckoutRepositoryImpl';
+import ReadCheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutReadRepositoryImpl';
+import { MongoClient } from 'mongodb';
+import CheckoutReadRepositoryImpl from '../../../Infrastructure/Repository/CheckoutReadRepositoryImpl';
 
 
 
 
 describe('Read Checkout Repository', () => {
-    let checkoutRepository: ReadCheckoutRepositoryImpl = null
+    let checkoutRepository: CheckoutReadRepositoryImpl = null
     
     beforeEach(async () => {
         const moduleRef = await Test.createTestingModule({
-            providers: [ReadCheckoutRepositoryImpl, {
+            providers: [CheckoutReadRepositoryImpl, {
                 provide: 'MongoDataSource',
                 useFactory: async () => {
-                  const dataSource = new DataSource({
-                    type: "mongodb",
-                    host: "localhost",
-                    port: 27017,
-                    database: "checkout_service_test_read_db",
-                    entities: [
-                      CheckoutDocument, CheckoutItemDocument
-                    ]
-                  })
-                  return await dataSource.initialize()
+                    const client = new MongoClient("mongodb://127.0.0.1:27017")
+                    return client
                 },
-              }, {
-                provide: CheckoutAggregateMapperContext.name,
-                useFactory: (domainModelfactoryCtx: IDomainModelFactoryContext) => {
-                    const context = new CheckoutAggregateMapperContext
-                    context.setStrategy(new ReadCheckoutAggregateMapper(domainModelfactoryCtx))
-                    return context;
-                },
-                inject: [{token: "DomainModelFactoryContext", optional:false}]
-
-            },                {
-                provide:"DomainModelFactoryContext",
-                useFactory: () => {
-                    const factoryCtx: IDomainModelFactoryContext = new DomainModelFactoryContext()
-                    factoryCtx.addFactoryClass(NullableAllArgumentCheckoutFactory.name, new NullableAllArgumentCheckoutFactory)
-                            .addFactoryClass(NullableCheckoutItemFactory.name, new NullableCheckoutItemFactory)
-                    return factoryCtx
-                }
             },
-]
+        ]
         }).compile()
 
-        checkoutRepository = await moduleRef.resolve<ReadCheckoutRepositoryImpl>(ReadCheckoutRepositoryImpl)
+        checkoutRepository = await moduleRef.resolve<CheckoutReadRepositoryImpl>(CheckoutReadRepositoryImpl)
     })
 
     afterEach( async () => {
