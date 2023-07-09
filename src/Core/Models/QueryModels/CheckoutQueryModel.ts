@@ -12,7 +12,7 @@ interface CheckoutQueryModelConstructerParameters {
  
     readonly checkoutState:string
  
-    readonly checkoutItemDocument: Array<CheckoutItemQueryModel>
+    readonly checkoutItemDocument?: Array<CheckoutItemQueryModel>
  
     readonly createdDate: Date
  
@@ -53,5 +53,20 @@ export default class CheckoutQueryModel {
 
     static valueOf(prop:CheckoutQueryModelConstructerParameters){
         return new CheckoutQueryModel(prop)
+    }
+
+    setCheckoutItemsDocument(checkoutItems: CheckoutItemQueryModel[]){
+        return new CheckoutQueryModel({
+            uuid: this.uuid,
+            customerUuid: this.customerUuid,
+            checkoutItemDocument: checkoutItems,
+            checkoutState: this.checkoutState,
+            createdDate: this.createdDate,
+            peymentMethod: this.peymentMethod,
+            shippingPrice: this.shippingPrice,
+            subTotal: this.subTotal,
+            updatedDate: this.updatedDate
+
+        })
     }
 }   
