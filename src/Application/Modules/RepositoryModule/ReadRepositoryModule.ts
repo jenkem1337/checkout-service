@@ -5,9 +5,9 @@ import CheckoutReadRepositoryImpl from "../../../Infrastructure/Repository/Check
 @Module({
     providers: [{
         useClass:CheckoutReadRepositoryImpl,
-        provide:"ReadCheckoutRepository"
+        provide:"CheckoutReadRepository"
     }],
     imports: [MongoORMModule],
-    exports: ["ReadCheckoutReposityory"]
+    exports: ["CheckoutReadRepository"]
 })
 export default class ReadRepositoryModule {}
