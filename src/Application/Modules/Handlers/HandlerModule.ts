@@ -6,13 +6,14 @@ import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/Co
 import DomainModelFactoryModule from '../DomainModelFactoryModule';
 import { CheckoutSagas } from '../../../Core/Services/Sagas/CheckoutSagas';
 import TransactionalCommandHandler from '../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
+import PostGreDataSourceModule from '../ORMModule/PostGreDataSourceModule';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler]
 
 @Module({
-    imports: [WriteRepositoryModule, DomainModelFactoryModule, CqrsModule],
+    imports: [PostGreDataSourceModule,WriteRepositoryModule, DomainModelFactoryModule, CqrsModule],
     providers: [
         CheckoutSagas,
         ...CommandHandlers
