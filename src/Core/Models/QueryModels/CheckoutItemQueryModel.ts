@@ -1,5 +1,6 @@
 interface CheckoutItemQueryModelConstructorParameters {
     readonly uuid:string
+    readonly checkoutUuid:string
     readonly productBasePrice:number
     readonly productQuantity: number
     readonly productHeader:string
@@ -11,6 +12,7 @@ interface CheckoutItemQueryModelConstructorParameters {
 
 export default class CheckoutItemQueryModel {
     public readonly uuid:string
+    public readonly checkoutUuid:string
     public readonly productBasePrice:number
     public readonly productQuantity: number
     public readonly productHeader:string
@@ -19,6 +21,7 @@ export default class CheckoutItemQueryModel {
     public readonly updatedDate: Date
     private constructor(prop: CheckoutItemQueryModelConstructorParameters){
         this.uuid = prop.uuid
+        this.checkoutUuid = prop.checkoutUuid
         this.productBasePrice = prop.productBasePrice
         this.productHeader = prop.productHeader
         this.productQuantity = prop.productQuantity
