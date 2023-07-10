@@ -6,6 +6,8 @@ import { IDomainModelFactoryContext } from "../../../../Core/Models/Factories/Do
 import CreateCheckoutWithCheckoutCreatedEventFactory from "../../../../Core/Models/Factories/Checkout/CreateCheckoutWithCheckoutCreatedEventFactory";
 import CheckoutConstructorParamaters from "../../../../Core/Models/Factories/Checkout/CheckoutConstructorParameters";
 import Checkout from '../../../Models/Domain Models/Checkout/Checkout';
+import SuccessResult from '../../../Models/Result/SuccsessResult';
+import CheckoutUuidResult from '../../../Models/Result/AbstractResultTypes/CheckoutUuidResult';
 
 @CommandHandler(CreateCheckoutCommand)
 export default class CreateCheckoutCommandHandler implements ICommandHandler<CreateCheckoutCommand> {
@@ -23,10 +25,12 @@ export default class CreateCheckoutCommandHandler implements ICommandHandler<Cre
                                                                 userUuid: command.customerUuid
                                                             })
         
-        await this.checkoutWriteRepository.saveChanges(checkoutDomainModel)
+        this.checkoutWriteRepository.saveChanges(checkoutDomainModel)
         
         this.eventPublisher.mergeObjectContext(checkoutDomainModel).commit()
-        return checkoutDomainModel.getUuid().getUuid()
+        
+        return new SuccessResult(
+            new CheckoutUuidResult(checkoutDomainModel.getUuid().getUuid()))
     }
 
 
