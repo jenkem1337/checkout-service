@@ -41,7 +41,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
     }
 
     fromDataMapperToAggregate(_checkoutDataMapper: CheckoutDataMapper):CheckoutInterface {
-        if(!_checkoutDataMapper) return new NullCheckout
         let checkoutItemFactory = this.domainModelFactoryCtx.directlyGetFactoryMethod<CheckoutItemInterface, CheckoutItemConstructorParameters>(NullableCheckoutItemFactory.name)
         let checkoutDomainObject: CheckoutInterface = this.domainModelFactoryCtx.setFactoryMethod(NullableAllArgumentCheckoutFactory.name)
                                                                             .createInstance<CheckoutInterface, CheckoutConstructorParamaters>({
@@ -78,7 +77,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
     fromDataMapperArrayToAggrageteArray(_checkoutDataMapper: CheckoutDataMapper[]):CheckoutInterface[]{
         return _checkoutDataMapper.map(_checkout => {
             
-            if(!_checkout) return new NullCheckout
 
             let checkoutItemFactory = this.domainModelFactoryCtx.directlyGetFactoryMethod<CheckoutItemInterface, CheckoutItemConstructorParameters>(NullableCheckoutItemFactory.name)
             let checkoutDomainObject: CheckoutInterface = this.domainModelFactoryCtx.setFactoryMethod(NullableAllArgumentCheckoutFactory.name)
