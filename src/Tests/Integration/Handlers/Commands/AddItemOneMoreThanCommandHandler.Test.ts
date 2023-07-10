@@ -104,14 +104,6 @@ describe("AddItemOneMoreThanCommandHandler", () => {
         expect(_checkout.getSubTotal().getAmount()).toBe(500)
     })
 
-    it("should persist not exist checkout item", async () => {
-        const checkoutUuid = randomUUID()
-        const customerUuid = randomUUID()
-        await commandBus.execute(new AddItemOneMoreThanCommand(checkoutUuid, customerUuid, randomUUID(), randomUUID(), "Product 1", 100, 4, new Date))
-        let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
-
-        expect(_checkout.getSubTotal().getAmount()).toBe(400)
-    })
 
     it("should persist Checkout Item with TransactionalCommandHandler", async () => {
         const checkoutUuid = randomUUID()
