@@ -37,7 +37,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
                 uuid: uuid,
                 customerUuid:customerUuid
             }
-        })
+        }) ?? CheckoutDataMapper.createNull()
         
         return this.objectMapper.fromDataMapperToAggregate(_checkoutDataMapper)
 
@@ -51,7 +51,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
             where: {
                 customerUuid: custormerUuid
             }
-        })
+        }) ?? [CheckoutDataMapper.createNull()]
 
         return this.objectMapper.fromDataMapperArrayToAggrageteArray(_checkoutDataMapper)
 
@@ -64,7 +64,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
             where: {
                 uuid: _uuid
             }
-        })
+        }) ?? CheckoutDataMapper.createNull()
         return this.objectMapper.fromDataMapperToAggregate(_checkoutDataMapper)
     }
     async findManyByUuid(uuid: string): Promise<Array<CheckoutInterface>> {
@@ -75,7 +75,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
             where: {
                 uuid: uuid
             }
-        })
+        }) ?? [CheckoutDataMapper.createNull()]
 
         return this.objectMapper.fromDataMapperArrayToAggrageteArray(_checkoutDataMapper)
     }
