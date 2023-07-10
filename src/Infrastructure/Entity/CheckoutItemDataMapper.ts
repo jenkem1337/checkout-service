@@ -36,5 +36,7 @@ export default class CheckoutItemDataMapper {
         this.productUuid = productUuid
         this.checkout = checkout
     }
-
+    static createNull(){
+        return new CheckoutItemDataMapper(null, null, null, null, null, null)
+    }
 }

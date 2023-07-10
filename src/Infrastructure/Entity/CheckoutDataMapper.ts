@@ -42,4 +42,8 @@ export default class CheckoutDataMapper {
         this.checkoutState = checkoutState
         this.checkoutItems = checkoutItems
     }
+
+    static createNull() {
+        return new CheckoutDataMapper(null, null, null, null, null, null, [CheckoutItemDataMapper.createNull()])
+    }
 }
