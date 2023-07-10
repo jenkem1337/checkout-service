@@ -10,11 +10,11 @@ export default class CheckoutServiceController {
         private readonly commandBus: CommandBus
     ){}
     @MessagePattern({cmd: "create_checkout"})
-    async createCheckout(@Payload() payload:string){
+    async createCheckout(@Payload() uuid:string){
         
-        this.commandBus.execute(new TransactionalCommand(
-                                        new CreateCheckoutCommand(payload)
+        return await this.commandBus.execute(new TransactionalCommand(
+                                        new CreateCheckoutCommand(uuid)
                                     ))
-        return payload
+        
     }
 }
