@@ -1,10 +1,10 @@
 import CheckoutItemInterface from "../../Domain Models/Checkout/CheckoutItemInterface"
 
 export default interface CheckoutConstructorParamaters {
-    checkoutUuid:string
-    userUuid:string
-    subTotal:number
-    checkoutState:string
+    checkoutUuid?:string
+    userUuid?:string
+    subTotal?:number
+    checkoutState?:string
     shippingPrice?:number
     peymentMethod?:string
     checkoutItems?: Map<string, CheckoutItemInterface>
@@ -16,7 +16,7 @@ export default interface CheckoutConstructorParamaters {
     addressProvince?:string,
     addressDistrict?:string,
     addressZipCode?:string
-    createdAt:Date
-    updatedAt:Date
+    createdAt?:Date
+    updatedAt?:Date
 
 }
