@@ -1,3 +1,4 @@
+import CheckoutCreated from "../Domain Models/Checkout/Events/CheckoutCreated"
 import CheckoutItemQueryModel from "./CheckoutItemQueryModel"
 interface CheckoutQueryModelConstructerParameters {
     readonly uuid: string
@@ -6,9 +7,9 @@ interface CheckoutQueryModelConstructerParameters {
  
     readonly subTotal:number
  
-    readonly shippingPrice:number
+    readonly shippingPrice?:number
  
-    readonly peymentMethod:string
+    readonly peymentMethod?:string
  
     readonly checkoutState:string
  
@@ -55,18 +56,4 @@ export default class CheckoutQueryModel {
         return new CheckoutQueryModel(prop)
     }
 
-    setCheckoutItemsDocument(checkoutItems: CheckoutItemQueryModel[]){
-        return new CheckoutQueryModel({
-            uuid: this.uuid,
-            customerUuid: this.customerUuid,
-            checkoutItemDocument: checkoutItems,
-            checkoutState: this.checkoutState,
-            createdDate: this.createdDate,
-            peymentMethod: this.peymentMethod,
-            shippingPrice: this.shippingPrice,
-            subTotal: this.subTotal,
-            updatedDate: this.updatedDate
-
-        })
-    }
 }   
