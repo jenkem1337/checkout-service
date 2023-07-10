@@ -24,6 +24,7 @@ import CheckoutCreated from './Events/CheckoutCreated';
 import ShippingAddressAdded from './Events/ShippingAddressAdded';
 import PeymentMethodAdded from "./Events/PeymentMehodAdded";
 import ShippingPriceAdded from "./Events/ShippingPriceAdded";
+import { randomUUID } from "crypto";
 
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
@@ -66,10 +67,16 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     static valueOfOnlyRequiredArguments(uuid: CheckoutID, userUuid: CustomerID, subTotal: Money, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date,){
         return new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
     }
-    static fromCheckoutCreatedEvent(event: CheckoutCreated){
-        const checkoutDomainModel: Checkout =  new Checkout(event.checkoutUuid, event.userUuid, event.subTotal, event.checkoutState, event.createdAt, event.updatedAt)
-        return checkoutDomainModel
-
+    static createCheckout(customerUuid: CustomerID){
+        const checkout = new Checkout(new CheckoutID(randomUUID()), customerUuid, new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
+        checkout.apply(new CheckoutCreated(
+                checkout.getUuid(), 
+                checkout.getUserUuid(), 
+                checkout.getSubTotal(),
+                checkout.getCheckoutState(),
+                checkout.getCreatedAt(),
+                checkout.getUpdatedAt()))
+        return checkout
     }
     setShippingAddress(address: () => Address) {
         this.address = address()
