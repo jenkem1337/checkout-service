@@ -1,6 +1,7 @@
-import { Controller, Delete, Get, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { BadRequestException, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put, Request, UseGuards } from "@nestjs/common";
 import CheckoutClientService from "../ClientService/CheckoutClientService";
 import { JwtAuthGuard } from "../Auth/JwtAuthGuard";
+import { map, firstValueFrom } from "rxjs";
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -8,10 +9,19 @@ export default class CheckoutClientController {
         private readonly checkoutService:CheckoutClientService,
     ){}
     
-
     @Post()
     async createCheckout(){
-        return this.checkoutService.createCheckout()
+        const result = await firstValueFrom(this.checkoutService.createCheckout()
+                        .pipe(
+                          map(result => {
+                            switch(result.type){
+                              case "ERROR": 
+                                    throw new BadRequestException({"error_message": result.result});
+                              case "SUCCESS": return result.result;
+                            }
+                          })
+                        ))
+        return result
     }
 
     @UseGuards(JwtAuthGuard)
@@ -41,7 +51,5 @@ export default class CheckoutClientController {
     //@Delete()
     //async deleteItemsOneMoreThanByUuid(){}
 //
-    //@Post()
-    //async createOrder(){}
-//
+
 }
