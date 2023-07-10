@@ -1,7 +1,5 @@
 import { Module } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import CheckoutDocument from "src/Infrastructure/Documents/CheckoutDocument";
-import CheckoutItemDocument from "src/Infrastructure/Documents/CheckoutItemDocument";
 import { MongoClient } from 'mongodb';
 
 @Module({
