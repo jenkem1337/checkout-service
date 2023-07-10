@@ -47,7 +47,7 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
                                                             updatedAt: command.itemUpdatedDate
                                                         })
         checkoutDomainModel.addAnItem(checkoutItem)
-        await this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
         this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
     }
 }

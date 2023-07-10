@@ -32,7 +32,7 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
             new ProductQuantity(command.quantity)
         )
         
-        await this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
         this.eventPublisher.mergeObjectContext(checkoutDomainModel).commit()
 
     }
