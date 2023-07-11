@@ -6,15 +6,20 @@ import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/Co
 import DomainModelFactoryModule from '../DomainModelFactoryModule';
 import { CheckoutSagas } from '../../../Core/Services/Sagas/CheckoutSagas';
 import TransactionalCommandHandler from '../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
-import PostGreDataSourceModule from '../ORMModule/PostGreDataSourceModule';
+import PostGreDataSourceModule from '../DatabaseConnectionModule/PostGreDataSourceModule';
 import CreateCheckoutCommandHandler from '../../../Core/Services/Commands/CommandHandlers/CreateCheckoutCommandHandler';
 import CheckoutCreatedEventHandler from '../../../Core/Services/Events/EventHandlers/CheckoutCreatedEventHandler';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import FindCheckoutByUuidAndCustomerUuidQueryHandler from 'src/Core/Services/Queries/QueryHandlers/FindCheckoutByUuidAndCustomerQueryHandler';
+import ReadRepositoryModule from '../RepositoryModule/ReadRepositoryModule';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
     CreateCheckoutCommandHandler
+]
+const QueryHandlers = [
+    FindCheckoutByUuidAndCustomerUuidQueryHandler
 ]
 const EventHandlers = [
     CheckoutCreatedEventHandler
@@ -23,6 +28,7 @@ const EventHandlers = [
     imports: [
         PostGreDataSourceModule,
         WriteRepositoryModule, 
+        ReadRepositoryModule,
         DomainModelFactoryModule, 
         CqrsModule,
         ClientsModule.register([{
@@ -38,6 +44,7 @@ const EventHandlers = [
     providers: [
         CheckoutSagas,
         ...CommandHandlers,
+        ...QueryHandlers,
         ...EventHandlers
     ]
 })
