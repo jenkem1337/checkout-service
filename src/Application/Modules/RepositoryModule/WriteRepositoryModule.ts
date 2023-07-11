@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import CheckoutRepositoryImpl from '../../../Infrastructure/Repository/CheckoutRepositoryImpl';
-import PostGreDataSourceModule from "../ORMModule/PostGreDataSourceModule";
+import PostGreDataSourceModule from "../DatabaseConnectionModule/PostGreDataSourceModule";
 import CheckoutAggregateMapperContext from '../../../Infrastructure/Repository/Mapper/CheckoutAggregateMapperContext';
 import WriteCheckoutAggregateMapper from '../../../Infrastructure/Repository/Mapper/WriteCheckoutAggregateMapper';
 import { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';

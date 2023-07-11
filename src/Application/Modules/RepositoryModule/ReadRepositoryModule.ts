@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import CheckoutReadRepositoryImpl from "../../../Infrastructure/Repository/CheckoutReadRepositoryImpl";
-import MongoModule from "../ORMModule/MongoModule";
+import MongoModule from "../DatabaseConnectionModule/MongoModule";
 
 @Module({
     providers: [{
