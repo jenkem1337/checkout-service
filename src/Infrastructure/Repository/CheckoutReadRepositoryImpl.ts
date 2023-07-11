@@ -4,6 +4,8 @@ import { MongoClient, Db , ObjectId} from 'mongodb';
 import CheckoutQueryModel from '../../Core/Models/QueryModels/CheckoutQueryModel';
 import CheckoutReadRepository from '../../Core/Interfaces/CheckoutReadRepository';
 import CheckoutItemQueryModel from '../../Core/Models/QueryModels/CheckoutItemQueryModel';
+import QueryModel from '../../Core/Models/QueryModels/QueryModel';
+import NullCheckoutQueryModel from '../../Core/Models/QueryModels/NullCheckoutQueryModel';
 
 interface MongoCheckoutDocument {
     _id: string,
@@ -79,12 +81,16 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             _id: (uuid)
         })
     }
-    async findOneByUuidAndCustomerUuid(checkoutUuid: string, customerUuid: string): Promise<CheckoutQueryModel> {
+    async findOneByUuidAndCustomerUuid(checkoutUuid: string, customerUuid: string): Promise<QueryModel> {
         const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
             {
                 _id: (checkoutUuid),
                 customerUuid: customerUuid
             })
+        if(!checkoutDocument){
+            return NullCheckoutQueryModel.valueOf()
+        }
+    
         const checkoutItems = await this.mongoClient.collection<MongoCheckoutItemDocument>("checkout_items")
                                                 .find({checkoutUuid: checkoutUuid})
                                                 .map(item => CheckoutItemQueryModel.valueOf({
@@ -110,12 +116,26 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             updatedDate: checkoutDocument.updatedAt
         })
     }
-    async findManyByCustomerUuid(customerUuid: string): Promise<CheckoutQueryModel[]> {
+    async findManyByCustomerUuid(customerUuid: string): Promise<QueryModel[]> {
         
         const checkoutDocuments = this.mongoClient.collection<MongoCheckoutDocument>("checkouts")
                                                     .find({customerUuid: customerUuid})
-        let checkoutQueryModelArr: Array<CheckoutQueryModel> = []
+        let checkoutQueryModelArr: Array<QueryModel> = []
         for await ( const checkout of checkoutDocuments) {
+            let checkoutItems = await this.mongoClient.collection<MongoCheckoutItemDocument>("checkout_items")
+                                                    .find({
+                                                        checkoutUuid: checkout._id
+                                                    }).map(checkoutItem => CheckoutItemQueryModel.valueOf({
+                                                        checkoutUuid:checkoutItem.checkoutUuid,
+                                                        createdDate:checkoutItem.createdAt,
+                                                        productBasePrice: checkoutItem.basePrice,
+                                                        productHeader: checkoutItem.header,
+                                                        productQuantity: checkoutItem.quantity,
+                                                        productUuid: checkoutItem.productUuid,
+                                                        updatedDate: checkoutItem.updatedAt,
+                                                        uuid: checkout._id
+                                                    })).toArray()
+            
             checkoutQueryModelArr.push(CheckoutQueryModel.valueOf({
                 uuid: checkout._id,
                 customerUuid: checkout.customerUuid,
@@ -124,17 +144,21 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                 peymentMethod: checkout.peymentMethod,
                 shippingPrice: checkout.shippingPrice,
                 subTotal: checkout.subTotal,
-                updatedDate: checkout.updatedAt
+                updatedDate: checkout.updatedAt,
+                checkoutItemDocument:checkoutItems
             }))
-
         }
         return checkoutQueryModelArr
     }
-    async findOneByUuid(checkoutUuid: string): Promise<CheckoutQueryModel> {
+    async findOneByUuid(checkoutUuid: string): Promise<QueryModel> {
         const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
             {
                 _id: (checkoutUuid),
             })
+            if(!checkoutDocument){
+                return NullCheckoutQueryModel.valueOf()
+            }
+    
         const checkoutItems = await this.mongoClient.collection<MongoCheckoutItemDocument>("checkout_items")
                                                 .find({checkoutUuid: checkoutUuid})
                                                 .map(item => CheckoutItemQueryModel.valueOf({
