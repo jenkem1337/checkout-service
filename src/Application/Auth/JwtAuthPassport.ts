@@ -13,6 +13,6 @@ export default class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return payload
+    return {customerUUID: payload.user_uuid}
   }
 }
