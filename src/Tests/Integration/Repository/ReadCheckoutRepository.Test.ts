@@ -4,7 +4,6 @@ import CheckoutReadRepositoryImpl from '../../../Infrastructure/Repository/Check
 import CheckoutQueryModel from '../../../Core/Models/QueryModels/CheckoutQueryModel';
 import { CheckoutStates } from '../../../Core/Models/ValueObjects/CheckoutState';
 import { randomUUID } from 'crypto';
-import MUUID from "uuid-mongodb"
 import CheckoutItemQueryModel from '../../../Core/Models/QueryModels/CheckoutItemQueryModel';
 
 
@@ -81,7 +80,7 @@ describe('Read Checkout Repository', () => {
                 uuid:checkoutItemUuid
             })
         )
-        const checkoutQueryModel = await checkoutRepository.findOneByUuid(checkoutUuid)
+        const checkoutQueryModel = await checkoutRepository.findOneByUuid(checkoutUuid) as CheckoutQueryModel
         expect(checkoutQueryModel).toBeInstanceOf(CheckoutQueryModel)
         const checkoutItemQueryModel = checkoutQueryModel.checkoutItemDocument[0]
         expect(checkoutItemQueryModel).toBeInstanceOf(CheckoutItemQueryModel)
