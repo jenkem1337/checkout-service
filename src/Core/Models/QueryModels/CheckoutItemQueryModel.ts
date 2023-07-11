@@ -1,3 +1,5 @@
+import QueryModel from "./QueryModel"
+
 interface CheckoutItemQueryModelConstructorParameters {
     readonly uuid:string
     readonly checkoutUuid:string
@@ -10,7 +12,7 @@ interface CheckoutItemQueryModelConstructorParameters {
 
 }
 
-export default class CheckoutItemQueryModel {
+export default class CheckoutItemQueryModel implements QueryModel{
     public readonly uuid:string
     public readonly checkoutUuid:string
     public readonly productBasePrice:number
@@ -28,6 +30,9 @@ export default class CheckoutItemQueryModel {
         this.productUuid = prop.productUuid
         this.createdDate = prop.createdDate
         this.updatedDate = prop.updatedDate
+    }
+    isNull(): boolean {
+        return false
     }
 
     static valueOf(prop: CheckoutItemQueryModelConstructorParameters){

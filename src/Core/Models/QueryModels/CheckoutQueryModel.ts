@@ -1,5 +1,6 @@
 import CheckoutCreated from "../Domain Models/Checkout/Events/CheckoutCreated"
 import CheckoutItemQueryModel from "./CheckoutItemQueryModel"
+import QueryModel from "./QueryModel"
 interface CheckoutQueryModelConstructerParameters {
     readonly uuid: string
      
@@ -20,7 +21,7 @@ interface CheckoutQueryModelConstructerParameters {
     readonly updatedDate:Date
 
 }
-export default class CheckoutQueryModel {
+export default class CheckoutQueryModel implements QueryModel{
     public readonly uuid: string
      
     public readonly customerUuid:string
@@ -50,6 +51,9 @@ export default class CheckoutQueryModel {
         this.checkoutItemDocument = prop.checkoutItemDocument ?? []
         this.createdDate = prop.createdDate
         this.updatedDate = prop.updatedDate
+    }
+    isNull(): boolean {
+        return false
     }
 
     static valueOf(prop:CheckoutQueryModelConstructerParameters){
