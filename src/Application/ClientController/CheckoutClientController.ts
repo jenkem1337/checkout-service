@@ -1,7 +1,7 @@
-import { BadRequestException, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { BadRequestException, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
 import CheckoutClientService from "../ClientService/CheckoutClientService";
 import { JwtAuthGuard } from "../Auth/JwtAuthGuard";
-import { map, firstValueFrom } from "rxjs";
+import { map, firstValueFrom, NotFoundError } from "rxjs";
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -9,47 +9,56 @@ export default class CheckoutClientController {
         private readonly checkoutService:CheckoutClientService,
     ){}
     
+    @UseGuards(JwtAuthGuard)
     @Post()
-    async createCheckout(){
-        const result = await firstValueFrom(this.checkoutService.createCheckout()
+    async createCheckout(@Request() req){
+        return await firstValueFrom(this.checkoutService.createCheckout(req.user.customerUUID as string)
                         .pipe(
                           map(result => {
                             switch(result.type){
                               case "ERROR": 
                                     throw new BadRequestException({"error_message": result.result});
-                              case "SUCCESS": return result.result;
+                              case "SUCCESS": 
+                                    return result.result;
                             }
                           })
                         ))
-        return result
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get("/insert-an-item")
+    @Post("/item")
     async addAnItemToCheckout(@Request() req){
         this.checkoutService.addAnItemToCheckout()
     }
 
-    //@Post()
-    //async addItemOneMoreThan(){}
+    //@Post("/items")
+    //async addItemOneMoreThanToCheckout(){}
+
+    @UseGuards(JwtAuthGuard)
+    @Get("/:checkout_uuid")
+    async getAnCheckoutByUuidAndCustomerUuid(@Request() req, @Param("checkout_uuid") checkoutUuid: string){
+      return await firstValueFrom(this.checkoutService.findAnCheckoutByUuidAndCustomerUuid(checkoutUuid, req.user.customerUUID as string)
+                        .pipe(
+                          map(result => {
+                            switch(result.type){
+                              case "ERROR": 
+                                    throw new NotFoundException({"error_message": result.result});
+                              case "SUCCESS": 
+                                    return result.result;
+                            }
+                          })
+                        ))
+
+    }
 //
-    //@Post()
-    //async getCheckoutUuid(){}
-//
-    //@Get()
-    //async getCheckoutByUuid(){}
-//
-    //@Get()
-    //async getCheckoutByUuidAndCustomerUuid(){}
-//
-    //@Delete()
-    //async deleteAnCheckoutItemByUuid(){}  
+    //@Delete("/item/:item_uuid/:checkout_uuid")
+    //async deleteAnItemFromCheckoutByUuid(){}  
     //
-    //@Delete()
-    //async deleteAllSameItemsByUuid(){}
+    //@Delete("/same-items")
+    //async deleteAllSameItemsFromCheckoutByUuid(){}
 //
-    //@Delete()
-    //async deleteItemsOneMoreThanByUuid(){}
+    //@Delete("/items")
+    //async deleteItemsOneMoreThanFromCheckoutByUuid(){}
 //
 
 }
