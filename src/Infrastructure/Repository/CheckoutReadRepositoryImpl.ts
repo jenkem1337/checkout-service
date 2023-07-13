@@ -36,6 +36,19 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
     ){
         this.mongoClient = mongoClient
     }
+    async updateStateByUuid(uuid: string, state: string): Promise<void> {
+        await this.mongoClient.collection<MongoCheckoutItemDocument>("checkouts").findOneAndUpdate(
+            {
+                _id: (uuid)
+            }, 
+            {
+                $set: {
+                    state: state,
+                    updatedAt: new Date        
+                }
+        })
+
+    }
     async save(checkout: CheckoutQueryModel): Promise<void> {
         await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").insertOne({
             _id: checkout.uuid,
@@ -149,6 +162,26 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             }))
         }
         return checkoutQueryModelArr
+    }
+    async findOneWithoutItemsByUuid(checkoutUuid:string){
+        const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
+            {
+                _id: (checkoutUuid),
+            })
+            if(!checkoutDocument){
+                return NullCheckoutQueryModel.valueOf()
+            }
+            return CheckoutQueryModel.valueOf({
+                uuid: checkoutDocument._id,
+                customerUuid: checkoutDocument.customerUuid,
+                checkoutState: checkoutDocument.state,
+                createdDate: checkoutDocument.createdAt,
+                peymentMethod: checkoutDocument.peymentMethod,
+                shippingPrice: checkoutDocument.shippingPrice,
+                subTotal: checkoutDocument.subTotal,
+                updatedDate: checkoutDocument.updatedAt
+            })
+    
     }
     async findOneByUuid(checkoutUuid: string): Promise<QueryModel> {
         const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
