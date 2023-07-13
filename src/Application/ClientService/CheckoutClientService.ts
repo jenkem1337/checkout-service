@@ -1,6 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { randomUUID } from "crypto";
 
 @Injectable()
 export default class CheckoutClientService {
@@ -20,5 +19,10 @@ export default class CheckoutClientService {
     findAnCheckoutByUuidAndCustomerUuid(checkoutUuid:string, customerUuid:string){
         const payload = {checkoutUuid, customerUuid}
         return this.client.send({cmd: "find_an_checkout_by_uuid_and_customer_uuid"}, payload)
+    }
+
+    cancelCheckout(checkoutUuid:string, customerUuid:string){
+        const payload = {checkoutUuid, customerUuid}
+        return this.client.send({cmd: "cancel_checkout"}, payload)
     }
 }

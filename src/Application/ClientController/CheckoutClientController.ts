@@ -50,6 +50,22 @@ export default class CheckoutClientController {
                         ))
 
     }
+    @UseGuards(JwtAuthGuard)
+    @Post("/cancel/:checkout_uuid")
+    async cancelCheckout(@Request() req, @Param("checkout_uuid") checkoutUuid:string){
+      return await firstValueFrom(this.checkoutService.cancelCheckout(checkoutUuid, req.user.customerUUID as string)
+      .pipe(
+        map(result => {
+          switch(result.type){
+            case "ERROR": 
+                  throw new BadRequestException({"error_message": result.result});
+            case "SUCCESS": 
+                  return result.result;
+          }
+        })
+      ))
+
+    }
 //
     //@Delete("/item/:item_uuid/:checkout_uuid")
     //async deleteAnItemFromCheckoutByUuid(){}  

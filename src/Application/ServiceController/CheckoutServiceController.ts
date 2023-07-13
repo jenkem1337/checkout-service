@@ -4,6 +4,7 @@ import { MessagePattern, Payload } from "@nestjs/microservices";
 import CreateCheckoutCommand from '../../Core/Services/Commands/Command/CreateCheckoutCommand';
 import TransactionalCommand from '../../Core/Services/Commands/Command/TransactionalCommand';
 import CheckoutByUuidAndCustomerUuidQuery from "src/Core/Services/Queries/Query/CheckoutByUuidAndCustomerUuidQuery";
+import CancelCheckoutCommand from '../../Core/Services/Commands/Command/CancelCheckoutCommand';
 
 @Controller()
 export default class CheckoutServiceController {
@@ -24,5 +25,11 @@ export default class CheckoutServiceController {
         return await this.queryBus.execute(
             new CheckoutByUuidAndCustomerUuidQuery(payload.checkoutUuid, payload.customerUuid)
         )
+    }
+    @MessagePattern({cmd: "cancel_checkout"})
+    async cancelCheckout(@Payload() payload:{checkoutUuid:string, customerUuid:string}){
+        return await this.commandBus.execute(new TransactionalCommand(
+            new CancelCheckoutCommand(payload.checkoutUuid, payload.customerUuid)
+        ))
     }
 }
