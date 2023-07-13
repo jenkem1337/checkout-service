@@ -6,6 +6,7 @@ import CheckoutItemID from '../../../../Core/Models/ValueObjects/CheckoutItemID'
 import ProductQuantity from '../../../../Core/Models/ValueObjects/ProductQuantity';
 import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
 import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainModelFactoryContext';
+import CheckoutNotFound from '../../../../Core/Exceptions/CheckoutNotFound';
 
 @CommandHandler(AddItemOneMoreThanCommand)
 export default class AddItemOneMoreThanCommandHandler implements ICommandHandler<AddItemOneMoreThanCommand> {
@@ -20,7 +21,9 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
     }
     async execute(command: AddItemOneMoreThanCommand): Promise<any> {
         const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
-                
+        if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
+        checkoutDomainModel.isCheckoutCancelled()
+        
         if(checkoutDomainModel.isNotNull()) {
             await this.addCheckoutItems(checkoutDomainModel as Checkout, command)
         }

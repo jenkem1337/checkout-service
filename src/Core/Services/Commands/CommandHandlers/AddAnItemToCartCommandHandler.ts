@@ -8,6 +8,7 @@ import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainMode
 import ConcreateCheckoutItemFactory from '../../../Models/Factories/CheckoutItem/ConcreateCheckoutItem';
 import CheckoutItemInterface from '../../../Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemConstructorParameters from 'src/Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
+import CheckoutNotFound from 'src/Core/Exceptions/CheckoutNotFound';
 
 
 @CommandHandler(AddAnItemCommand)
@@ -30,6 +31,9 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
     async execute(command: AddAnItemCommand): Promise<any> {
         const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
+        if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
+        checkoutDomainModel.isCheckoutCancelled()
+
         if(checkoutDomainModel.isNotNull()) {
             await this.addAnCheckoutItem(checkoutDomainModel, command)
         }
