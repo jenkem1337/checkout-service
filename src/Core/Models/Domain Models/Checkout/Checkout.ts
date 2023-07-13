@@ -25,6 +25,7 @@ import ShippingAddressAdded from './Events/ShippingAddressAdded';
 import PeymentMethodAdded from "./Events/PeymentMehodAdded";
 import ShippingPriceAdded from "./Events/ShippingPriceAdded";
 import { randomUUID } from "crypto";
+import CheckoutAllreadyCancelledException from '../../../Exceptions/CheckoutAllreadyCancelledException';
 
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
@@ -235,6 +236,12 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     completeThisCheckout(){
         this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED)
         this.apply(new CheckoutCompleted(this.getUuid()))
+    }
+
+    isCheckoutCancelled(){
+        if(this.checkoutState.getState() === CheckoutStates.CHECKOUT_CANCELLED){
+            throw new CheckoutAllreadyCancelledException()
+        }
     }
 
     getSubTotal = () => this.subTotal

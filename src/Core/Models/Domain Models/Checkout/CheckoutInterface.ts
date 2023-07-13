@@ -22,6 +22,7 @@ export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
     calculateSubTotal():void
     cancelThisCheckout():void
     completeThisCheckout():void
+    isCheckoutCancelled():void
     getSubTotal():Money
     getUserUuid():CustomerID
     getAddress():Address

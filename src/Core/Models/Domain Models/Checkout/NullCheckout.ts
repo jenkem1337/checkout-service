@@ -11,6 +11,9 @@ import CheckoutInterface from './CheckoutInterface';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import NullObjectException from '../../../Exceptions/NullObjectException';
 export default class NullCheckout implements CheckoutInterface {
+    isCheckoutCancelled(): void {
+        throw new NullObjectException
+    }
     setPeymentMethod(peymentMethod: () => PeymentMethod): void {
         throw new NullObjectException
     }
