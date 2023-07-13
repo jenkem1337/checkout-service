@@ -12,17 +12,21 @@ import CheckoutCreatedEventHandler from '../../../Core/Services/Events/EventHand
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import FindCheckoutByUuidAndCustomerUuidQueryHandler from 'src/Core/Services/Queries/QueryHandlers/FindCheckoutByUuidAndCustomerQueryHandler';
 import ReadRepositoryModule from '../RepositoryModule/ReadRepositoryModule';
+import CheckoutCancelledEventHandler from 'src/Core/Services/Events/EventHandlers/CheckoutCancelledEventHandler';
+import CancelCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CancelCheckoutCommandHandler';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
-    CreateCheckoutCommandHandler
+    CreateCheckoutCommandHandler,
+    CancelCheckoutCommandHandler
 ]
 const QueryHandlers = [
     FindCheckoutByUuidAndCustomerUuidQueryHandler
 ]
 const EventHandlers = [
-    CheckoutCreatedEventHandler
+    CheckoutCreatedEventHandler,
+    CheckoutCancelledEventHandler
 ]
 @Module({
     imports: [
