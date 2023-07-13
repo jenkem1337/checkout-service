@@ -21,4 +21,8 @@ export default class CheckoutProjection {
         })
         this.chekcoutReadRepository.save(checkoutQueryModel)
     }
+    @EventPattern("checkout_cancelled")
+    async handleCheckoutCancelledEvent(event:any){
+        this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid.uuid, event.newCheckoutState)
+    }
 }
