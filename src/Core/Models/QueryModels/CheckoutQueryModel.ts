@@ -59,5 +59,6 @@ export default class CheckoutQueryModel implements QueryModel{
     static valueOf(prop:CheckoutQueryModelConstructerParameters){
         return new CheckoutQueryModel(prop)
     }
-
+    
+    
 }   
