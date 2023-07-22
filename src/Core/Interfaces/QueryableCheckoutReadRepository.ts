@@ -6,4 +6,5 @@ export default interface  QueryableCheckoutReadRepository {
     findOneByUuidAndCustomerUuid(uuid:string, customerUuid:string): Promise<QueryModel>
     findManyByCustomerUuid(custormerUuid:string): Promise<QueryModel[]>
     findOneWithoutItemsByUuid(custormerUuid:string): Promise<QueryModel>
+    findOneCheckoutItemByUuid(uuid:string):Promise<QueryModel>
 }
