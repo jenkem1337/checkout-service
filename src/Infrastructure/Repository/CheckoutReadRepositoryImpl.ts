@@ -1,4 +1,3 @@
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Inject, Injectable } from '@nestjs/common';
 import { MongoClient, Db , ObjectId} from 'mongodb';
 import CheckoutQueryModel from '../../Core/Models/QueryModels/CheckoutQueryModel';
@@ -6,6 +5,7 @@ import CheckoutReadRepository from '../../Core/Interfaces/CheckoutReadRepository
 import CheckoutItemQueryModel from '../../Core/Models/QueryModels/CheckoutItemQueryModel';
 import QueryModel from '../../Core/Models/QueryModels/QueryModel';
 import NullCheckoutQueryModel from '../../Core/Models/QueryModels/NullCheckoutQueryModel';
+import NullCheckoutItemQueryModel from 'src/Core/Models/QueryModels/NullCheckoutItemQuery';
 
 interface MongoCheckoutDocument {
     _id: string,
@@ -36,8 +36,34 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
     ){
         this.mongoClient = mongoClient
     }
+    async updateCheckoutItemQuantityByUuid(uuid:string, quantity:number){
+        await this.mongoClient.collection<MongoCheckoutItemDocument>("checkout_items").findOneAndUpdate(
+            {
+                _id: (uuid)
+            }, 
+            {
+                $set: {
+                    quantity:quantity,
+                    updatedAt: new Date        
+                }
+        })
+
+    }
+    async updateSubTotalByUuid(uuid: string, subTotal:number){
+        await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOneAndUpdate(
+            {
+                _id: (uuid)
+            }, 
+            {
+                $set: {
+                    subTotal:subTotal,
+                    updatedAt: new Date        
+                }
+        })
+
+    }
     async updateStateByUuid(uuid: string, state: string): Promise<void> {
-        await this.mongoClient.collection<MongoCheckoutItemDocument>("checkouts").findOneAndUpdate(
+        await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOneAndUpdate(
             {
                 _id: (uuid)
             }, 
@@ -129,6 +155,25 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             updatedDate: checkoutDocument.updatedAt
         })
     }
+    async findOneCheckoutItemByUuid(uuid:string) {
+        const checkoutItemDocument = await this.mongoClient.collection<MongoCheckoutItemDocument>("checkout_items").findOne({
+            _id: uuid
+        })
+        if(!checkoutItemDocument){
+            return NullCheckoutItemQueryModel.valueOf()
+        }
+        return CheckoutItemQueryModel.valueOf({
+            checkoutUuid:checkoutItemDocument.checkoutUuid,
+            uuid: checkoutItemDocument._id,
+            createdDate: checkoutItemDocument.createdAt,
+            productBasePrice: checkoutItemDocument.basePrice,
+            productHeader: checkoutItemDocument.header,
+            productQuantity: checkoutItemDocument.quantity,
+            productUuid:checkoutItemDocument.productUuid,
+            updatedDate:checkoutItemDocument.updatedAt
+
+        })
+    }
     async findManyByCustomerUuid(customerUuid: string): Promise<QueryModel[]> {
         
         const checkoutDocuments = this.mongoClient.collection<MongoCheckoutDocument>("checkouts")
@@ -146,7 +191,7 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                                                         productQuantity: checkoutItem.quantity,
                                                         productUuid: checkoutItem.productUuid,
                                                         updatedDate: checkoutItem.updatedAt,
-                                                        uuid: checkout._id
+                                                        uuid: checkoutItem._id
                                                     })).toArray()
             
             checkoutQueryModelArr.push(CheckoutQueryModel.valueOf({
