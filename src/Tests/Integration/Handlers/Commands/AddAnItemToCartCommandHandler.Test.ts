@@ -106,8 +106,8 @@ describe("AddAnItemToCartCommandHandler", () => {
                                             }))
 
 
-        await commandBus.execute(new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID(), "Product 1", 120, new Date, new Date))
-        await commandBus.execute(new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID(), "Product 1", 120, new Date, new Date))
+        await commandBus.execute(new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID()))
+        await commandBus.execute(new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID()))
 
         let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
         let _checkoutItem = _checkout.getCheckoutItems().get(itemUuid)
@@ -128,7 +128,7 @@ describe("AddAnItemToCartCommandHandler", () => {
                                                 updatedAt: new Date
                                             }))
         await commandBus.execute(new TransactionalCommand<AddAnItemCommand>(
-            new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID(), "Product 1", 120, new Date, new Date)))
+            new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID())))
             
             let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)
             let _checkoutItem = _checkout.getCheckoutItems().get(itemUuid)
