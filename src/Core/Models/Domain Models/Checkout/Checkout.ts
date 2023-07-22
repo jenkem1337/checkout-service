@@ -13,7 +13,6 @@ import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import CheckoutInterface from './CheckoutInterface';
 import ProductID from '../../ValueObjects/ProductID';
 import CheckoutItemPricesUpdated from "./Events/CheckoutItemsPriceUpdated";
-import ItemAdded from "./Events/ItemAdded";
 import ItemQuantityIncreased from './Events/ItemQuantityIncreased';
 import NullObjectException from '../../../Exceptions/NullObjectException';
 import ItemDeletedAsQuantity from './Events/ItemDeletedAsQuantity';
@@ -26,6 +25,7 @@ import PeymentMethodAdded from "./Events/PeymentMehodAdded";
 import ShippingPriceAdded from "./Events/ShippingPriceAdded";
 import { randomUUID } from "crypto";
 import CheckoutAllreadyCancelledException from '../../../Exceptions/CheckoutAllreadyCancelledException';
+import AnItemAdded from "./Events/AnItemAdded";
 
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
@@ -97,17 +97,19 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         this.apply(new ShippingPriceAdded(this.getUuid(), this.shippingPrice))
     }
     addAnItem(item:CheckoutItemInterface): void{
+        let itemDomainModel:CheckoutItemInterface = item
         if(this.isItemExistInList(item)) {
-            const itemDomainModel:CheckoutItemInterface = this.checkoutItems.get(item.getUuid().getUuid()) 
+            itemDomainModel = this.checkoutItems.get(itemDomainModel.getUuid().getUuid()) 
             itemDomainModel.incraseQuantity(1)
-            this.checkoutItems.set(item.getUuid().getUuid(), itemDomainModel)
+            this.checkoutItems.set(itemDomainModel.getUuid().getUuid(), itemDomainModel)
             this.calculateSubTotal()
-            this.apply(new ItemAdded(item))
+            console.log(itemDomainModel.getProductQuantity().getQuantity())
+            this.apply(new AnItemAdded(itemDomainModel, this.subTotal))
             return;
         }
-        this.checkoutItems.set(item.getUuid().getUuid(), item)
+        this.checkoutItems.set(itemDomainModel.getUuid().getUuid(), itemDomainModel)
         this.calculateSubTotal()
-        this.apply(new ItemAdded(item))
+        this.apply(new AnItemAdded(itemDomainModel, this.subTotal))
     }
 
     private isItemExistInList(item:CheckoutItemInterface): boolean {
