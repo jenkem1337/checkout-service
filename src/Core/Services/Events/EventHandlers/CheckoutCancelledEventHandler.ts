@@ -1,7 +1,6 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import CheckoutCancelled from '../../../Models/Domain Models/Checkout/Events/CheckoutCancelled';
 import { Inject } from '@nestjs/common';
-import { Client } from "@nestjs/microservices/external/nats-client.interface";
 import { ClientProxy } from "@nestjs/microservices";
 
 @EventsHandler(CheckoutCancelled)
