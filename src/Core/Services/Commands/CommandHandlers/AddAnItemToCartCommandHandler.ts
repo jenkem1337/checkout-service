@@ -9,49 +9,59 @@ import ConcreateCheckoutItemFactory from '../../../Models/Factories/CheckoutItem
 import CheckoutItemInterface from '../../../Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemConstructorParameters from 'src/Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
 import CheckoutNotFound from 'src/Core/Exceptions/CheckoutNotFound';
-
-
+import MessageQueue from '../../../../Infrastructure/Queue/MessageQueue';
+import { randomUUID } from 'crypto';
+import SuccessResult from 'src/Core/Models/Result/SuccsessResult';
+interface ProductResponse {
+    header: string,
+    price: number,
+    hasError: boolean
+    errorMessage?: string; 
+}
 @CommandHandler(AddAnItemCommand)
 export default class AddAnItemToCartCommadHandler implements ICommandHandler<AddAnItemCommand> {
-    private readonly checkoutWriteRepository: CheckoutRepository
-    private readonly eventPublisher: EventPublisher
-    private readonly domainModelFactoryContext: IDomainModelFactoryContext
-    private readonly eventBus: EventBus
     constructor(
-            @Inject("CheckoutRepository") 
-            writeRepository:CheckoutRepository,
-            @Inject("DomainModelFactoryContext") 
-            domainModelFactoryContext: IDomainModelFactoryContext,
-            eventPublisher: EventPublisher,
-        ) {
-        this.checkoutWriteRepository = writeRepository
-        this.domainModelFactoryContext = domainModelFactoryContext
-        this.eventPublisher = eventPublisher
-    }
+        @Inject("CheckoutRepository") 
+        private readonly checkoutWriteRepository: CheckoutRepository,
+        @Inject("DomainModelFactoryContext") 
+        private readonly domainModelFactoryContext: IDomainModelFactoryContext,
+        @Inject("MessageQueue")
+        private readonly messageQueue: MessageQueue,
+        private readonly eventPublisher: EventPublisher
+    ){}
     async execute(command: AddAnItemCommand): Promise<any> {
         const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
+        //if checkout cancelled it will throw exception
         checkoutDomainModel.isCheckoutCancelled()
-
-        if(checkoutDomainModel.isNotNull()) {
-            await this.addAnCheckoutItem(checkoutDomainModel, command)
+        
+        await this.messageQueue.publishMessage("find-one-product-by-uuid", command.productUuid)
+        const productResponseFromProductService = await this.messageQueue.getResponseFromQueue<ProductResponse>("one-product-founded")
+        
+        if(productResponseFromProductService.hasError) {
+            throw new Error(productResponseFromProductService.errorMessage)
         }
-    }
-    private async addAnCheckoutItem(checkoutDomainModel: CheckoutInterface, command: AddAnItemCommand){
-        const checkoutItem = this.domainModelFactoryContext.setFactoryMethod(ConcreateCheckoutItemFactory.name)
-                                                        .createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({
-                                                            checkoutItemUuid: command.checkoutItemUuid,
-                                                            checkoutUuid: command.checkoutUuid,
-                                                            createdAt: command.itemCreatedDate,
-                                                            productBasePrice:command.productBasePrice,
-                                                            productHeader:command.productHeader,
-                                                            productQuantity: command.quantity,
-                                                            productUuid: command.productUuid,
-                                                            updatedAt: command.itemUpdatedDate
-                                                        })
+
+        const checkoutItem = this.domainModelFactoryContext
+                                                    .setFactoryMethod(ConcreateCheckoutItemFactory.name)
+                                                    .createInstance
+                                                            <CheckoutItemInterface, CheckoutItemConstructorParameters>
+                                                    ({
+                                                        checkoutItemUuid: command.checkoutItemUuid ?? randomUUID(),
+                                                        checkoutUuid: command.checkoutUuid,
+                                                        createdAt: new Date,
+                                                        productBasePrice:productResponseFromProductService.price,
+                                                        productHeader:productResponseFromProductService.header,
+                                                        productQuantity: command.quantity,
+                                                        productUuid: command.productUuid,
+                                                        updatedAt: new Date
+                                                    })
         checkoutDomainModel.addAnItem(checkoutItem)
         this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
         this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
+        return new SuccessResult({
+            checkout_item_uuid: checkoutItem.getUuid().getUuid()
+        })
     }
 }
