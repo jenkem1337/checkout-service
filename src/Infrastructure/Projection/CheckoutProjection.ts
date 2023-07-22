@@ -2,6 +2,8 @@ import { Controller, Inject } from "@nestjs/common";
 import {EventPattern} from "@nestjs/microservices"
 import CheckoutQueryModel from '../../Core/Models/QueryModels/CheckoutQueryModel';
 import ReadCheckoutRepository from "../../Core/Interfaces/CheckoutReadRepository";
+import AnItemAdded from "src/Core/Models/Domain Models/Checkout/Events/AnItemAdded";
+import CheckoutItemQueryModel from "src/Core/Models/QueryModels/CheckoutItemQueryModel";
 @Controller()
 export default class CheckoutProjection {
 
@@ -24,5 +26,28 @@ export default class CheckoutProjection {
     @EventPattern("checkout_cancelled")
     async handleCheckoutCancelledEvent(event:any){
         this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid.uuid, event.newCheckoutState)
+    }
+
+    @EventPattern("an_item_added")
+    async handleAnCheckoutItemAdded(event: any){
+        let checkoutItemFromRepo = await this.chekcoutReadRepository.findOneCheckoutItemByUuid(event.itemEntityUuid.uuid)
+        
+        if(checkoutItemFromRepo.isNull()){
+            const checkoutItem = CheckoutItemQueryModel.valueOf({
+                checkoutUuid: event.checkoutUuid.uuid,
+                createdDate: event.createdAt,
+                productBasePrice: event.productBasePrice.amount,
+                productHeader: event.productHeader.header,
+                productQuantity: event.productQuantity.quantity,
+                productUuid: event.productUuid.uuid,
+                updatedDate: event.updatedAt,
+                uuid: event.itemEntityUuid.uuid
+            })
+            this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
+            return
+        }
+        console.log("projection "+ event.productQuantity.quantity)
+        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.itemEntityUuid.uuid, event.productQuantity.quantity)
     }
 }
