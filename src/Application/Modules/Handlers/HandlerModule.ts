@@ -14,6 +14,8 @@ import FindCheckoutByUuidAndCustomerUuidQueryHandler from 'src/Core/Services/Que
 import ReadRepositoryModule from '../RepositoryModule/ReadRepositoryModule';
 import CheckoutCancelledEventHandler from 'src/Core/Services/Events/EventHandlers/CheckoutCancelledEventHandler';
 import CancelCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CancelCheckoutCommandHandler';
+import RedisPubSubModule from '../QueueModule/RedisPubSubModule';
+import AnCheckoutItemAddedEventHandler from 'src/Core/Services/Events/EventHandlers/AnCheckoutItemAddedEventHandler';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
@@ -26,10 +28,12 @@ const QueryHandlers = [
 ]
 const EventHandlers = [
     CheckoutCreatedEventHandler,
-    CheckoutCancelledEventHandler
+    CheckoutCancelledEventHandler,
+    AnCheckoutItemAddedEventHandler
 ]
 @Module({
     imports: [
+        RedisPubSubModule,
         PostGreDataSourceModule,
         WriteRepositoryModule, 
         ReadRepositoryModule,
