@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
+import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto";
 
 @Injectable()
 export default class CheckoutClientService {
@@ -8,8 +9,8 @@ export default class CheckoutClientService {
         private client:ClientProxy
     ){}
 
-    addAnItemToCheckout(){
-        return this.client.send({cmd: "add_an_item"}, {})
+    addAnItemToCheckout(dto: AddAnCheckoutItemDto){
+        return this.client.send({cmd: "add_an_item"}, dto)
     }
 
     createCheckout(customerUuid:string){

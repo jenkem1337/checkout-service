@@ -1,7 +1,10 @@
-import { BadRequestException, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { Redis } from 'ioredis';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
 import CheckoutClientService from "../ClientService/CheckoutClientService";
 import { JwtAuthGuard } from "../Auth/JwtAuthGuard";
-import { map, firstValueFrom, NotFoundError } from "rxjs";
+import { map, firstValueFrom } from "rxjs";
+import RedisPubSub from "src/Infrastructure/Queue/RedisPubSub";
+import AddAnCheckoutItemDto from './DTOs/AddAnCheckoutItemDto';
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -27,9 +30,20 @@ export default class CheckoutClientController {
 
     @UseGuards(JwtAuthGuard)
     @Post("/item")
-    async addAnItemToCheckout(@Request() req){
-        this.checkoutService.addAnItemToCheckout()
-    }
+    async addAnItemToCheckout(@Request() req,@Body() dto: AddAnCheckoutItemDto){
+      dto.customerUuid = req.user.customerUUID
+      return await firstValueFrom(this.checkoutService.addAnItemToCheckout(dto)
+      .pipe(
+        map(result => {
+          switch(result.type){
+            case "ERROR": 
+                  throw new BadRequestException({"error_message": result.result});
+            case "SUCCESS": 
+                  return result.result;
+          }
+        })
+      ))
+}
 
     //@Post("/items")
     //async addItemOneMoreThanToCheckout(){}
