@@ -56,4 +56,9 @@ export default class CheckoutProjection {
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
     }
 
+    @EventPattern("an-item-deleted")
+    async handleAnItemDeleted(event:any) {
+        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
+        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+    }
 }
