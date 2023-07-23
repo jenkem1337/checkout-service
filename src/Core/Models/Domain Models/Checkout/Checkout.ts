@@ -142,7 +142,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             checkoutItem.decreaseQuantity(1)
             this.checkoutItems.set(checkoutItemEntityUuid.getUuid(), checkoutItem)
             this.calculateSubTotal()
-            this.apply(new AnItemDeleted(checkoutItemEntityUuid, this.getUuid()))
+            this.apply(new AnItemDeleted(checkoutItemEntityUuid, this.getUuid(), this.subTotal, checkoutItem.getProductQuantity()))
             return;
         }
 
