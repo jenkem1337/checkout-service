@@ -9,6 +9,8 @@ import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto"
 import AddAnItemCommand from "src/Core/Services/Commands/Command/AddAnItemCommand";
 import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
 import AddItemOneMoreThanCommand from "src/Core/Services/Commands/Command/AddItemOneMoreThanCommand";
+import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
+import TakeOutAnItemCommand from "src/Core/Services/Commands/Command/TakeOutAnItemCommand";
 
 @Controller()
 export default class CheckoutServiceController {
@@ -59,6 +61,13 @@ export default class CheckoutServiceController {
     async cancelCheckout(@Payload() payload:{checkoutUuid:string, customerUuid:string}){
         return await this.commandBus.execute(new TransactionalCommand(
             new CancelCheckoutCommand(payload.checkoutUuid, payload.customerUuid)
+        ))
+    }
+
+    @MessagePattern({cmd: "delete-an-item"})
+    async deleteAnItem(@Payload() payload: DeleteAnItemDto){
+        return await this.commandBus.execute(new TransactionalCommand(
+            new TakeOutAnItemCommand(payload.checkoutUuid, payload.checkoutItemUuid, payload.customerUuid)
         ))
     }
 }
