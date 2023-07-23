@@ -129,7 +129,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
         this.calculateSubTotal()
-        this.apply(new ItemQuantityIncreased(this.getUuid(), itemUuid, quantity))
+        this.apply(new ItemQuantityIncreased(this.getUuid(), itemUuid, checkoutItemDomainModel.getProductQuantity(), this.subTotal))
     }
 
     takeOutAnItem(checkoutItemEntityUuid: CheckoutItemID) {
