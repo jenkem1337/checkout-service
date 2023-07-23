@@ -7,6 +7,8 @@ import ProductQuantity from '../../../../Core/Models/ValueObjects/ProductQuantit
 import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
 import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainModelFactoryContext';
 import CheckoutNotFound from '../../../../Core/Exceptions/CheckoutNotFound';
+import MessageQueue from 'src/Infrastructure/Queue/MessageQueue';
+import SuccessResult from 'src/Core/Models/Result/SuccsessResult';
 
 @CommandHandler(AddItemOneMoreThanCommand)
 export default class AddItemOneMoreThanCommandHandler implements ICommandHandler<AddItemOneMoreThanCommand> {
@@ -22,22 +24,23 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
     async execute(command: AddItemOneMoreThanCommand): Promise<any> {
         const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
+        
         checkoutDomainModel.isCheckoutCancelled()
         
-        if(checkoutDomainModel.isNotNull()) {
-            await this.addCheckoutItems(checkoutDomainModel as Checkout, command)
-        }
-    }
-    
-    private async addCheckoutItems(checkoutDomainModel: Checkout, command: AddItemOneMoreThanCommand){
         checkoutDomainModel.addItemOneMoreThan(
             new CheckoutItemID(command.checkoutItemUuid), 
             new ProductQuantity(command.quantity)
         )
         
         this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
-        this.eventPublisher.mergeObjectContext(checkoutDomainModel).commit()
-
+        this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
+        return new SuccessResult({
+            checkout_item_uuid: command.checkoutItemUuid,
+            checkout_quantity: command.quantity
+        })
     }
+
 }
+    
+
     
