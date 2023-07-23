@@ -5,6 +5,7 @@ import { JwtAuthGuard } from "../Auth/JwtAuthGuard";
 import { map, firstValueFrom } from "rxjs";
 import RedisPubSub from "src/Infrastructure/Queue/RedisPubSub";
 import AddAnCheckoutItemDto from './DTOs/AddAnCheckoutItemDto';
+import AddOneMoreThanItemDto from './DTOs/AddOneMoreThanItemDto';
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -44,9 +45,24 @@ export default class CheckoutClientController {
         })
       ))
 }
+    
+    @UseGuards(JwtAuthGuard)
+    @Post("/items")
+    async addItemOneMoreThanToCheckout(@Body() dto: AddOneMoreThanItemDto, @Request() req){
+      dto.customerUuid = req.user.customerUUID
+      return await firstValueFrom(this.checkoutService.addOneMoreThanItemToCheckout(dto)
+                        .pipe(
+                          map(result => {
+                            switch(result.type){
+                              case "ERROR": 
+                                    throw new NotFoundException({"error_message": result.result});
+                              case "SUCCESS": 
+                                    return result.result;
+                            }
+                          })
+                        ))
 
-    //@Post("/items")
-    //async addItemOneMoreThanToCheckout(){}
+    }
 
     @UseGuards(JwtAuthGuard)
     @Get("/:checkout_uuid")
