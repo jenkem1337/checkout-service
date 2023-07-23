@@ -46,8 +46,14 @@ export default class CheckoutProjection {
             this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
             return
         }
-        console.log("projection "+ event.productQuantity.quantity)
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.itemEntityUuid.uuid, event.productQuantity.quantity)
     }
+
+    @EventPattern("item-quantity-increased")
+    async handleItemQuantityIncreased(event:any){
+        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
+    }
+
 }
