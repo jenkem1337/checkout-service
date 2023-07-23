@@ -6,6 +6,7 @@ import { map, firstValueFrom } from "rxjs";
 import RedisPubSub from "src/Infrastructure/Queue/RedisPubSub";
 import AddAnCheckoutItemDto from './DTOs/AddAnCheckoutItemDto';
 import AddOneMoreThanItemDto from './DTOs/AddOneMoreThanItemDto';
+import DeleteAnItemDto from './DTOs/DeleteAnItemDto';
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -15,7 +16,7 @@ export default class CheckoutClientController {
     
     @UseGuards(JwtAuthGuard)
     @Post()
-    async createCheckout(@Request() req){
+    async createCheckout(@Request() req:any){
         return await firstValueFrom(this.checkoutService.createCheckout(req.user.customerUUID as string)
                         .pipe(
                           map(result => {
@@ -31,7 +32,7 @@ export default class CheckoutClientController {
 
     @UseGuards(JwtAuthGuard)
     @Post("/item")
-    async addAnItemToCheckout(@Request() req,@Body() dto: AddAnCheckoutItemDto){
+    async addAnItemToCheckout(@Request() req:any, @Body() dto: AddAnCheckoutItemDto){
       dto.customerUuid = req.user.customerUUID
       return await firstValueFrom(this.checkoutService.addAnItemToCheckout(dto)
       .pipe(
@@ -48,7 +49,7 @@ export default class CheckoutClientController {
     
     @UseGuards(JwtAuthGuard)
     @Post("/items")
-    async addItemOneMoreThanToCheckout(@Body() dto: AddOneMoreThanItemDto, @Request() req){
+    async addItemOneMoreThanToCheckout(@Body() dto: AddOneMoreThanItemDto, @Request() req:any){
       dto.customerUuid = req.user.customerUUID
       return await firstValueFrom(this.checkoutService.addOneMoreThanItemToCheckout(dto)
                         .pipe(
@@ -66,7 +67,7 @@ export default class CheckoutClientController {
 
     @UseGuards(JwtAuthGuard)
     @Get("/:checkout_uuid")
-    async getAnCheckoutByUuidAndCustomerUuid(@Request() req, @Param("checkout_uuid") checkoutUuid: string){
+    async getAnCheckoutByUuidAndCustomerUuid(@Request() req:any, @Param("checkout_uuid") checkoutUuid: string){
       return await firstValueFrom(this.checkoutService.findAnCheckoutByUuidAndCustomerUuid(checkoutUuid, req.user.customerUUID as string)
                         .pipe(
                           map(result => {
@@ -82,7 +83,7 @@ export default class CheckoutClientController {
     }
     @UseGuards(JwtAuthGuard)
     @Post("/cancel/:checkout_uuid")
-    async cancelCheckout(@Request() req, @Param("checkout_uuid") checkoutUuid:string){
+    async cancelCheckout(@Request() req:any, @Param("checkout_uuid") checkoutUuid:string){
       return await firstValueFrom(this.checkoutService.cancelCheckout(checkoutUuid, req.user.customerUUID as string)
       .pipe(
         map(result => {
@@ -96,10 +97,24 @@ export default class CheckoutClientController {
       ))
 
     }
-//
-    //@Delete("/item/:item_uuid/:checkout_uuid")
-    //async deleteAnItemFromCheckoutByUuid(){}  
-    //
+    @UseGuards(JwtAuthGuard)
+    @Delete("/item")
+    async deleteAnItemFromCheckout(@Body() dto: DeleteAnItemDto, @Request() req:any){
+      dto.customerUuid = req.user.customerUUID
+      return await firstValueFrom(this.checkoutService.deleteAnItemFromCheckout(dto)
+                          .pipe(
+                            map(result => {
+                              switch(result.type){
+                                case "ERROR": 
+                                      throw new BadRequestException({"error_message": result.result});
+                                case "SUCCESS": 
+                                      return result.result;
+                              }
+                            })
+                          ))
+
+    }  
+    
     //@Delete("/same-items")
     //async deleteAllSameItemsFromCheckoutByUuid(){}
 //
