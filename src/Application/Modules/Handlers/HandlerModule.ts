@@ -16,6 +16,7 @@ import CheckoutCancelledEventHandler from 'src/Core/Services/Events/EventHandler
 import CancelCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CancelCheckoutCommandHandler';
 import RedisPubSubModule from '../QueueModule/RedisPubSubModule';
 import AnCheckoutItemAddedEventHandler from 'src/Core/Services/Events/EventHandlers/AnCheckoutItemAddedEventHandler';
+import ItemQuantityIncreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityIncreasedEventHandler';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
@@ -29,7 +30,8 @@ const QueryHandlers = [
 const EventHandlers = [
     CheckoutCreatedEventHandler,
     CheckoutCancelledEventHandler,
-    AnCheckoutItemAddedEventHandler
+    AnCheckoutItemAddedEventHandler,
+    ItemQuantityIncreasedEventHandler
 ]
 @Module({
     imports: [
