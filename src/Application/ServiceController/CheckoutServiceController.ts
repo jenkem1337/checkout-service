@@ -7,6 +7,8 @@ import CheckoutByUuidAndCustomerUuidQuery from "src/Core/Services/Queries/Query/
 import CancelCheckoutCommand from '../../Core/Services/Commands/Command/CancelCheckoutCommand';
 import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto";
 import AddAnItemCommand from "src/Core/Services/Commands/Command/AddAnItemCommand";
+import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
+import AddItemOneMoreThanCommand from "src/Core/Services/Commands/Command/AddItemOneMoreThanCommand";
 
 @Controller()
 export default class CheckoutServiceController {
@@ -22,6 +24,18 @@ export default class CheckoutServiceController {
                 dto.customerUuid,
                 dto.checkoutItemUuid,
                 dto.productUuid,
+                dto.quantity
+            )
+        ))
+    }
+
+    @MessagePattern({cmd: "add_one_more_than_item"})
+    async addOneMoreThanItemToCheckout(@Payload() dto: AddOneMoreThanItemDto){
+        return await this.commandBus.execute(new TransactionalCommand(
+            new AddItemOneMoreThanCommand(
+                dto.checkoutUuid,
+                dto.customerUuid,
+                dto.checkoutItemUuid,
                 dto.quantity
             )
         ))
