@@ -1,6 +1,6 @@
 import { AggregateRoot } from "@nestjs/cqrs";
 import BaseUUIDValueObject from './ValueObjects/BaseUUIDValueObject';
-import EntityInterface from './EntityInterface';
+import EntityInterface from '../Interfaces/EntityInterface';
 import NullPropertyException from "../Exceptions/NullPropertyException";
 
 export default abstract class AggregateRootEntity<T extends BaseUUIDValueObject> extends AggregateRoot implements EntityInterface<T> {

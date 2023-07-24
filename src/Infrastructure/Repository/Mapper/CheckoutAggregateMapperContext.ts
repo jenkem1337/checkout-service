@@ -1,4 +1,4 @@
-import CheckoutAggregateMapperStrategy from './CheckoutAggregateStrategy';
+import CheckoutAggregateMapperStrategy from '../../../Core/Interfaces/CheckoutAggregateStrategy';
 import DoesntExistException from '../../../Core/Exceptions/DoesntExistExcepiton';
 
 export default class CheckoutAggregateMapperContext {

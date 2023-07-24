@@ -1,5 +1,5 @@
 import {CommandHandler, EventPublisher, ICommandHandler } from "@nestjs/cqrs";
-import Result from "src/Core/Models/Result/Result";
+import Result from "src/Core/Interfaces/Result";
 import { Inject } from "@nestjs/common";
 import CheckoutRepository from "src/Core/Interfaces/CheckoutRepository";
 import CheckoutNotFound from "src/Core/Exceptions/CheckoutNotFound";

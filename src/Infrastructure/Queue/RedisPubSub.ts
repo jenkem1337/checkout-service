@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import MessageQueue from "./MessageQueue";
+import MessageQueue from "../../Core/Interfaces/MessageQueue";
 export default class RedisPubSub implements MessageQueue {
 
     constructor(

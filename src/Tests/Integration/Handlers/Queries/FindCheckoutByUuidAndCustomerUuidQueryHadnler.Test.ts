@@ -1,4 +1,4 @@
-import Result  from '../../../../Core/Models/Result/Result';
+import Result  from '../../../../Core/Interfaces/Result';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CqrsModule, QueryBus } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';

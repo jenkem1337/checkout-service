@@ -1,5 +1,5 @@
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
-import EntityInterface from '../../EntityInterface';
+import EntityInterface from '../../../Interfaces/EntityInterface';
 import ProductID from '../../ValueObjects/ProductID';
 import Money from '../../ValueObjects/Money';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';

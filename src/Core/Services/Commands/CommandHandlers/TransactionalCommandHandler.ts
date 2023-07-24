@@ -2,7 +2,7 @@ import { CommandBus, CommandHandler, ICommand, ICommandHandler } from "@nestjs/c
 import TransactionalCommand from "../Command/TransactionalCommand";
 import { Inject } from "@nestjs/common";
 import { DataSource } from "typeorm";
-import Result from '../../../Models/Result/Result';
+import Result from '../../../Interfaces/Result';
 import ErrorResult from '../../../Models/Result/ErrorResult';
 import NullableResult from '../../../Models/Result/NullableResult';
 @CommandHandler(TransactionalCommand)

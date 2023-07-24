@@ -5,7 +5,7 @@ import CheckoutRepository from '../../Core/Interfaces/CheckoutRepository';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import CheckoutDataMapper from '../Entity/CheckoutDataMapper';
 import CheckoutAggregateMapperContext from './Mapper/CheckoutAggregateMapperContext';
-import CheckoutAggregateMapperStrategy from './Mapper/CheckoutAggregateStrategy';
+import CheckoutAggregateMapperStrategy from '../../Core/Interfaces/CheckoutAggregateStrategy';
 import CheckoutItemDataMapper from '../Entity/CheckoutItemDataMapper';
 
 @Injectable()

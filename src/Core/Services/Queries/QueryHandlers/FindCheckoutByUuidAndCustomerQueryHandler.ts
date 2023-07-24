@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import Result from '../../../../Core/Models/Result/Result';
+import Result from '../../../Interfaces/Result';
 import { Inject } from "@nestjs/common";
 import QueryableCheckoutReadRepository from '../../../../Core/Interfaces/QueryableCheckoutReadRepository';
 import SuccessResult from '../../../../Core/Models/Result/SuccsessResult';

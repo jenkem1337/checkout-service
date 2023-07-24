@@ -1,6 +1,6 @@
 import { ICommand, IQuery } from '@nestjs/cqrs';
 import ErrorResult from '../../../Core/Models/Result/ErrorResult';
-import Result from '../../../Core/Models/Result/Result';
+import Result from '../../Interfaces/Result';
 export function HandleException(target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<(name: IQuery | ICommand) => Promise<Result<any>>>
 ){
   

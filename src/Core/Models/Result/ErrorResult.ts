@@ -1,4 +1,4 @@
-import Result from "./Result";
+import Result from "../../Interfaces/Result";
 
 export default class ErrorResult implements Result<string> {
     private readonly type = "ERROR"

@@ -9,7 +9,7 @@ import ConcreateCheckoutItemFactory from '../../../Models/Factories/CheckoutItem
 import CheckoutItemInterface from '../../../Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutItemConstructorParameters from 'src/Core/Models/Factories/CheckoutItem/CheckoutItemConstructorParameters';
 import CheckoutNotFound from 'src/Core/Exceptions/CheckoutNotFound';
-import MessageQueue from '../../../../Infrastructure/Queue/MessageQueue';
+import MessageQueue from '../../../Interfaces/MessageQueue';
 import { randomUUID } from 'crypto';
 import SuccessResult from 'src/Core/Models/Result/SuccsessResult';
 interface ProductResponse {

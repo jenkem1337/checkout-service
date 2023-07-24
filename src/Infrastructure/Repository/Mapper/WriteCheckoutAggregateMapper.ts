@@ -4,7 +4,7 @@ import Checkout from "../../../Core/Models/Domain Models/Checkout/Checkout";
 import CheckoutDataMapper from '../../Entity/CheckoutDataMapper';
 import CheckoutInterface from '../../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import NullCheckout from '../../../Core/Models/Domain Models/Checkout/NullCheckout';
-import CheckoutAggregateMapperStrategy from './CheckoutAggregateStrategy';
+import CheckoutAggregateMapperStrategy from '../../../Core/Interfaces/CheckoutAggregateStrategy';
 import { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
 import NullableAllArgumentCheckoutFactory from "../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory";
 import CheckoutConstructorParamaters from "../../../Core/Models/Factories/Checkout/CheckoutConstructorParameters";

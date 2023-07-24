@@ -1,4 +1,4 @@
-import EntityInterface from '../../EntityInterface';
+import EntityInterface from '../../../Interfaces/EntityInterface';
 import CheckoutID from '../../ValueObjects/CheckoutID';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';

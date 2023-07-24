@@ -1,4 +1,4 @@
-import EntityInterface from './EntityInterface';
+import EntityInterface from '../Interfaces/EntityInterface';
 import BaseUUIDValueObject from './ValueObjects/BaseUUIDValueObject';
 import NullPropertyException from '../Exceptions/NullPropertyException';
 export default abstract class Entity<T extends BaseUUIDValueObject> implements EntityInterface<T> {
