@@ -11,6 +11,8 @@ import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDt
 import AddItemOneMoreThanCommand from "src/Core/Services/Commands/Command/AddItemOneMoreThanCommand";
 import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
 import TakeOutAnItemCommand from "src/Core/Services/Commands/Command/TakeOutAnItemCommand";
+import DeleteItemOneMoreThanDto from '../ClientController/DTOs/DeleteItemOneMoreThanDto';
+import TakeOutOneMoreThanItemCommand from "src/Core/Services/Commands/Command/TakeOutOneMoreThanItemCommand";
 
 @Controller()
 export default class CheckoutServiceController {
@@ -68,6 +70,17 @@ export default class CheckoutServiceController {
     async deleteAnItem(@Payload() payload: DeleteAnItemDto){
         return await this.commandBus.execute(new TransactionalCommand(
             new TakeOutAnItemCommand(payload.checkoutUuid, payload.checkoutItemUuid, payload.customerUuid)
+        ))
+    }
+    @MessagePattern({cmd: "delete-item-one-more-than"})
+    async deleteItemOneMoreThan(@Payload() dto: DeleteItemOneMoreThanDto){
+        return await this.commandBus.execute(new TransactionalCommand(
+            new TakeOutOneMoreThanItemCommand(
+                dto.checkoutUuid,
+                dto.checkoutItemUuid,
+                dto.customerUuid,
+                dto.quantity
+            )
         ))
     }
 }
