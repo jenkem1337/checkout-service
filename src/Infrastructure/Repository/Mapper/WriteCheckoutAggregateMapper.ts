@@ -35,8 +35,12 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
             checkout.getShippingPrice() ? checkout.getShippingPrice().getAmount() : 0 ,
             checkout.getPeymentMethod() ? checkout.getPeymentMethod().getPeymentMethod() : null,
             checkout.getCheckoutState().getState(),
-            checkoutItemDataMapper
         )
+        checkoutItemDataMapper.forEach(item => {
+            item.checkout = checkoutDataMapper
+        })
+
+        checkoutDataMapper.checkoutItems = checkoutItemDataMapper
         return checkoutDataMapper
     }
 
