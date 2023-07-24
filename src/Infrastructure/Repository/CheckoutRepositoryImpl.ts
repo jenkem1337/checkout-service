@@ -6,6 +6,7 @@ import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/Checkout
 import CheckoutDataMapper from '../Entity/CheckoutDataMapper';
 import CheckoutAggregateMapperContext from './Mapper/CheckoutAggregateMapperContext';
 import CheckoutAggregateMapperStrategy from './Mapper/CheckoutAggregateStrategy';
+import CheckoutItemDataMapper from '../Entity/CheckoutItemDataMapper';
 
 @Injectable()
 export default class CheckoutRepositoryImpl implements CheckoutRepository{
@@ -27,7 +28,15 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
         const checkoutDataMapper = this.objectMapper.fromAggregateToDataMapper(checkout)
         await this.dataSoruce.manager.save(checkoutDataMapper)
     }
-
+    async removeCheckoutItemByUuid(uuid:string) {
+        await this.dataSoruce.manager.remove(
+            await this.dataSoruce.manager.findOne(CheckoutItemDataMapper, {
+                where: {
+                    uuid: uuid
+                }
+            })
+        )
+    }
     async findOneByUuidAndCustomerUuid(uuid: string, customerUuid: string): Promise<CheckoutInterface> {
         const _checkoutDataMapper = await this.dataSoruce.manager.findOne(CheckoutDataMapper, {
             relations: {
