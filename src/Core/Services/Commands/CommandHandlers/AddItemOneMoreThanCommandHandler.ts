@@ -7,7 +7,6 @@ import ProductQuantity from '../../../../Core/Models/ValueObjects/ProductQuantit
 import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
 import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainModelFactoryContext';
 import CheckoutNotFound from '../../../../Core/Exceptions/CheckoutNotFound';
-import MessageQueue from 'src/Infrastructure/Queue/MessageQueue';
 import SuccessResult from 'src/Core/Models/Result/SuccsessResult';
 
 @CommandHandler(AddItemOneMoreThanCommand)
