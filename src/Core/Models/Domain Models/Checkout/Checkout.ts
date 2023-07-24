@@ -148,7 +148,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
 
         this.checkoutItems.delete(checkoutItemEntityUuid.getUuid())
         this.calculateSubTotal()
-        this.apply(new ItemDeleted(checkoutItemEntityUuid, this.getUuid()))
+        this.apply(new ItemDeleted(checkoutItemEntityUuid, this.getUuid(), this.subTotal))
     }
 
     takeOutOneMoreThanItem(itemUuid: CheckoutItemID, itemQuantity: ProductQuantity){
@@ -161,12 +161,12 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         if(this.isCheckoutItemQuantityEqualToZero(checkoutItemDomainModel)){
             this.checkoutItems.delete(itemUuid.getUuid())
             this.calculateSubTotal()
-            this.apply(new ItemDeleted(itemUuid, this.getUuid()))
+            this.apply(new ItemDeleted(itemUuid, this.getUuid(), this.subTotal))
             return;
         }
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
         this.calculateSubTotal()
-        this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), itemQuantity))
+        this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), this.subTotal, checkoutItemDomainModel.getProductQuantity()))
     }
 
     takeOutSameItems(itemUuid:CheckoutItemID){
@@ -175,7 +175,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         }
         this.checkoutItems.delete(itemUuid.getUuid())
         this.calculateSubTotal()
-        this.apply(new ItemDeleted(itemUuid, this.getUuid()))
+        this.apply(new ItemDeleted(itemUuid, this.getUuid(), this.subTotal))
     }
 
     private isCheckoutItemQuantityEqualToZero(checkoutItem:CheckoutItemInterface) {
