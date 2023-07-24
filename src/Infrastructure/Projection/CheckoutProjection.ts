@@ -44,6 +44,7 @@ export default class CheckoutProjection {
                 uuid: event.itemEntityUuid.uuid
             })
             this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
+            this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
             return
         }
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
@@ -60,5 +61,18 @@ export default class CheckoutProjection {
     async handleAnItemDeleted(event:any) {
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+    }
+    
+    @EventPattern("item-deleted")
+    async handleItemDeleted(event:any){
+        this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)
+        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+    }
+
+    @EventPattern("item-quantity-decreased")
+    async handleItemQuantityDecreased(event:any){
+        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
+        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+
     }
 }
