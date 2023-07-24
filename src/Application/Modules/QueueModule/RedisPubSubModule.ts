@@ -1,7 +1,7 @@
 import { Redis } from 'ioredis';
 import { Module } from "@nestjs/common";
 import RedisPubSub from "../../../Infrastructure/Queue/RedisPubSub";
-import MessageQueue from '../../../Infrastructure/Queue/MessageQueue';
+import MessageQueue from '../../../Core/Interfaces/MessageQueue';
 
 @Module({
     providers: [{
