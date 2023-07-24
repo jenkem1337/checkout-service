@@ -20,13 +20,16 @@ import ItemQuantityIncreasedEventHandler from 'src/Core/Services/Events/EventHan
 import TakeOutAnItemFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutAnItemFromCheckoutCommandHandler';
 import AnItemDeletedEventHandler from 'src/Core/Services/Events/EventHandlers/AnItemDeletedEventHandler';
 import ItemDeletedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemDeletedEventHandler';
+import TakeOutOneMoreThanItemCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutOneMoreThanItemCommandHandler';
+import ItemQuantityDecreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityDecreasedEventHandler';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
     CreateCheckoutCommandHandler,
     CancelCheckoutCommandHandler,
-    TakeOutAnItemFromCheckoutCommandHandler
+    TakeOutAnItemFromCheckoutCommandHandler,
+    TakeOutOneMoreThanItemCommandHandler,
 ]
 const QueryHandlers = [
     FindCheckoutByUuidAndCustomerUuidQueryHandler
@@ -37,7 +40,8 @@ const EventHandlers = [
     AnCheckoutItemAddedEventHandler,
     ItemQuantityIncreasedEventHandler,
     AnItemDeletedEventHandler,
-    ItemDeletedEventHandler
+    ItemDeletedEventHandler,
+    ItemQuantityDecreasedEventHandler
 ]
 @Module({
     imports: [
