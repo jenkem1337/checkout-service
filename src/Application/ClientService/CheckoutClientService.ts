@@ -3,6 +3,7 @@ import { ClientProxy } from "@nestjs/microservices";
 import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto";
 import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
 import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
+import DeleteItemOneMoreThanDto from "../ClientController/DTOs/DeleteItemOneMoreThanDto";
 
 @Injectable()
 export default class CheckoutClientService {
@@ -19,6 +20,9 @@ export default class CheckoutClientService {
     }
     deleteAnItemFromCheckout(dto: DeleteAnItemDto){
         return this.client.send({cmd: "delete-an-item"}, dto)
+    }
+    deleteItemOneMoreThan(dto: DeleteItemOneMoreThanDto){
+        return this.client.send({cmd: "delete-item-one-more-than"}, dto)
     }
     createCheckout(customerUuid:string){
         return this.client.send({cmd: "create_checkout"}, customerUuid)

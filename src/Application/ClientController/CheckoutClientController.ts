@@ -7,6 +7,8 @@ import RedisPubSub from "src/Infrastructure/Queue/RedisPubSub";
 import AddAnCheckoutItemDto from './DTOs/AddAnCheckoutItemDto';
 import AddOneMoreThanItemDto from './DTOs/AddOneMoreThanItemDto';
 import DeleteAnItemDto from './DTOs/DeleteAnItemDto';
+import DeleteItemOneMoreThanDto from './DTOs/DeleteItemOneMoreThanDto';
+import { Not } from 'typeorm';
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -89,7 +91,7 @@ export default class CheckoutClientController {
         map(result => {
           switch(result.type){
             case "ERROR": 
-                  throw new BadRequestException({"error_message": result.result});
+                  throw new NotFoundException({"error_message": result.result});
             case "SUCCESS": 
                   return result.result;
           }
@@ -106,7 +108,7 @@ export default class CheckoutClientController {
                             map(result => {
                               switch(result.type){
                                 case "ERROR": 
-                                      throw new BadRequestException({"error_message": result.result});
+                                      throw new NotFoundException({"error_message": result.result});
                                 case "SUCCESS": 
                                       return result.result;
                               }
@@ -117,9 +119,23 @@ export default class CheckoutClientController {
     
     //@Delete("/same-items")
     //async deleteAllSameItemsFromCheckoutByUuid(){}
-//
-    //@Delete("/items")
-    //async deleteItemsOneMoreThanFromCheckoutByUuid(){}
-//
+
+    @UseGuards(JwtAuthGuard)
+    @Delete("/items")
+    async deleteItemsOneMoreThanFromCheckoutByUuid(@Body() dto: DeleteItemOneMoreThanDto, @Request() req:any){
+      dto.customerUuid = req.user.customerUUID
+      return await firstValueFrom(this.checkoutService.deleteItemOneMoreThan(dto)
+                            .pipe(
+                              map(result => {
+                                switch(result.type){
+                                  case "ERROR": 
+                                        throw new NotFoundException({"error_message": result.result});
+                                  case "SUCCESS": 
+                                        return result.result;
+                                }
+                              })
+                            ))
+
+    }
 
 }
