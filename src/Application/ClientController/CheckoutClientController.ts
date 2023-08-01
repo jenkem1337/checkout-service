@@ -9,6 +9,7 @@ import AddOneMoreThanItemDto from './DTOs/AddOneMoreThanItemDto';
 import DeleteAnItemDto from './DTOs/DeleteAnItemDto';
 import DeleteItemOneMoreThanDto from './DTOs/DeleteItemOneMoreThanDto';
 import { Not } from 'typeorm';
+import DeleteSameItemsDto from './DTOs/DeleteSameItems';
 
 @Controller("/checkout")
 export default class CheckoutClientController {
@@ -117,8 +118,23 @@ export default class CheckoutClientController {
 
     }  
     
-    //@Delete("/same-items")
-    //async deleteAllSameItemsFromCheckoutByUuid(){}
+    @UseGuards(JwtAuthGuard)
+    @Delete("/same-items")
+    async deleteAllSameItemsFromCheckoutByUuid(@Body() dto:DeleteSameItemsDto, @Request() req:any){
+      dto.customerUuid = req.user.customerUUID
+      return await firstValueFrom(this.checkoutService.deleteSameItems(dto)
+                            .pipe(
+                              map(result => {
+                                switch(result.type){
+                                  case "ERROR": 
+                                        throw new NotFoundException({"error_message": result.result});
+                                  case "SUCCESS": 
+                                        return result.result;
+                                }
+                              })
+                            ))
+
+    }
 
     @UseGuards(JwtAuthGuard)
     @Delete("/items")

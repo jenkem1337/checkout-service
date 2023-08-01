@@ -13,6 +13,8 @@ import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
 import TakeOutAnItemCommand from "src/Core/Services/Commands/Command/TakeOutAnItemCommand";
 import DeleteItemOneMoreThanDto from '../ClientController/DTOs/DeleteItemOneMoreThanDto';
 import TakeOutOneMoreThanItemCommand from "src/Core/Services/Commands/Command/TakeOutOneMoreThanItemCommand";
+import DeleteSameItemsDto from "../ClientController/DTOs/DeleteSameItems";
+import TakeOutSameItemsCommand from "src/Core/Services/Commands/Command/TakeOutSameItemCommand";
 
 @Controller()
 export default class CheckoutServiceController {
@@ -80,6 +82,17 @@ export default class CheckoutServiceController {
                 dto.checkoutItemUuid,
                 dto.customerUuid,
                 dto.quantity
+            )
+        ))
+    }
+    
+    @MessagePattern({cmd: "delete-same-items"})
+    async deleteSameItems(@Payload() dto: DeleteSameItemsDto){
+        return await this.commandBus.execute(new TransactionalCommand(
+            new TakeOutSameItemsCommand(
+                dto.checkoutItemUuid,
+                dto.checkoutUuid,
+                dto.customerUuid
             )
         ))
     }

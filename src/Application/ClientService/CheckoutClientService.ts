@@ -4,6 +4,7 @@ import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto"
 import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
 import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
 import DeleteItemOneMoreThanDto from "../ClientController/DTOs/DeleteItemOneMoreThanDto";
+import DeleteSameItemsDto from "../ClientController/DTOs/DeleteSameItems";
 
 @Injectable()
 export default class CheckoutClientService {
@@ -23,6 +24,9 @@ export default class CheckoutClientService {
     }
     deleteItemOneMoreThan(dto: DeleteItemOneMoreThanDto){
         return this.client.send({cmd: "delete-item-one-more-than"}, dto)
+    }
+    deleteSameItems(dto:DeleteSameItemsDto) {
+        return this.client.send({cmd:"delete-same-items"}, dto)
     }
     createCheckout(customerUuid:string){
         return this.client.send({cmd: "create_checkout"}, customerUuid)
