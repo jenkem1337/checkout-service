@@ -22,6 +22,7 @@ import AnItemDeletedEventHandler from 'src/Core/Services/Events/EventHandlers/An
 import ItemDeletedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemDeletedEventHandler';
 import TakeOutOneMoreThanItemCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutOneMoreThanItemCommandHandler';
 import ItemQuantityDecreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityDecreasedEventHandler';
+import TakeOutSameItemsFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutSameItemsFromCheckoutCommandHandler';
 const CommandHandlers = [ 
     TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
@@ -30,6 +31,7 @@ const CommandHandlers = [
     CancelCheckoutCommandHandler,
     TakeOutAnItemFromCheckoutCommandHandler,
     TakeOutOneMoreThanItemCommandHandler,
+    TakeOutSameItemsFromCheckoutCommandHandler
 ]
 const QueryHandlers = [
     FindCheckoutByUuidAndCustomerUuidQueryHandler
