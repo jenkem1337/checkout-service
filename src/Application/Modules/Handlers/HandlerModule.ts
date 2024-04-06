@@ -5,7 +5,6 @@ import AddAnItemToCartCommadHandler from '../../../Core/Services/Commands/Comman
 import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
 import DomainModelFactoryModule from '../DomainModelFactoryModule';
 import { CheckoutSagas } from '../../../Core/Services/Sagas/CheckoutSagas';
-import TransactionalCommandHandler from '../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
 import PostGreDataSourceModule from '../DatabaseConnectionModule/PostGreDataSourceModule';
 import CreateCheckoutCommandHandler from '../../../Core/Services/Commands/CommandHandlers/CreateCheckoutCommandHandler';
 import CheckoutCreatedEventHandler from '../../../Core/Services/Events/EventHandlers/CheckoutCreatedEventHandler';
@@ -23,8 +22,10 @@ import ItemDeletedEventHandler from 'src/Core/Services/Events/EventHandlers/Item
 import TakeOutOneMoreThanItemCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutOneMoreThanItemCommandHandler';
 import ItemQuantityDecreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityDecreasedEventHandler';
 import TakeOutSameItemsFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutSameItemsFromCheckoutCommandHandler';
+import WriteRepositoryFactoryModule from '../RepositoryModule/WriteCheckoutRepositoryFactory';
+import TransactionManagerFactoryModule from '../RepositoryModule/TransactionManagerFactoryModule';
+import { ClsModule } from 'nestjs-cls';
 const CommandHandlers = [ 
-    TransactionalCommandHandler,
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
     CreateCheckoutCommandHandler,
@@ -49,7 +50,8 @@ const EventHandlers = [
     imports: [
         RedisPubSubModule,
         PostGreDataSourceModule,
-        WriteRepositoryModule, 
+        WriteRepositoryFactoryModule,
+        TransactionManagerFactoryModule,
         ReadRepositoryModule,
         DomainModelFactoryModule, 
         CqrsModule,
