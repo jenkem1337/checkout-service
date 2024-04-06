@@ -7,17 +7,19 @@ import CheckoutItemID from "src/Core/Models/ValueObjects/CheckoutItemID";
 import Checkout from "src/Core/Models/Domain Models/Checkout/Checkout";
 import SuccessResult from "src/Core/Models/Result/SuccsessResult";
 import TakeOutSameItemsCommand from "../Command/TakeOutSameItemCommand";
+import ICheckoutRepositoryFactory from "src/Core/Interfaces/ICheckoutRepositoryFactory";
 
 @CommandHandler(TakeOutSameItemsCommand)
 export default class TakeOutSameItemsFromCheckoutCommandHandler implements ICommandHandler<TakeOutSameItemsCommand, Result<object>> {
     constructor(
-        @Inject("CheckoutRepository") 
-        private readonly checkoutWriteRepository: CheckoutRepository,
+        @Inject("CheckoutRepositoryFactory") 
+        private readonly checkoutRepositoryFactory: ICheckoutRepositoryFactory,
         private readonly eventPublisher: EventPublisher,
     ){}
 
     async execute(command: TakeOutSameItemsCommand): Promise<Result<object>> {
-        const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
+        const checkoutRepository = this.checkoutRepositoryFactory.createCheckoutRepository()
+        const checkoutDomainModel = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
         checkoutDomainModel.isCheckoutCancelled()
@@ -26,7 +28,7 @@ export default class TakeOutSameItemsFromCheckoutCommandHandler implements IComm
             new CheckoutItemID(command.checkoutItemUuid),
         )
         
-        await this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        await checkoutRepository.saveChanges(checkoutDomainModel as Checkout)
         this.eventPublisher.mergeObjectContext(checkoutDomainModel as  Checkout).commit()
 
         return new SuccessResult({

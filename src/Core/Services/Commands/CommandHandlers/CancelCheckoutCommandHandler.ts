@@ -6,17 +6,18 @@ import CheckoutRepository from "src/Core/Interfaces/CheckoutRepository";
 import SuccessResult from '../../../../Core/Models/Result/SuccsessResult';
 import CheckoutNotFound from "src/Core/Exceptions/CheckoutNotFound";
 import Checkout from "src/Core/Models/Domain Models/Checkout/Checkout";
-import { check } from "prettier";
+import ICheckoutRepositoryFactory from "src/Core/Interfaces/ICheckoutRepositoryFactory";
 
 @CommandHandler(CancelCheckoutCommand)
 export default class CancelCheckoutCommandHandler implements ICommandHandler<CancelCheckoutCommand, Result<object>>{
     constructor(
-        @Inject("CheckoutRepository")
-        private readonly checkoutRepository: CheckoutRepository,
+        @Inject("CheckoutRepositoryFactory")
+        private readonly checkoutRepositoryFactory: ICheckoutRepositoryFactory,
         private readonly eventPublisher: EventPublisher
     ){}
     async execute(command: CancelCheckoutCommand): Promise<Result<object>> {
-        const checkout = await this.checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
+        const checkoutRepository = this.checkoutRepositoryFactory.createCheckoutRepository()
+        const checkout = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkout.isNull()) throw new CheckoutNotFound()
         checkout.isCheckoutCancelled()
@@ -25,7 +26,7 @@ export default class CancelCheckoutCommandHandler implements ICommandHandler<Can
         
         publishableCheckout.cancelThisCheckout()
         
-        this.checkoutRepository.saveChanges(publishableCheckout)
+        await checkoutRepository.saveChanges(publishableCheckout)
         
         publishableCheckout.commit()
         return new SuccessResult({message: "Checkout successfully cancelled."});

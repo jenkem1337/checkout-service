@@ -8,20 +8,22 @@ import Checkout from '../../../../Core/Models/Domain Models/Checkout/Checkout';
 import { IDomainModelFactoryContext } from '../../../Models/Factories/DomainModelFactoryContext';
 import CheckoutNotFound from '../../../../Core/Exceptions/CheckoutNotFound';
 import SuccessResult from 'src/Core/Models/Result/SuccsessResult';
+import ICheckoutRepositoryFactory from 'src/Core/Interfaces/ICheckoutRepositoryFactory';
 
 @CommandHandler(AddItemOneMoreThanCommand)
 export default class AddItemOneMoreThanCommandHandler implements ICommandHandler<AddItemOneMoreThanCommand> {
     
     constructor(
-        @Inject("CheckoutRepository") 
-        private readonly checkoutWriteRepository: CheckoutRepository,
-        @Inject("DomainModelFactoryContext")
-        private readonly domainModelFactoryContext: IDomainModelFactoryContext,
+        @Inject("CheckoutRepositoryFactory") 
+        private readonly checkoutRepositoryFactory: ICheckoutRepositoryFactory,
         private readonly eventPublisher: EventPublisher,
         ){
     }
     async execute(command: AddItemOneMoreThanCommand): Promise<any> {
-        const checkoutDomainModel = await this.checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
+        const checkoutWriteRepository = this.checkoutRepositoryFactory.createCheckoutRepository()
+        
+        const checkoutDomainModel = await checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
+        
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
         
         checkoutDomainModel.isCheckoutCancelled()
@@ -31,8 +33,10 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
             new ProductQuantity(command.quantity)
         )
         
-        this.checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        await checkoutWriteRepository.saveChanges(checkoutDomainModel as Checkout)
+        
         this.eventPublisher.mergeObjectContext(checkoutDomainModel as Checkout).commit()
+        
         return new SuccessResult({
             checkout_item_uuid: command.checkoutItemUuid,
             checkout_quantity: command.quantity

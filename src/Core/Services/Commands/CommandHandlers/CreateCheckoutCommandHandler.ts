@@ -8,24 +8,27 @@ import CheckoutConstructorParamaters from "../../../../Core/Models/Factories/Che
 import Checkout from '../../../Models/Domain Models/Checkout/Checkout';
 import SuccessResult from '../../../Models/Result/SuccsessResult';
 import CheckoutUuidResult from '../../../Models/Result/AbstractResultTypes/CheckoutUuidResult';
+import ICheckoutRepositoryFactory from "src/Core/Interfaces/ICheckoutRepositoryFactory";
 
 @CommandHandler(CreateCheckoutCommand)
 export default class CreateCheckoutCommandHandler implements ICommandHandler<CreateCheckoutCommand> {
     constructor(
-        @Inject("CheckoutRepository")
-        private readonly checkoutWriteRepository: CheckoutRepository,
+        @Inject("CheckoutRepositoryFactory")
+        private readonly checkoutRepositoryFactory: ICheckoutRepositoryFactory,
         @Inject("DomainModelFactoryContext")
         private readonly domainFactoryContext: IDomainModelFactoryContext,
         private readonly eventPublisher: EventPublisher
     ){}
     
     async execute(command: CreateCheckoutCommand): Promise<any> {
+        const checkoutRepository = this.checkoutRepositoryFactory.createCheckoutRepository()
+        
         const checkoutDomainModel = this.domainFactoryContext.setFactoryMethod(CreateCheckoutWithCheckoutCreatedEventFactory.name)
                                                             .createInstance<Checkout, CheckoutConstructorParamaters>({
                                                                 userUuid: command.customerUuid
                                                             })
         
-        this.checkoutWriteRepository.saveChanges(checkoutDomainModel)
+        await checkoutRepository.saveChanges(checkoutDomainModel)
         
         this.eventPublisher.mergeObjectContext(checkoutDomainModel).commit()
         
