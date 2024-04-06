@@ -19,8 +19,6 @@ import NullableCheckoutItemFactory from '../../../../Core/Models/Factories/Check
 import ConcreateAllArgumentCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreateAllArgumentCheckoutFactory';
 import { CheckoutStates } from '../../../../Core/Models/ValueObjects/CheckoutState';
 import NullableAllArgumentCheckoutFactory from '../../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
-import TransactionalCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
-import TransactionalCommand from '../../../../Core/Services/Commands/Command/TransactionalCommand';
 describe("AddAnItemToCartCommandHandler", () => {
     let commandBus: CommandBus
     let repository: CheckoutRepositoryImpl
@@ -29,7 +27,6 @@ describe("AddAnItemToCartCommandHandler", () => {
         const moduleRef = await Test.createTestingModule({
             imports: [CqrsModule],
             providers: [
-                TransactionalCommandHandler,
                 AddAnItemToCartCommandHandler,
                 {
                     provide:"DomainModelFactoryContext",
@@ -81,7 +78,7 @@ describe("AddAnItemToCartCommandHandler", () => {
         factoryCtx = moduleRef.get("DomainModelFactoryContext")
 
         commandBus.register([
-            AddAnItemToCartCommandHandler, TransactionalCommandHandler
+            AddAnItemToCartCommandHandler
         ])
     })
 
@@ -127,7 +124,7 @@ describe("AddAnItemToCartCommandHandler", () => {
                                                 subTotal: 0,
                                                 updatedAt: new Date
                                             }))
-        await commandBus.execute(new TransactionalCommand<AddAnItemCommand>(
+        await commandBus.execute((
             new AddAnItemCommand(checkoutUuid, customerUuid, itemUuid, randomUUID())))
             
             let _checkout = await repository.findOneByUuidAndCustomerUuid(checkoutUuid, customerUuid)

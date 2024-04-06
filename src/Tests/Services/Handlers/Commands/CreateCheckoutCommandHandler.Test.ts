@@ -3,7 +3,6 @@ import CheckoutRepositoryImpl from '../../../../Infrastructure/Repository/Checko
 import { IDomainModelFactoryContext } from '../../../../Core/Models/Factories/DomainModelFactoryContext';
 import { Test } from "@nestjs/testing";
 import CreateCheckoutCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/CreateCheckoutCommandHandler';
-import TransactionalCommandHandler from '../../../../Core/Services/Commands/CommandHandlers/TransactionalCommandHandler';
 import DomainModelFactoryContext from '../../../../Core/Models/Factories/DomainModelFactoryContext';
 import NullableCheckoutFactory from '../../../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
 import ConcreteCheckoutFactory from '../../../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
@@ -31,7 +30,6 @@ describe("AddAnItemToCartCommandHandler", () => {
         const moduleRef = await Test.createTestingModule({
             imports: [CqrsModule],
             providers: [
-                TransactionalCommandHandler,
                 CreateCheckoutCommandHandler,
                 {
                     provide:"DomainModelFactoryContext",
@@ -86,7 +84,7 @@ describe("AddAnItemToCartCommandHandler", () => {
         cmdH = moduleRef.get(CreateCheckoutCommandHandler)
 
         commandBus.register([
-            CreateCheckoutCommandHandler, TransactionalCommandHandler
+            CreateCheckoutCommandHandler
         ])
     })
 
