@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import CheckoutDataMapper from "../../../Infrastructure/Entity/CheckoutDataMapper";
-import CheckoutItemDataMapper from "src/Infrastructure/Entity/CheckoutItemDataMapper";
+import CheckoutItemDataMapper from "../../../Infrastructure/Entity/CheckoutItemDataMapper";
 import { DataSource } from "typeorm";
 
 @Module({
@@ -20,7 +20,7 @@ import { DataSource } from "typeorm";
             synchronize:true
           });
     
-          return dataSource.initialize();
+          return await dataSource.initialize();
         },
     }],
     exports:["DataSource"]
