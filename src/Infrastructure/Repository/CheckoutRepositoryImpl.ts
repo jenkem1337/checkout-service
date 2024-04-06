@@ -1,6 +1,5 @@
 import Checkout from '../../Core/Models/Domain Models/Checkout/Checkout';
-import { DataSource } from 'typeorm';
-import { Inject, Injectable } from '@nestjs/common';
+import { EntityManager, QueryRunner } from 'typeorm';
 import CheckoutRepository from '../../Core/Interfaces/CheckoutRepository';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import CheckoutDataMapper from '../Entity/CheckoutDataMapper';
@@ -8,29 +7,24 @@ import CheckoutAggregateMapperContext from './Mapper/CheckoutAggregateMapperCont
 import CheckoutAggregateMapperStrategy from '../../Core/Interfaces/CheckoutAggregateStrategy';
 import CheckoutItemDataMapper from '../Entity/CheckoutItemDataMapper';
 
-@Injectable()
 export default class CheckoutRepositoryImpl implements CheckoutRepository{
+        
+    private readonly objectMapper: CheckoutAggregateMapperStrategy<CheckoutDataMapper>
     
-    private readonly objectMapperContext: CheckoutAggregateMapperContext
-    
-    private objectMapper: CheckoutAggregateMapperStrategy<CheckoutDataMapper>
-    
-    private readonly dataSoruce:DataSource
     constructor(
-        @Inject("DataSource") dataSource:DataSource,
-        @Inject(CheckoutAggregateMapperContext.name) objectMapperContext:CheckoutAggregateMapperContext
+        private readonly entityManager:EntityManager,
+        objectMapperContext:CheckoutAggregateMapperContext
     ){
-        this.dataSoruce = dataSource
-        this.objectMapperContext = objectMapperContext
-        this.objectMapper = this.objectMapperContext.getMapperStrategy();
+        this.objectMapper = objectMapperContext.getMapperStrategy();
     }
+    
     async saveChanges(checkout: Checkout): Promise<void> {
         const checkoutDataMapper = this.objectMapper.fromAggregateToDataMapper(checkout)
-        await this.dataSoruce.manager.save(checkoutDataMapper)
+        await this.entityManager.save(checkoutDataMapper)
     }
-    async removeCheckoutItemByUuid(uuid:string) {
-        await this.dataSoruce.manager.remove(
-            await this.dataSoruce.manager.findOne(CheckoutItemDataMapper, {
+    async removeCheckoutItemByUuid(uuid:string, queryRunner?:QueryRunner) {
+        await this.entityManager.remove(
+            await this.entityManager.findOne(CheckoutItemDataMapper, {
                 where: {
                     uuid: uuid
                 }
@@ -38,7 +32,8 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
         )
     }
     async findOneByUuidAndCustomerUuid(uuid: string, customerUuid: string): Promise<CheckoutInterface> {
-        const _checkoutDataMapper = await this.dataSoruce.manager.findOne(CheckoutDataMapper, {
+        
+        const _checkoutDataMapper = await this.entityManager.findOne(CheckoutDataMapper,{
             relations: {
                 checkoutItems:true
             },
@@ -53,7 +48,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
     }
     async findManyByCustomerUuid(custormerUuid: string): Promise<CheckoutInterface[]> {
         
-        const _checkoutDataMapper = await this.dataSoruce.manager.find(CheckoutDataMapper, {
+        const _checkoutDataMapper = await this.entityManager.find(CheckoutDataMapper,{
             relations: {
                 checkoutItems:true
             },
@@ -66,7 +61,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
 
     }
     async findOneByUuid(_uuid: string): Promise<CheckoutInterface> {
-        const _checkoutDataMapper = await this.dataSoruce.manager.findOne(CheckoutDataMapper, {
+        const _checkoutDataMapper = await this.entityManager.findOne(CheckoutDataMapper, {
             relations: {
                 checkoutItems:true
             },
@@ -77,7 +72,7 @@ export default class CheckoutRepositoryImpl implements CheckoutRepository{
         return this.objectMapper.fromDataMapperToAggregate(_checkoutDataMapper)
     }
     async findManyByUuid(uuid: string): Promise<Array<CheckoutInterface>> {
-        const _checkoutDataMapper = await this.dataSoruce.manager.find(CheckoutDataMapper, {
+        const _checkoutDataMapper = await this.entityManager.find(CheckoutDataMapper,{
             relations: {
                 checkoutItems:true
             },
