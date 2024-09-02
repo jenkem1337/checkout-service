@@ -7,7 +7,7 @@ import DeleteItemOneMoreThanDto from './DTOs/DeleteItemOneMoreThanDto';
 import DeleteSameItemsDto from './DTOs/DeleteSameItems';
 import CheckoutService from '../Service/CheckoutService';
 
-@Controller("checkout")
+@Controller("/v1/api/checkout")
 export default class CheckoutController {
     constructor(
         private readonly checkoutService:CheckoutService,
@@ -34,12 +34,6 @@ export default class CheckoutController {
 
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get("/:checkout_uuid")
-    async getAnCheckoutByUuidAndCustomerUuid(@Request() req:any, @Param("checkout_uuid") checkoutUuid: string){
-      return await this.checkoutService.findAnCheckoutByUuidAndCustomerUuid(checkoutUuid, req.user.customerUUID as string)
-
-    }
     @UseGuards(JwtAuthGuard)
     @Post("/cancel/:checkout_uuid")
     async cancelCheckout(@Request() req:any, @Param("checkout_uuid") checkoutUuid:string){
