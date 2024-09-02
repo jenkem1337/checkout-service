@@ -10,7 +10,7 @@ export default class ItemDeletedEventHandler implements IEventHandler<ItemDelete
         @Inject("CHECKOUT_PROJECTION_SERVICE")
         private readonly checkoutProjectionClient:ClientProxy,
         @Inject("CheckoutRepositoryFactory")
-        private readonly checkoutRepository:ICheckoutRepositoryFactory
+        private readonly checkoutRepository:ICheckoutRepositoryFactory,
     ){}
 
     handle(event: ItemDeleted) {

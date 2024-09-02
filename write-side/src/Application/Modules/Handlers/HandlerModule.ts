@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CqrsModule, ICommandHandler } from '@nestjs/cqrs';
-import WriteRepositoryModule from '../RepositoryModule/WriteRepositoryModule';
+import { CqrsModule } from '@nestjs/cqrs';
 import AddAnItemToCartCommadHandler from '../../../Core/Services/Commands/CommandHandlers/AddAnItemToCartCommandHandler';
 import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
 import DomainModelFactoryModule from '../DomainModelFactoryModule';
@@ -23,8 +22,7 @@ import TakeOutOneMoreThanItemCommandHandler from 'src/Core/Services/Commands/Com
 import ItemQuantityDecreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityDecreasedEventHandler';
 import TakeOutSameItemsFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutSameItemsFromCheckoutCommandHandler';
 import WriteRepositoryFactoryModule from '../RepositoryModule/WriteCheckoutRepositoryFactory';
-import TransactionManagerFactoryModule from '../RepositoryModule/TransactionManagerFactoryModule';
-import { ClsModule } from 'nestjs-cls';
+import { AlsModule } from '../AlsModule';
 const CommandHandlers = [ 
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
@@ -48,10 +46,10 @@ const EventHandlers = [
 ]
 @Module({
     imports: [
+        AlsModule,
         RedisPubSubModule,
         PostGreDataSourceModule,
         WriteRepositoryFactoryModule,
-        TransactionManagerFactoryModule,
         ReadRepositoryModule,
         DomainModelFactoryModule, 
         CqrsModule,

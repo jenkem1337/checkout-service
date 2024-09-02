@@ -1,19 +1,19 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import CheckoutClientController from '../../ClientController/CheckoutClientController';
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import JwtStrategy from '../../Auth/JwtAuthPassport';
 import { CqrsModule } from "@nestjs/cqrs";
 import HandlerModule from "../Handlers/HandlerModule";
-import CheckoutService from "../../Service/CheckoutClientService";
+import CheckoutService from "../../Service/CheckoutService";
 import { AlsModule } from "../AlsModule";
 import { AsyncLocalStorage } from "async_hooks";
 import { QueryRunner } from "typeorm";
-import TransactionManagerFactoryModule from "../RepositoryModule/TransactionManagerFactoryModule";
+import TransactionManagerFactoryModule from "../RepositoryModule/TransactionManagerModule";
+import CheckoutController from "../../ClientController/CheckoutController";
 
 
 @Module({
-    controllers:[CheckoutClientController],
+    controllers:[CheckoutController],
     providers: [CheckoutService, JwtStrategy],
     imports:[
         JwtModule.register({secret: "$2y$10$YZM.npx0LPKqbmQjzWNTWeqX06MUkm6wtsS2jxdDtasWWXFzNhuES"}),
@@ -21,7 +21,7 @@ import TransactionManagerFactoryModule from "../RepositoryModule/TransactionMana
         HandlerModule, 
         CqrsModule,
         AlsModule,
-        TransactionManagerFactoryModule
+        TransactionManagerFactoryModule,
     ]
 })
 export default class CheckoutClientModule implements NestModule{

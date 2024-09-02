@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Scope } from "@nestjs/common";
 import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto";
 import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
 import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
@@ -13,20 +13,18 @@ import CreateCheckoutCommand from "src/Core/Services/Commands/Command/CreateChec
 import CheckoutByUuidAndCustomerUuidQuery from "src/Core/Services/Queries/Query/CheckoutByUuidAndCustomerUuidQuery";
 import CancelCheckoutCommand from "src/Core/Services/Commands/Command/CancelCheckoutCommand";
 import AddAnItemCommand from "src/Core/Services/Commands/Command/AddAnItemCommand";
-import ITransactionManagerFactory from "src/Core/Interfaces/ITransactionManagerFactory";
+import ITransactionManager from "src/Core/Interfaces/ITransactionManager";
 
-@Injectable()
+@Injectable({scope:Scope.TRANSIENT})
 export default class CheckoutService {
     constructor(
-        @Inject("TransactionManagerFactory")
-        private readonly transactionManagerFactory:ITransactionManagerFactory,
+        @Inject("TransactionManager")
+        private readonly transactionManager:ITransactionManager,
         private readonly commandBus:CommandBus,
-        private readonly queryBus:QueryBus
+        private readonly queryBus:QueryBus,
     ){}
-
     async addAnItemToCheckout(dto: AddAnCheckoutItemDto){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new AddAnItemCommand(
                     dto.checkoutUuid,
@@ -39,8 +37,7 @@ export default class CheckoutService {
         })
     }
     async addOneMoreThanItemToCheckout(dto:AddOneMoreThanItemDto){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new AddItemOneMoreThanCommand(
                     dto.checkoutUuid,
@@ -53,8 +50,7 @@ export default class CheckoutService {
         })
     }
     async deleteAnItemFromCheckout(dto: DeleteAnItemDto){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new TakeOutAnItemCommand(dto.checkoutUuid, dto.checkoutItemUuid, dto.customerUuid)
             )
@@ -62,8 +58,7 @@ export default class CheckoutService {
         })
     }
     async deleteItemOneMoreThan(dto: DeleteItemOneMoreThanDto){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new TakeOutOneMoreThanItemCommand(
                     dto.checkoutUuid,
@@ -76,8 +71,7 @@ export default class CheckoutService {
         })
     }
     async deleteSameItems(dto:DeleteSameItemsDto) {
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new TakeOutSameItemsCommand(
                     dto.checkoutItemUuid,
@@ -89,8 +83,7 @@ export default class CheckoutService {
         })
     }
     async createCheckout(customerUuid:string){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new CreateCheckoutCommand(customerUuid)
             )
@@ -106,8 +99,7 @@ export default class CheckoutService {
     }
 
     async cancelCheckout(checkoutUuid:string, customerUuid:string){
-        const tx = await this.transactionManagerFactory.createTransactionFactory()
-        return await tx.startTransaction(async () => {
+        return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new CancelCheckoutCommand(checkoutUuid, customerUuid)
             )
