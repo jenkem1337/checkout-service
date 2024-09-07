@@ -10,10 +10,11 @@ import TakeOutAnItemCommand from "src/Core/Services/Commands/Command/TakeOutAnIt
 import TakeOutOneMoreThanItemCommand from "src/Core/Services/Commands/Command/TakeOutOneMoreThanItemCommand";
 import TakeOutSameItemsCommand from "src/Core/Services/Commands/Command/TakeOutSameItemCommand";
 import CreateCheckoutCommand from "src/Core/Services/Commands/Command/CreateCheckoutCommand";
-import CheckoutByUuidAndCustomerUuidQuery from "src/Core/Services/Queries/Query/CheckoutByUuidAndCustomerUuidQuery";
 import CancelCheckoutCommand from "src/Core/Services/Commands/Command/CancelCheckoutCommand";
 import AddAnItemCommand from "src/Core/Services/Commands/Command/AddAnItemCommand";
 import ITransactionManager from "src/Core/Interfaces/ITransactionManager";
+import { HttpService } from "@nestjs/axios";
+import ProductNotFound from "src/Core/Exceptions/ProductNotFound";
 
 @Injectable({scope:Scope.TRANSIENT})
 export default class CheckoutService {
@@ -21,9 +22,16 @@ export default class CheckoutService {
         @Inject("TransactionManager")
         private readonly transactionManager:ITransactionManager,
         private readonly commandBus:CommandBus,
-        private readonly queryBus:QueryBus,
+        private readonly httpService:HttpService
     ){}
     async addAnItemToCheckout(dto: AddAnCheckoutItemDto){
+        const anProductFromProductService = await this.httpService.axiosRef.get(`http://localhost:80/products/${dto.productUuid}`)
+        console.log(anProductFromProductService.data)
+        
+        if ((anProductFromProductService.data.error_message !== null) && (anProductFromProductService.data.error_message !== undefined)) {
+            throw new ProductNotFound(dto.productUuid)
+        }
+        
         return await this.transactionManager.startTransaction(async () => {
             return await this.commandBus.execute(
                 new AddAnItemCommand(
@@ -31,7 +39,9 @@ export default class CheckoutService {
                     dto.customerUuid,
                     dto.checkoutItemUuid,
                     dto.productUuid,    
-                    dto.quantity
+                    dto.quantity,
+                    anProductFromProductService.data.price,
+                    anProductFromProductService.data.header
                 )
             )
         })
@@ -89,13 +99,6 @@ export default class CheckoutService {
             )
     
         })
-}
-
-    async findAnCheckoutByUuidAndCustomerUuid(checkoutUuid:string, customerUuid:string){
-
-        return await this.queryBus.execute(
-            new CheckoutByUuidAndCustomerUuidQuery(checkoutUuid, customerUuid)
-        )
     }
 
     async cancelCheckout(checkoutUuid:string, customerUuid:string){
