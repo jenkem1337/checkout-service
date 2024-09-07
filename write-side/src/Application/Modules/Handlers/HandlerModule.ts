@@ -3,16 +3,12 @@ import { CqrsModule } from '@nestjs/cqrs';
 import AddAnItemToCartCommadHandler from '../../../Core/Services/Commands/CommandHandlers/AddAnItemToCartCommandHandler';
 import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
 import DomainModelFactoryModule from '../DomainModelFactoryModule';
-import { CheckoutSagas } from '../../../Core/Services/Sagas/CheckoutSagas';
 import PostGreDataSourceModule from '../DatabaseConnectionModule/PostGreDataSourceModule';
 import CreateCheckoutCommandHandler from '../../../Core/Services/Commands/CommandHandlers/CreateCheckoutCommandHandler';
 import CheckoutCreatedEventHandler from '../../../Core/Services/Events/EventHandlers/CheckoutCreatedEventHandler';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import FindCheckoutByUuidAndCustomerUuidQueryHandler from 'src/Core/Services/Queries/QueryHandlers/FindCheckoutByUuidAndCustomerQueryHandler';
-import ReadRepositoryModule from '../RepositoryModule/ReadRepositoryModule';
 import CheckoutCancelledEventHandler from 'src/Core/Services/Events/EventHandlers/CheckoutCancelledEventHandler';
 import CancelCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CancelCheckoutCommandHandler';
-import RedisPubSubModule from '../QueueModule/RedisPubSubModule';
 import AnCheckoutItemAddedEventHandler from 'src/Core/Services/Events/EventHandlers/AnCheckoutItemAddedEventHandler';
 import ItemQuantityIncreasedEventHandler from 'src/Core/Services/Events/EventHandlers/ItemQuantityIncreasedEventHandler';
 import TakeOutAnItemFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutAnItemFromCheckoutCommandHandler';
@@ -32,9 +28,6 @@ const CommandHandlers = [
     TakeOutOneMoreThanItemCommandHandler,
     TakeOutSameItemsFromCheckoutCommandHandler
 ]
-const QueryHandlers = [
-    FindCheckoutByUuidAndCustomerUuidQueryHandler
-]
 const EventHandlers = [
     CheckoutCreatedEventHandler,
     CheckoutCancelledEventHandler,
@@ -47,26 +40,21 @@ const EventHandlers = [
 @Module({
     imports: [
         AlsModule,
-        RedisPubSubModule,
         PostGreDataSourceModule,
         WriteRepositoryFactoryModule,
-        ReadRepositoryModule,
         DomainModelFactoryModule, 
         CqrsModule,
         ClientsModule.register([{
             name:"CHECKOUT_PROJECTION_SERVICE",
             transport:Transport.REDIS,
             options: {
-                host:"localhost",
-                port:6379
-            }
-            }])
-    
+                host: process.env.MESSAGE_QUEUE_HOST,
+                port: 6379,
+              },
+        }])
     ],
     providers: [
-        CheckoutSagas,
         ...CommandHandlers,
-        ...QueryHandlers,
         ...EventHandlers
     ]
 })
