@@ -9,11 +9,11 @@ import { DataSource } from "typeorm";
         useFactory: async () => {
           const dataSource = new DataSource({
             type: 'postgres',
-            host: 'localhost',
-            port: 5432,
-            username: 'postgres',
-            password: 'admin',
-            database: 'checkout_service_write_db',
+            host: process.env.POSTGRES_HOST,
+            port: new Number(process.env.POSTGRES_PORT).valueOf(),
+            username: process.env.POSTGRES_USERNAME,
+            password: process.env.POSTGRES_PASSWORD,
+            database: process.env.POSTGRES_DB_NAME,
             entities: [
               CheckoutDataMapper, CheckoutItemDataMapper
             ],
