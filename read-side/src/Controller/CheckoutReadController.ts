@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Param, Request } from "@nestjs/common";
 import CheckoutService from "src/Service/CheckoutService";
 
-@Controller("/v1/api/checkout")
+@Controller("/api/v1/checkout")
 export default class CheckoutReadController {
     
     constructor(
