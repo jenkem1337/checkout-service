@@ -1,3 +1,4 @@
+import FindAnCheckoutDto from '../Controller/DTO/FindAnCheckoutDto';
 export default interface CheckoutService {
-    findAnCheckoutByUuidAndCustomerUuid(checkoutUuid:string, customerUuid:string)
+    findAnCheckoutByUuidAndCustomerUuid(findAnCheckoutDto:FindAnCheckoutDto)
 }
