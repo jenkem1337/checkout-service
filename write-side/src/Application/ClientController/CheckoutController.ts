@@ -7,7 +7,7 @@ import DeleteItemOneMoreThanDto from './DTOs/DeleteItemOneMoreThanDto';
 import DeleteSameItemsDto from './DTOs/DeleteSameItems';
 import CheckoutService from '../Service/CheckoutService';
 
-@Controller("/v1/api/checkout")
+@Controller("/api/v1/checkout")
 export default class CheckoutController {
     constructor(
         private readonly checkoutService:CheckoutService,
