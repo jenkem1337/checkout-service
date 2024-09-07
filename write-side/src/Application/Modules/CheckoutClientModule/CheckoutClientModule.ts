@@ -10,18 +10,20 @@ import { AsyncLocalStorage } from "async_hooks";
 import { QueryRunner } from "typeorm";
 import TransactionManagerFactoryModule from "../RepositoryModule/TransactionManagerModule";
 import CheckoutController from "../../ClientController/CheckoutController";
+import { HttpModule } from "@nestjs/axios";
 
 
 @Module({
     controllers:[CheckoutController],
     providers: [CheckoutService, JwtStrategy],
     imports:[
-        JwtModule.register({secret: "$2y$10$YZM.npx0LPKqbmQjzWNTWeqX06MUkm6wtsS2jxdDtasWWXFzNhuES"}),
+        JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
         PassportModule,
         HandlerModule, 
         CqrsModule,
         AlsModule,
         TransactionManagerFactoryModule,
+        HttpModule
     ]
 })
 export default class CheckoutClientModule implements NestModule{
