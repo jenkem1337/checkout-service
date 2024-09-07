@@ -14,7 +14,7 @@ export default class ItemDeletedEventHandler implements IEventHandler<ItemDelete
     ){}
 
     handle(event: ItemDeleted) {
-        this.checkoutRepository.createCheckoutRepository().removeCheckoutItemByUuid(event.checkoutItemUuid.getUuid())
+        //this.checkoutRepository.createCheckoutRepository().removeCheckoutItemByUuid(event.checkoutItemUuid.getUuid())
         this.checkoutProjectionClient.emit("item-deleted", event)
     }
 }
