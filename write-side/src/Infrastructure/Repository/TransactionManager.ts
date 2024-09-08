@@ -7,18 +7,17 @@ import { DataSource, QueryRunner } from "typeorm";
 
 @Injectable()
 export default class TransactionManager implements ITransactionManager{
-    private readonly queryRunner:QueryRunner
-    private readonly als: AsyncLocalStorage<Map<string, QueryRunner | string>>
     private hasTransactionDestroyed:boolean = false
+    private queryRunner: QueryRunner
     constructor(
         @Inject("DataSource")
-        dataSource: DataSource, 
-        als: AsyncLocalStorage<Map<string, QueryRunner | string>>
+        private readonly dataSource: DataSource, 
+        private readonly als: AsyncLocalStorage<Map<string, QueryRunner | string>>
     ){
-        this.queryRunner = dataSource.createQueryRunner()
-        this.als = als
     }    
     async beginTransaction(){
+        this.queryRunner = this.dataSource.createQueryRunner()
+
         if (this.queryRunner.isTransactionActive) return;
         await this.queryRunner.connect()
         await this.queryRunner.startTransaction()
@@ -26,10 +25,12 @@ export default class TransactionManager implements ITransactionManager{
     }
     async commitTransaction(){
         if(this.hasTransactionDestroyed) return
+        this.als.getStore().set("QUERY_RUNNER", undefined)
         await this.queryRunner.commitTransaction()
     }
     async rollbackTransaction(){
         if(this.hasTransactionDestroyed) return
+        this.als.getStore().set("QUERY_RUNNER", undefined)
         await this.queryRunner.rollbackTransaction()
     }
     async releaseConnection(){
