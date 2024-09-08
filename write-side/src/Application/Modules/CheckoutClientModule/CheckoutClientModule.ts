@@ -9,7 +9,7 @@ import { AlsModule } from "../AlsModule";
 import { AsyncLocalStorage } from "async_hooks";
 import { QueryRunner } from "typeorm";
 import TransactionManagerFactoryModule from "../RepositoryModule/TransactionManagerModule";
-import CheckoutController from "../../ClientController/CheckoutController";
+import CheckoutController from "../../Controller/CheckoutController";
 import { HttpModule } from "@nestjs/axios";
 
 
