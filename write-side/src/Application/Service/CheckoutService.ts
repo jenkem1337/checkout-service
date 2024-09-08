@@ -1,9 +1,9 @@
 import { Inject, Injectable, Scope } from "@nestjs/common";
-import AddAnCheckoutItemDto from "../ClientController/DTOs/AddAnCheckoutItemDto";
-import AddOneMoreThanItemDto from "../ClientController/DTOs/AddOneMoreThanItemDto";
-import DeleteAnItemDto from "../ClientController/DTOs/DeleteAnItemDto";
-import DeleteItemOneMoreThanDto from "../ClientController/DTOs/DeleteItemOneMoreThanDto";
-import DeleteSameItemsDto from "../ClientController/DTOs/DeleteSameItems";
+import AddAnCheckoutItemDto from "../Controller/DTOs/AddAnCheckoutItemDto";
+import AddOneMoreThanItemDto from "../Controller/DTOs/AddOneMoreThanItemDto";
+import DeleteAnItemDto from "../Controller/DTOs/DeleteAnItemDto";
+import DeleteItemOneMoreThanDto from "../Controller/DTOs/DeleteItemOneMoreThanDto";
+import DeleteSameItemsDto from "../Controller/DTOs/DeleteSameItems";
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import AddItemOneMoreThanCommand from "src/Core/Services/Commands/Command/AddItemOneMoreThanCommand";
 import TakeOutAnItemCommand from "src/Core/Services/Commands/Command/TakeOutAnItemCommand";
