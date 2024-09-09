@@ -11,12 +11,16 @@ import { QueryRunner } from "typeorm";
 import TransactionManagerFactoryModule from "../RepositoryModule/TransactionManagerModule";
 import CheckoutController from "../../Controller/CheckoutController";
 import { HttpModule } from "@nestjs/axios";
+import { ConfigModule } from "@nestjs/config";
 
 
 @Module({
     controllers:[CheckoutController],
     providers: [CheckoutService, JwtStrategy],
     imports:[
+        ConfigModule.forRoot({
+            envFilePath: [".env"]
+        }),
         JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
         PassportModule,
         HandlerModule, 

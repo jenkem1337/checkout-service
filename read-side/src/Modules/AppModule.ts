@@ -6,9 +6,13 @@ import CheckoutReadController from 'src/Controller/CheckoutReadController';
 import CheckoutServiceImpl from 'src/Service/CheckoutServiceImpl';
 import MongoModule from './MongoModule';
 import CheckoutReadRepositoryImpl from 'src/Repository/CheckoutReadRepositoryImpl';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: [".env"]
+    }),
     JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
     PassportModule,
     MongoModule
