@@ -49,7 +49,7 @@ const EventHandlers = [
             transport:Transport.REDIS,
             options: {
                 host: process.env.MESSAGE_QUEUE_HOST,
-                port: 6379,
+                port: 6379
               },
         }])
     ],
