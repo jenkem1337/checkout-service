@@ -25,7 +25,7 @@ export default class CheckoutService {
         private readonly httpService:HttpService
     ){}
     async addAnItemToCheckout(dto: AddAnCheckoutItemDto){
-        const anProductFromProductService = await this.httpService.axiosRef.get(`http://localhost:80/products/${dto.productUuid}`)
+        const anProductFromProductService = await this.httpService.axiosRef.get(`${process.env.E_COMMARCE_MONOLITH_SERVICE}/products/${dto.productUuid}`)
         console.log(anProductFromProductService.data)
         
         if ((anProductFromProductService.data.error_message !== null) && (anProductFromProductService.data.error_message !== undefined)) {
