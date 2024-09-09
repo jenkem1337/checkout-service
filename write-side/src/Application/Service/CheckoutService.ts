@@ -16,7 +16,7 @@ import ITransactionManager from "src/Core/Interfaces/ITransactionManager";
 import { HttpService } from "@nestjs/axios";
 import ProductNotFound from "src/Core/Exceptions/ProductNotFound";
 
-@Injectable({scope:Scope.TRANSIENT})
+@Injectable()
 export default class CheckoutService {
     constructor(
         @Inject("TransactionManager")
