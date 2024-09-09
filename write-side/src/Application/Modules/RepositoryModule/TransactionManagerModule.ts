@@ -6,7 +6,6 @@ import TransactionManager from "src/Infrastructure/Repository/TransactionManager
 @Module({
     providers:[
         {
-            scope:Scope.TRANSIENT,
             provide:"TransactionManager",
             useClass:TransactionManager
         }
