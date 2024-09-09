@@ -27,6 +27,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@types/dotenv": "^6.1.1",
+    "dotenv": "^16.4.5",
     "ioredis": "^5.4.1",
     "mongodb": "^6.8.1",
     "passport": "^0.7.0",
