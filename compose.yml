@@ -10,8 +10,6 @@ services:
     restart: always
     networks:
       - checkout-service-network
-    environment:
-      - MESSAGE_QUEUE_HOST=redis-pubsub
 
   
   redis-pubsub:
@@ -33,8 +31,6 @@ services:
     restart: always
     networks:
       - checkout-service-network
-    environment:
-      - MESSAGE_QUEUE_HOST=redis-pubsub
 
 
 networks:
