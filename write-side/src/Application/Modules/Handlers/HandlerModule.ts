@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import AddAnItemToCartCommadHandler from '../../../Core/Services/Commands/CommandHandlers/AddAnItemToCartCommandHandler';
 import AddItemOneMoreThanCommandHandler from '../../../Core/Services/Commands/CommandHandlers/AddItemOneMoreThanCommandHandler';
@@ -44,18 +44,26 @@ const EventHandlers = [
         WriteRepositoryFactoryModule,
         DomainModelFactoryModule, 
         CqrsModule,
-        ClientsModule.register([{
-            name:"CHECKOUT_PROJECTION_SERVICE",
-            transport:Transport.REDIS,
-            options: {
-                host: process.env.MESSAGE_QUEUE_HOST,
-                port: 6379
-              },
-        }])
-    ],
+        ClientsModule.registerAsync([
+            {
+              name: 'CHECKOUT_PROJECTION_SERVICE',
+              useFactory: async () => ({
+                transport: Transport.REDIS,
+                options: {
+                  host: process.env.MESSAGE_QUEUE_HOST,
+                  port: parseInt(process.env.MESSAGE_QUEUE_PORT,10)
+                },
+              }),
+            },
+          ]),
+          ],
     providers: [
         ...CommandHandlers,
         ...EventHandlers
     ]
 })
-export default class HandlerModule {}
+export default class HandlerModule implements OnModuleInit{
+    onModuleInit() {
+        console.log(`redis host name::${process.env.MESSAGE_QUEUE_HOST}`)
+    }
+}
