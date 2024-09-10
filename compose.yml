@@ -12,15 +12,6 @@ services:
       - checkout-service-network
 
   
-  redis-pubsub:
-    container_name: redis-pubsub
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - checkout-service-network
-    restart: always
-
   checkout-read-service:
     build:
       context: ./read-side
