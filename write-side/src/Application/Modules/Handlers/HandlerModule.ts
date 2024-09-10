@@ -48,10 +48,15 @@ const EventHandlers = [
             {
               name: 'CHECKOUT_PROJECTION_SERVICE',
               useFactory: async () => ({
-                transport: Transport.REDIS,
+                transport: Transport.KAFKA,
                 options: {
-                  host: process.env.MESSAGE_QUEUE_HOST,
-                  port: parseInt(process.env.MESSAGE_QUEUE_PORT,10)
+                  client: {
+                    clientId: `checkout-producer`,
+                    brokers: [`${process.env.MESSAGE_QUEUE_HOST}:${process.env.MESSAGE_QUEUE_PORT}`],
+                  },
+                  consumer: {
+                    groupId: 'checkout-consumer'
+                  }
                 },
               }),
             },
@@ -62,8 +67,4 @@ const EventHandlers = [
         ...EventHandlers
     ]
 })
-export default class HandlerModule implements OnModuleInit{
-    onModuleInit() {
-        console.log(`redis host name::${process.env.MESSAGE_QUEUE_HOST}`)
-    }
-}
+export default class HandlerModule{}
