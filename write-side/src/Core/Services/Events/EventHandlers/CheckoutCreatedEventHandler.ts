@@ -1,6 +1,6 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import CheckoutCreated from '../../../Models/Domain Models/Checkout/Events/CheckoutCreated';
-import { ClientProxy } from "@nestjs/microservices";
+import { ClientKafka, ClientProxy } from "@nestjs/microservices";
 import { Inject } from "@nestjs/common";
 
 @EventsHandler(CheckoutCreated)
@@ -8,10 +8,11 @@ export default class CheckoutCreatedEventHandler implements IEventHandler<Checko
     
     constructor(
         @Inject("CHECKOUT_PROJECTION_SERVICE")
-        private readonly checkoutProjectionClient: ClientProxy
+        private readonly checkoutProjectionClient: ClientKafka
     ){}
     handle(event: CheckoutCreated) {
-        this.checkoutProjectionClient.emit("checkout_created", event)
+        
+        this.checkoutProjectionClient.emit("checkout_created",  JSON.parse(JSON.stringify(event)))
     }
 
 }
