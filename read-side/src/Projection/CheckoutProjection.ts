@@ -1,5 +1,5 @@
 import { Controller, Inject } from "@nestjs/common";
-import {EventPattern} from "@nestjs/microservices"
+import {Ctx, EventPattern, KafkaContext, Payload} from "@nestjs/microservices"
 import CheckoutQueryModel from '../Model/CheckoutQueryModel';
 import CheckoutItemQueryModel from '../Model/CheckoutItemQueryModel';
 import ReadCheckoutRepository from '../Repository/CheckoutReadRepository';
@@ -11,7 +11,7 @@ export default class CheckoutProjection {
         private readonly chekcoutReadRepository: ReadCheckoutRepository
     ){}
     @EventPattern("checkout_created")
-    handleCheckoutCreatedEvent(event:any){
+    handleCheckoutCreatedEvent(@Payload() event:any, @Ctx() context: KafkaContext){
         const checkoutQueryModel = CheckoutQueryModel.valueOf({
             checkoutState: event.checkoutState.state,
             createdDate: event.createdAt,
@@ -23,12 +23,12 @@ export default class CheckoutProjection {
         this.chekcoutReadRepository.save(checkoutQueryModel)
     }
     @EventPattern("checkout_cancelled")
-    async handleCheckoutCancelledEvent(event:any){
+    async handleCheckoutCancelledEvent(@Payload() event:any){
         this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid.uuid, event.newCheckoutState)
     }
 
     @EventPattern("an_item_added")
-    async handleAnCheckoutItemAdded(event: any){
+    async handleAnCheckoutItemAdded(@Payload() event: any){
         let checkoutItemFromRepo = await this.chekcoutReadRepository.findOneCheckoutItemByUuid(event.itemEntityUuid.uuid)
         
         if(checkoutItemFromRepo.isNull()){
@@ -51,25 +51,25 @@ export default class CheckoutProjection {
     }
 
     @EventPattern("item-quantity-increased")
-    async handleItemQuantityIncreased(event:any){
+    async handleItemQuantityIncreased(@Payload() event:any){
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
     }
 
     @EventPattern("an-item-deleted")
-    async handleAnItemDeleted(event:any) {
+    async handleAnItemDeleted(@Payload() event:any) {
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
     }
     
     @EventPattern("item-deleted")
-    async handleItemDeleted(event:any){
+    async handleItemDeleted(@Payload() event:any){
         this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
     }
 
     @EventPattern("item-quantity-decreased")
-    async handleItemQuantityDecreased(event:any){
+    async handleItemQuantityDecreased(@Payload() event:any){
         this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
         this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
 
