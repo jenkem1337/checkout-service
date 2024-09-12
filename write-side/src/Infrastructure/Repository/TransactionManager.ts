@@ -39,6 +39,8 @@ export default class TransactionManager implements ITransactionManager{
             return response
         } catch (error) {
             await this.rollbackTransaction()
+            console.log("Transaction has been rollbacked")
+            console.log("Error Message: "+ error.message)
             throw error
         } 
     }
