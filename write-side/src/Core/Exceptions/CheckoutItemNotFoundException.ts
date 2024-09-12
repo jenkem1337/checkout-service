@@ -1,5 +1,6 @@
 import DomainException from './DomainException';
-export default class CheckoutItemNotFoundException extends DomainException {
+import NotFoundBaseException from './NotFoundBaseException';
+export default class CheckoutItemNotFoundException extends NotFoundBaseException {
     constructor(){
         super('checkout item not found')
     }
