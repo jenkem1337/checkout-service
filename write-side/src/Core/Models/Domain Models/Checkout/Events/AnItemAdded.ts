@@ -6,8 +6,9 @@ import ProductID from "../../../ValueObjects/ProductID";
 import ProductQuantity from "../../../ValueObjects/ProductQuantity";
 import CheckoutItemInterface from '../CheckoutItemInterface';
 import CheckoutItemID from '../../../ValueObjects/CheckoutItemID';
+import DomainEvent from "./DomainEvent";
 
-export default class AnItemAdded implements IEvent {
+export default class AnItemAdded extends DomainEvent {
     public itemEntityUuid: CheckoutItemID
     public productBasePrice: Money
     public productQuantity: ProductQuantity
@@ -19,6 +20,7 @@ export default class AnItemAdded implements IEvent {
     public updatedAt: Date
 
     constructor(item: CheckoutItemInterface, subTotal:Money) {
+        super()
         this.checkoutUuid = item.getCheckoutUuid()
         this.productBasePrice = item.getProductBasePrice()
         this.itemEntityUuid = item.getUuid()
