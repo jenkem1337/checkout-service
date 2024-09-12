@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, Request, Scope, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Put, Request, Scope, UseFilters, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../Auth/JwtAuthGuard";
 import AddAnCheckoutItemDto from './DTOs/AddAnCheckoutItemDto';
 import AddOneMoreThanItemDto from './DTOs/AddOneMoreThanItemDto';
@@ -6,8 +6,11 @@ import DeleteAnItemDto from './DTOs/DeleteAnItemDto';
 import DeleteItemOneMoreThanDto from './DTOs/DeleteItemOneMoreThanDto';
 import DeleteSameItemsDto from './DTOs/DeleteSameItems';
 import CheckoutService from '../Service/CheckoutService';
+import NotFoundBaseExceptionFilter from "../ExcepitonFilters/NotFoundExceptionFilter";
+import InvalidOperationExceptionFilter from "../ExcepitonFilters/InvalidOperationExceptionFilter";
 
 @Controller("/api/v1/checkout")
+@UseFilters(NotFoundBaseExceptionFilter, InvalidOperationExceptionFilter)
 export default class CheckoutController {
     constructor(
         private readonly checkoutService:CheckoutService,

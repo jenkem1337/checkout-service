@@ -3,8 +3,10 @@ import CheckoutService from "src/Service/CheckoutService";
 import FindAnCheckoutDto from "./DTO/FindAnCheckoutDto";
 import { JwtAuthGuard } from "src/Auth/JwtAuthGuard";
 import { catchError, from, throwError } from "rxjs";
+import NotFoundBaseExceptionFilter from "./ExceptionFilter/NotFoundExceptionFilter";
 
 @Controller("/api/v1/checkout")
+@UseFilters(NotFoundBaseExceptionFilter)
 export default class CheckoutReadController {
     
     constructor(
@@ -15,13 +17,8 @@ export default class CheckoutReadController {
     @UseGuards(JwtAuthGuard)
     @Get("/:checkout_uuid")
     async getAnCheckoutByUuidAndCustomerUuid(@Request() req:any, @Param("checkout_uuid") checkoutUuid: string){
-      return from(
-        this.checkoutService.findAnCheckoutByUuidAndCustomerUuid(
-          new FindAnCheckoutDto(checkoutUuid, req.user.customerUUID),
-        ),
-      ).pipe(
-          catchError((error) => 
-                    throwError(
-                        () => new NotFoundException(`${error.message}`))))
+        return await this.checkoutService.findAnCheckoutByUuidAndCustomerUuid(
+          new FindAnCheckoutDto(checkoutUuid, req.user.customerUUID)
+        )
     }
 }
