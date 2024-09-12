@@ -6,7 +6,8 @@ import CustomerID from '../../../ValueObjects/CustomerID';
 import Money from '../../../ValueObjects/Money';
 import PeymentMethod from '../../../ValueObjects/PeymentMethod';
 import CheckoutItemInterface from '../CheckoutItemInterface';
-export default class CheckoutCreated implements IEvent{
+import DomainEvent from './DomainEvent';
+export default class CheckoutCreated extends DomainEvent{
     public checkoutUuid: CheckoutID
     public userUuid: CustomerID
     public subTotal: Money
@@ -22,6 +23,7 @@ export default class CheckoutCreated implements IEvent{
         createdAt: Date,
         updatedAt: Date,
         ){
+            super()
             this.checkoutUuid = uuid
             this.userUuid = userUuid
             this.subTotal = subTotal

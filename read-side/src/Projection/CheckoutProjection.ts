@@ -3,15 +3,25 @@ import {Ctx, EventPattern, KafkaContext, Payload} from "@nestjs/microservices"
 import CheckoutQueryModel from '../Model/CheckoutQueryModel';
 import CheckoutItemQueryModel from '../Model/CheckoutItemQueryModel';
 import ReadCheckoutRepository from '../Repository/CheckoutReadRepository';
+import IdempotentMessageRepository from "src/Repository/IdempotentMessageRepository";
 @Controller()
 export default class CheckoutProjection {
 
     constructor(
         @Inject("CheckoutReadRepository")
-        private readonly chekcoutReadRepository: ReadCheckoutRepository
+        private readonly chekcoutReadRepository: ReadCheckoutRepository,
+        @Inject("IdempotentMessageRepository")
+        private readonly idempotentMessageRepository: IdempotentMessageRepository
     ){}
     @EventPattern("checkout_created")
-    handleCheckoutCreatedEvent(@Payload() event:any, @Ctx() context: KafkaContext){
+    async handleCheckoutCreatedEvent(@Payload() event:any, @Ctx() context: KafkaContext){
+        console.log(event.id + ": event id")
+        
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+        
         const checkoutQueryModel = CheckoutQueryModel.valueOf({
             checkoutState: event.checkoutState.state,
             createdDate: event.createdAt,
@@ -20,17 +30,30 @@ export default class CheckoutProjection {
             updatedDate: event.updatedAt,
             uuid: event.checkoutUuid.uuid,
         })
-        this.chekcoutReadRepository.save(checkoutQueryModel)
+        await this.chekcoutReadRepository.save(checkoutQueryModel)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
     }
     @EventPattern("checkout_cancelled")
     async handleCheckoutCancelledEvent(@Payload() event:any){
-        this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid.uuid, event.newCheckoutState)
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+        await this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid.uuid, event.newCheckoutState)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
     }
 
     @EventPattern("an_item_added")
     async handleAnCheckoutItemAdded(@Payload() event: any){
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+
         let checkoutItemFromRepo = await this.chekcoutReadRepository.findOneCheckoutItemByUuid(event.itemEntityUuid.uuid)
-        
+
         if(checkoutItemFromRepo.isNull()){
             const checkoutItem = CheckoutItemQueryModel.valueOf({
                 checkoutUuid: event.checkoutUuid.uuid,
@@ -42,36 +65,68 @@ export default class CheckoutProjection {
                 updatedDate: event.updatedAt,
                 uuid: event.itemEntityUuid.uuid
             })
-            this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
-            this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+            await this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
+            await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
             return
         }
-        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
-        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.itemEntityUuid.uuid, event.productQuantity.quantity)
+        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.itemEntityUuid.uuid, event.productQuantity.quantity)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
     }
 
     @EventPattern("item-quantity-increased")
     async handleItemQuantityIncreased(@Payload() event:any){
-        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
-        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+
+        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
+
     }
 
     @EventPattern("an-item-deleted")
     async handleAnItemDeleted(@Payload() event:any) {
-        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
-        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+
+        await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
+        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
+
     }
     
     @EventPattern("item-deleted")
     async handleItemDeleted(@Payload() event:any){
-        this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)
-        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+
+        await this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)
+        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
+
     }
 
     @EventPattern("item-quantity-decreased")
     async handleItemQuantityDecreased(@Payload() event:any){
-        this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
-        this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
 
+        await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
+        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
+        
+        await this.idempotentMessageRepository.setMessageId(event.id)
     }
 }
