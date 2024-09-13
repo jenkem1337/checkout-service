@@ -26,7 +26,6 @@ export default class CheckoutProjection {
             checkoutState: event.checkoutState.state,
             createdDate: event.createdAt,
             customerUuid: event.userUuid.uuid,
-            subTotal: event.subTotal.amount,
             updatedDate: event.updatedAt,
             uuid: event.checkoutUuid.uuid,
         })
@@ -66,10 +65,8 @@ export default class CheckoutProjection {
                 uuid: event.itemEntityUuid.uuid
             })
             await this.chekcoutReadRepository.saveCheckoutItem(checkoutItem)
-            await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
             return
         }
-        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.itemEntityUuid.uuid, event.productQuantity.quantity)
         
         await this.idempotentMessageRepository.setMessageId(event.id)
@@ -82,7 +79,6 @@ export default class CheckoutProjection {
             return
         }
 
-        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.itemQuantity.quantity)
         
         await this.idempotentMessageRepository.setMessageId(event.id)
@@ -97,7 +93,6 @@ export default class CheckoutProjection {
         }
 
         await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
-        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         
         await this.idempotentMessageRepository.setMessageId(event.id)
 
@@ -110,9 +105,7 @@ export default class CheckoutProjection {
             return
         }
 
-        await this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)
-        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
-        
+        await this.chekcoutReadRepository.deleteCheckoutItemByUuid(event.checkoutItemUuid.uuid)        
         await this.idempotentMessageRepository.setMessageId(event.id)
 
     }
@@ -125,7 +118,6 @@ export default class CheckoutProjection {
         }
 
         await this.chekcoutReadRepository.updateCheckoutItemQuantityByUuid(event.checkoutItemUuid.uuid, event.quantity.quantity)
-        await this.chekcoutReadRepository.updateSubTotalByUuid(event.checkoutUuid.uuid, event.subTotal.amount)
         
         await this.idempotentMessageRepository.setMessageId(event.id)
     }

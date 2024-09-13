@@ -3,7 +3,6 @@ import CheckoutItemInterface from "../../Domain Models/Checkout/CheckoutItemInte
 export default interface CheckoutConstructorParamaters {
     checkoutUuid?:string
     userUuid?:string
-    subTotal?:number
     checkoutState?:string
     shippingPrice?:number
     peymentMethod?:string

@@ -39,7 +39,7 @@ describe('Checkout ORM Test', () => {
 
     it('should return an instance of Checkout data model when save and get', async () => {
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 150, 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED)
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED)
         await testDataSource.manager.save(checkoutDataMapper)
         const checkoutFromDb = await testDataSource.manager.findOne(CheckoutDataMapper, {
             where: {
@@ -54,7 +54,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 100, 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]
@@ -78,7 +78,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 100, 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]
@@ -105,7 +105,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 100, 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]
@@ -129,23 +129,5 @@ describe('Checkout ORM Test', () => {
         expect(checkoutFromDb2.checkoutItems.length).toBe(0)
     })
 
-    it('balaablabla', async () => {
-        let checkoutData = new CheckoutDataMapper
-        let uuid = randomUUID()
-        
-        checkoutData.uuid = uuid
-        checkoutData.customerUuid = randomUUID()
-        checkoutData.subTotal = 1111
-        checkoutData.checkoutState = CheckoutStates.CHECKOUT_COMPLETED
-        await testDataSource.manager.save(checkoutData)
-        
-        const checkoutFromDb = await testDataSource.manager.findOne(CheckoutDataMapper, {
-            where: {
-                uuid: uuid
-            }
-        })
-
-        expect(checkoutFromDb.shippingPrice).toBe(0)
-
-    })
+    
 })

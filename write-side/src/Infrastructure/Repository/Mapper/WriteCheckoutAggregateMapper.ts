@@ -31,7 +31,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
         const checkoutDataMapper = new CheckoutDataMapper(
             checkout.getUuid().getUuid(),
             checkout.getUserUuid().getUuid(),
-            checkout.getSubTotal().getAmount(),
             checkout.getShippingPrice() ? checkout.getShippingPrice().getAmount() : 0 ,
             checkout.getPeymentMethod() ? checkout.getPeymentMethod().getPeymentMethod() : null,
             checkout.getCheckoutState().getState(),
@@ -51,7 +50,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
                                                                                 checkoutState: _checkoutDataMapper.checkoutState,
                                                                                 checkoutUuid: _checkoutDataMapper.uuid,
                                                                                 createdAt: _checkoutDataMapper.createdDate,
-                                                                                subTotal: _checkoutDataMapper.subTotal,
                                                                                 updatedAt: _checkoutDataMapper.updatedDate,
                                                                                 userUuid: _checkoutDataMapper.customerUuid,
                                                                                 peymentMethod: _checkoutDataMapper.peymentMethod,
@@ -88,7 +86,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
                                                                                     checkoutState: _checkout.checkoutState,
                                                                                     checkoutUuid: _checkout.uuid,
                                                                                     createdAt: _checkout.createdDate,
-                                                                                    subTotal: _checkout.subTotal,
                                                                                     updatedAt: _checkout.updatedDate,
                                                                                     userUuid: _checkout.customerUuid,
                                                                                     peymentMethod: _checkout.peymentMethod,

@@ -8,13 +8,11 @@ export default class ItemQuantityIncreased extends DomainEvent {
     public checkoutUuid: CheckoutID
     public checkoutItemUuid: CheckoutItemID
     public itemQuantity: ProductQuantity
-    public subTotal: Money
 
-    constructor(checkoutUuid: CheckoutID, checkoutItemUuid: CheckoutItemID, itemQuantity: ProductQuantity, subTotal:Money){
+    constructor(checkoutUuid: CheckoutID, checkoutItemUuid: CheckoutItemID, itemQuantity: ProductQuantity){
         super()    
         this.checkoutUuid = checkoutUuid
         this.checkoutItemUuid = checkoutItemUuid
         this.itemQuantity = itemQuantity
-        this.subTotal = subTotal
     }
 }

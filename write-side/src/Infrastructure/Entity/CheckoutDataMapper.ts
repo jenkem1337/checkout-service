@@ -4,28 +4,25 @@ import CheckoutItemDataMapper from './CheckoutItemDataMapper';
 @Entity({name: 'checkouts'})
 export default class CheckoutDataMapper {
     
-    @PrimaryColumn()
+    @PrimaryColumn({name:"uuid"})
     public uuid: string
 
-    @Column()
+    @Column({name: "customer_uuid"})
     public customerUuid:string
 
-    @Column()
-    public subTotal:number
-
-    @Column({default: 0})
+    @Column({name:"shipping_price",default: 0})
     public shippingPrice:number
 
-    @Column({default: null})
+    @Column({name:"peyment_method",default: null})
     public peymentMethod:string
 
-    @Column()
+    @Column({name:"state"})
     public checkoutState:string
 
-    @CreateDateColumn()
+    @CreateDateColumn({name: "created_at"})
     public createdDate: Date
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({name: "updated_at"})
     public updatedDate:Date
     
     @OneToMany(() => CheckoutItemDataMapper, checkoutItem => checkoutItem.checkout, {
@@ -33,10 +30,9 @@ export default class CheckoutDataMapper {
     })
     public checkoutItems: CheckoutItemDataMapper[]
 
-    constructor(uuid?:string, customerUuid?:string, subTotal?:number, shippingPrice?:number, peymentMethod?:string, checkoutState?:string, checkoutItems?:CheckoutItemDataMapper[]) {
+    constructor(uuid?:string, customerUuid?:string, shippingPrice?:number, peymentMethod?:string, checkoutState?:string, checkoutItems?:CheckoutItemDataMapper[]) {
         this.uuid = uuid
         this.customerUuid = customerUuid
-        this.subTotal = subTotal
         this.shippingPrice = shippingPrice
         this.peymentMethod = peymentMethod
         this.checkoutState = checkoutState
@@ -44,6 +40,6 @@ export default class CheckoutDataMapper {
     }
 
     static createNull() {
-        return new CheckoutDataMapper(null, null, null, null, null, null, [CheckoutItemDataMapper.createNull()])
+        return new CheckoutDataMapper(null, null, null, null, null, [CheckoutItemDataMapper.createNull()])
     }
 }

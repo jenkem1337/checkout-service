@@ -15,11 +15,10 @@ export default class AnItemAdded extends DomainEvent {
     public productHeader: ProductHeader
     public checkoutUuid: CheckoutID
     public productUuid: ProductID
-    public subTotal: Money
     public createdAt: Date
     public updatedAt: Date
 
-    constructor(item: CheckoutItemInterface, subTotal:Money) {
+    constructor(item: CheckoutItemInterface) {
         super()
         this.checkoutUuid = item.getCheckoutUuid()
         this.productBasePrice = item.getProductBasePrice()
@@ -27,7 +26,6 @@ export default class AnItemAdded extends DomainEvent {
         this.productQuantity = item.getProductQuantity()
         this.productUuid = item.getProductUuid()
         this.productHeader = item.getProductHeader()
-        this.subTotal = subTotal
         this.createdAt = item.getCreatedAt()
         this.updatedAt = item.getUpdatedAt()
     }

@@ -14,12 +14,10 @@ export default class NullableCheckoutFactory implements DomainModelFactory<Check
             const checkoutUuid = new CheckoutID(constructerValues.checkoutUuid)
             const userUuid = new CustomerID(constructerValues.userUuid)
             const checkoutState = new CheckoutState(constructerValues.checkoutState)
-            const checkoutSubTotal = new Money(constructerValues.subTotal)
     
             return Checkout.valueOfOnlyRequiredArguments(
                 checkoutUuid,
                 userUuid,
-                checkoutSubTotal,
                 checkoutState,
                 constructerValues.createdAt,
                 constructerValues.updatedAt

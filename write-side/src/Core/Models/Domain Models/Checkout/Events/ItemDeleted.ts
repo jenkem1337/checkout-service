@@ -7,11 +7,10 @@ import DomainEvent from "./DomainEvent";
 export default class ItemDeleted extends DomainEvent {
     public checkoutItemUuid:CheckoutItemID
     public checkoutUuid: CheckoutID
-    public subTotal:Money
-    constructor (checkoutItemEntityUuid:CheckoutItemID, checkoutUuid: CheckoutID, subTotal:Money) {
+    constructor (checkoutItemEntityUuid:CheckoutItemID, checkoutUuid: CheckoutID) {
         super()
         this.checkoutItemUuid = checkoutItemEntityUuid
         this.checkoutUuid = checkoutUuid
-        this.subTotal = subTotal
+       
     }
 }

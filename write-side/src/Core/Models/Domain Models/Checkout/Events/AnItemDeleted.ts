@@ -8,13 +8,11 @@ export default class AnItemDeleted extends DomainEvent {
     
         public checkoutItemUuid:CheckoutItemID
         public checkoutUuid: CheckoutID
-        public subTotal: Money
         public quantity: ProductQuantity
-        constructor (checkoutItemEntityUuid:CheckoutItemID, checkoutUuid: CheckoutID, subTotal:Money, quantity:ProductQuantity) {
+        constructor (checkoutItemEntityUuid:CheckoutItemID, checkoutUuid: CheckoutID, quantity:ProductQuantity) {
             super()
             this.checkoutItemUuid = checkoutItemEntityUuid
             this.checkoutUuid = checkoutUuid
-            this.subTotal = subTotal
             this.quantity = quantity
         }
     

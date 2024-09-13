@@ -52,7 +52,6 @@ describe('Checkout', () => {
             let checkout: CheckoutInterface = new Checkout(
                 new CheckoutID(randomUUID()),
                 new CustomerID(randomUUID()),
-                new Money(0),
                 new CheckoutState(CheckoutStates.CHECKOUT_CREATED),
                 new Date,
                 new Date,
@@ -67,20 +66,18 @@ describe('Checkout', () => {
             expect(checkout.getCheckoutState().getState()).toBe('CHECKOUT_CREATED')
             expect(checkout.getPeymentMethod().getPeymentMethod()).toBe('CREDIT_CART')
             expect(checkout.getShippingPrice().getAmount()).toBe(18)
-            expect(checkout.getSubTotal().getAmount()).toBe(0)
+            
         })
         it('should return true when given without optional parameters', () => {
             let checkout: CheckoutInterface = new Checkout(
                                                                 new CheckoutID(randomUUID()),
                                                                 new CustomerID(randomUUID()),
-                                                                new Money(0),
                                                                 new CheckoutState(CheckoutStates.CHECKOUT_CREATED),
                                                                 new Date,
                                                                 new Date)
                 expect(checkout).toBeTruthy()
                 expect(checkout.getCheckoutItems()).toBeInstanceOf(Map<string, CheckoutItemInterface>)
                 expect(checkout.getCheckoutState().getState()).toBe('CHECKOUT_CREATED')
-                expect(checkout.getSubTotal().getAmount()).toBe(0)
     
         })
         
@@ -95,7 +92,7 @@ describe('Checkout', () => {
                     userUuid: randomUUID(),
                     checkoutState: CheckoutStates.CHECKOUT_CREATED,
                     createdAt: new Date,
-                    subTotal: 0,
+                    
                     updatedAt: new Date
                 })
                 expect(checkout).toBeInstanceOf(Checkout)
@@ -109,7 +106,7 @@ describe('Checkout', () => {
                                             userUuid: randomUUID(),
                                             checkoutState: null,
                                             createdAt: new Date,
-                                            subTotal: 0,
+                                            
                                             updatedAt: new Date
                                         })
                 expect(checkout).toBeInstanceOf(NullCheckout)
@@ -123,7 +120,6 @@ describe('Checkout', () => {
                                             userUuid: randomUUID(),
                                             checkoutState: CheckoutStates.CHECKOUT_CREATED,
                                             createdAt: new Date,
-                                            subTotal: 0,
                                             updatedAt: new Date
                                         })
                 
@@ -137,7 +133,7 @@ describe('Checkout', () => {
                                         userUuid: randomUUID(),
                                         checkoutState: null,
                                         createdAt: new Date,
-                                        subTotal: 0,
+                                     
                                         updatedAt: new Date
                 })).toThrow(NullPropertyException)
             })
@@ -159,7 +155,7 @@ describe('Checkout', () => {
                                                 })
                     checkoutDomainModel.addAnItem(checkoutItem)
 
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(123)
+                    
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
                 })
                 it('should return correct sub total, quantity and Map size when given same three concreate item to parameter', () => {
@@ -177,7 +173,7 @@ describe('Checkout', () => {
 
                     expect(item.getProductQuantity().getQuantity()).toBe(3)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(369)
+                    
                 })
             })
             describe('Checkout::addItemOneMoreThan', () => {
@@ -192,7 +188,7 @@ describe('Checkout', () => {
 
                     expect(item.getProductQuantity().getQuantity()).toBe(4)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(492)
+                  
 
                 })                
                 
@@ -213,7 +209,7 @@ describe('Checkout', () => {
 
                     expect(item.getProductQuantity().getQuantity()).toBe(2)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(246)
+                    
                 })
             })
 
@@ -226,7 +222,7 @@ describe('Checkout', () => {
                     checkoutDomainModel.takeOutAnItem(new CheckoutItemID(checkoutItemUuid))
 
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(0)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(0)
+                    
                 })
                 it('should return correct sub total, quantity and Map size when given same items uuid', () => {
                     let checkoutItemUuid = randomUUID()
@@ -243,7 +239,6 @@ describe('Checkout', () => {
 
                     expect(item.getProductQuantity().getQuantity()).toBe(2)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(246)
                 })
                 
                 it('should throw CheckoutItemNotFoundException when given not exist item uuid', () => {
@@ -268,7 +263,7 @@ describe('Checkout', () => {
 
                     expect(item.getProductQuantity().getQuantity()).toBe(1)
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(123)
+                   
                 })
 
                 it('should return correct sub total and Map size when given same items uuid and more than actual quantity', () => {
@@ -282,7 +277,7 @@ describe('Checkout', () => {
                     checkoutDomainModel.takeOutOneMoreThanItem(new CheckoutItemID(checkoutItemUuid), new ProductQuantity(10))
 
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(0)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(0)
+                  
 
                 })
                 it('should throw CheckoutItemNotFoundException when given not exist item uuid', () => {
@@ -303,7 +298,7 @@ describe('Checkout', () => {
                     checkoutDomainModel.takeOutSameItems(new CheckoutItemID(checkoutItemUuid))
 
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(0)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(0)
+                    
                 })
 
                 it('should throw CheckoutItemNotFoundException when given not exist item uuid', () => {
@@ -324,9 +319,9 @@ describe('Checkout', () => {
                     checkoutDomainModel.addAnItem(checkoutItem)
                     checkoutDomainModel.addAnItem(checkoutItem)
 
-                    checkoutDomainModel.updateItemPrices(new ProductID(productUuid), new Money(100))
+                   
                     expect(checkoutDomainModel.getCheckoutItems().size).toBe(1)
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(300)
+                    
                 })
 
                 it('should throw NegativeNumberException when given new price to negative value', () => {
@@ -339,9 +334,7 @@ describe('Checkout', () => {
                     checkoutDomainModel.addAnItem(checkoutItem)
                     checkoutDomainModel.addAnItem(checkoutItem)
 
-                   expect(() => checkoutDomainModel.updateItemPrices(new ProductID(productUuid), new Money(-100)))
-                        .toThrow(NegativeNumberException)
-
+                   
                 })
             })
 
@@ -390,52 +383,6 @@ describe('Checkout', () => {
                     checkoutDomainModel.setShippingPrice(() => new Money(8))
                     let shippingPrice = checkoutDomainModel.getShippingPrice()
                     expect(shippingPrice.getAmount()).toBe(8)
-                })
-
-                it('should return sub total + shipping price if sub total less than 100', () => {
-
-                    let checkoutItemUuid = randomUUID()
-                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 20,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
-
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    //before
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(40)
-                    
-                    checkoutDomainModel.setShippingPrice(() => new Money(8))
-                    //after
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(48)
-
-                })
-
-                it('should return sub total without shipping price if sub total equal 100', () =>  {
-                    let checkoutItemUuid = randomUUID()
-                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 50,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
-
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    //before
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(100)
-
-                    checkoutDomainModel.setShippingPrice(() => new Money(8))
-                    //after
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(100)
-                    
-                })
-
-                it('should return sub total without shipping price if sub total more than 100', () => {
-                    let checkoutItemUuid = randomUUID()
-                    const checkoutItem = factoryCtx.setFactoryMethod(ConcreateCheckoutItemFactory.name).createInstance<CheckoutItemInterface, CheckoutItemConstructorParameters>({    checkoutItemUuid: checkoutItemUuid,    checkoutUuid: checkoutDomainModel.getUuid().getUuid(),    createdAt: new Date,    productBasePrice: 150,    productHeader: "Deneme",    productQuantity: 1,    productUuid: randomUUID(),    updatedAt: new Date})
-
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    checkoutDomainModel.addAnItem(checkoutItem)
-                    //before
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(300)
-
-                    checkoutDomainModel.setShippingPrice(() => new Money(8))
-                    //after
-                    expect(checkoutDomainModel.getSubTotal().getAmount()).toBe(300)
-
                 })
             })
         })

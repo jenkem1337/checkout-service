@@ -10,7 +10,6 @@ import DomainEvent from './DomainEvent';
 export default class CheckoutCreated extends DomainEvent{
     public checkoutUuid: CheckoutID
     public userUuid: CustomerID
-    public subTotal: Money
     public checkoutState: CheckoutState
     public createdAt: Date
     public updatedAt:Date
@@ -18,7 +17,7 @@ export default class CheckoutCreated extends DomainEvent{
     constructor(
         uuid: CheckoutID,
         userUuid: CustomerID,
-        subTotal: Money,
+        
         checkoutState:CheckoutState,
         createdAt: Date,
         updatedAt: Date,
@@ -26,7 +25,7 @@ export default class CheckoutCreated extends DomainEvent{
             super()
             this.checkoutUuid = uuid
             this.userUuid = userUuid
-            this.subTotal = subTotal
+            
             this.checkoutState = checkoutState
             this.createdAt = createdAt
             this.updatedAt = updatedAt

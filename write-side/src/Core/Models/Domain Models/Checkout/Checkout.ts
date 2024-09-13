@@ -30,7 +30,6 @@ import AnItemAdded from "./Events/AnItemAdded";
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
     private address: Address
-    private subTotal: Money
     private shippingPrice: Money
     private paymentMethod: PeymentMethod
     private checkoutState: CheckoutState
@@ -39,7 +38,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     constructor(
         uuid: CheckoutID,
         userUuid: CustomerID,
-        subTotal: Money,
         checkoutState:CheckoutState,
         createdAt: Date,
         updatedAt: Date,
@@ -52,7 +50,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         ){
             super(uuid, createdAt, updatedAt)
             this.userUuid = userUuid
-            this.subTotal = subTotal
             this.checkoutState = checkoutState
             this.checkoutItems = checkoutItems ?? new Map<string, CheckoutItemInterface>(),
             this.address = shippingAddress
@@ -61,19 +58,18 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
 
         }
 
-    static valueOfAllConstructorArguments(uuid: CheckoutID, userUuid: CustomerID, subTotal: Money, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date, checkoutItems?:Map<string, CheckoutItemInterface>, shippingAddress?: Address, paymentMethod?: PeymentMethod, shippingPrice?: Money,){
-        return new Checkout(uuid, userUuid,subTotal,checkoutState,createdAt,updatedAt,checkoutItems, shippingAddress, paymentMethod, shippingPrice)
+    static valueOfAllConstructorArguments(uuid: CheckoutID, userUuid: CustomerID, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date, checkoutItems?:Map<string, CheckoutItemInterface>, shippingAddress?: Address, paymentMethod?: PeymentMethod, shippingPrice?: Money,){
+        return new Checkout(uuid, userUuid,checkoutState,createdAt,updatedAt,checkoutItems, shippingAddress, paymentMethod, shippingPrice)
     }
     
-    static valueOfOnlyRequiredArguments(uuid: CheckoutID, userUuid: CustomerID, subTotal: Money, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date,){
-        return new Checkout(uuid, userUuid, subTotal, checkoutState, createdAt, updatedAt)
+    static valueOfOnlyRequiredArguments(uuid: CheckoutID, userUuid: CustomerID, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date,){
+        return new Checkout(uuid, userUuid, checkoutState, createdAt, updatedAt)
     }
     static createCheckout(customerUuid: CustomerID){
-        const checkout = new Checkout(new CheckoutID(randomUUID()), customerUuid, new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
+        const checkout = new Checkout(new CheckoutID(randomUUID()), customerUuid, new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
         checkout.apply(new CheckoutCreated(
                 checkout.getUuid(), 
                 checkout.getUserUuid(), 
-                checkout.getSubTotal(),
                 checkout.getCheckoutState(),
                 checkout.getCreatedAt(),
                 checkout.getUpdatedAt()))
@@ -89,11 +85,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
     setShippingPrice(shippingPrice: () => Money) {
         this.shippingPrice = shippingPrice()
-        
-        if(this.isSubTotalPriceNotEqualOrMoreThan100()) {
-            this.subTotal = this.subTotal.plus(this.shippingPrice.getAmount())
-        }
-
         this.apply(new ShippingPriceAdded(this.getUuid(), this.shippingPrice))
     }
     addAnItem(item:CheckoutItemInterface): void{
@@ -102,14 +93,14 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             itemDomainModel = this.checkoutItems.get(itemDomainModel.getUuid().getUuid()) 
             itemDomainModel.incraseQuantity(1)
             this.checkoutItems.set(itemDomainModel.getUuid().getUuid(), itemDomainModel)
-            this.calculateSubTotal()
+            
             console.log(itemDomainModel.getProductQuantity().getQuantity())
-            this.apply(new AnItemAdded(itemDomainModel, this.subTotal))
+            this.apply(new AnItemAdded(itemDomainModel))
             return;
         }
         this.checkoutItems.set(itemDomainModel.getUuid().getUuid(), itemDomainModel)
-        this.calculateSubTotal()
-        this.apply(new AnItemAdded(itemDomainModel, this.subTotal))
+        
+        this.apply(new AnItemAdded(itemDomainModel))
     }
 
     private isItemExistInList(item:CheckoutItemInterface): boolean {
@@ -128,8 +119,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         checkoutItemDomainModel.incraseQuantity(quantity.getQuantity()) 
         
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
-        this.calculateSubTotal()
-        this.apply(new ItemQuantityIncreased(this.getUuid(), itemUuid, checkoutItemDomainModel.getProductQuantity(), this.subTotal))
+        
+        this.apply(new ItemQuantityIncreased(this.getUuid(), itemUuid, checkoutItemDomainModel.getProductQuantity()))
     }
 
     takeOutAnItem(checkoutItemEntityUuid: CheckoutItemID) {
@@ -141,14 +132,14 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             const checkoutItem = this.checkoutItems.get(checkoutItemEntityUuid.getUuid())
             checkoutItem.decreaseQuantity(1)
             this.checkoutItems.set(checkoutItemEntityUuid.getUuid(), checkoutItem)
-            this.calculateSubTotal()
-            this.apply(new AnItemDeleted(checkoutItemEntityUuid, this.getUuid(), this.subTotal, checkoutItem.getProductQuantity()))
+            
+            this.apply(new AnItemDeleted(checkoutItemEntityUuid, this.getUuid(), checkoutItem.getProductQuantity()))
             return;
         }
 
         this.checkoutItems.delete(checkoutItemEntityUuid.getUuid())
-        this.calculateSubTotal()
-        this.apply(new ItemDeleted(checkoutItemEntityUuid, this.getUuid(), this.subTotal))
+        
+        this.apply(new ItemDeleted(checkoutItemEntityUuid, this.getUuid()))
     }
 
     takeOutOneMoreThanItem(itemUuid: CheckoutItemID, itemQuantity: ProductQuantity){
@@ -160,13 +151,13 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         
         if(this.isCheckoutItemQuantityEqualToZero(checkoutItemDomainModel)){
             this.checkoutItems.delete(itemUuid.getUuid())
-            this.calculateSubTotal()
-            this.apply(new ItemDeleted(itemUuid, this.getUuid(), this.subTotal))
+            
+            this.apply(new ItemDeleted(itemUuid, this.getUuid()))
             return;
         }
         this.checkoutItems.set(itemUuid.getUuid(), checkoutItemDomainModel)
-        this.calculateSubTotal()
-        this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), this.subTotal, checkoutItemDomainModel.getProductQuantity()))
+        
+        this.apply(new ItemDeletedAsQuantity(itemUuid, this.getUuid(), checkoutItemDomainModel.getProductQuantity()))
     }
 
     takeOutSameItems(itemUuid:CheckoutItemID){
@@ -174,8 +165,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
             throw new CheckoutItemNotFoundException()
         }
         this.checkoutItems.delete(itemUuid.getUuid())
-        this.calculateSubTotal()
-        this.apply(new ItemDeleted(itemUuid, this.getUuid(), this.subTotal))
+        
+        this.apply(new ItemDeleted(itemUuid, this.getUuid()))
     }
 
     private isCheckoutItemQuantityEqualToZero(checkoutItem:CheckoutItemInterface) {
@@ -190,44 +181,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         const checkoutItem = this.checkoutItems.get(checkoutItemEntityUuid.getUuid())
         const checkoutItemQuantity = checkoutItem.getProductQuantity()
         return checkoutItemQuantity.getQuantity() > 1
-    }
-
-    updateItemPrices(itemUuid:ProductID,newPrice:Money) {
-        
-        this.checkoutItems.forEach((item:CheckoutItemInterface, itemKey:string) => {
-            if(item.isNull()) throw new NullObjectException()
-
-            item.changeProductBasePrice(newPrice.getAmount())
-                        
-            this.checkoutItems.set(itemKey, item)
-        })
-        this.calculateSubTotal()
-        this.apply(new CheckoutItemPricesUpdated(itemUuid, newPrice))
-    }
-
-    calculateSubTotal(){
-        this.subTotal = new Money(0)
-        if(this.checkoutItems.size === 0) return;
-        
-        this.checkoutItems.forEach((item:CheckoutItemInterface, uuid:string) => {
-
-            let itemQuantity: ProductQuantity = item.getProductQuantity()
-            let itemPrice: Money = item.getProductBasePrice()
-            let totalPrice: Money = itemPrice.times(itemQuantity.getQuantity())
-            
-            this.subTotal = this.subTotal.plus(totalPrice.getAmount())
-        })
-        
-        if(this.isSubTotalPriceNotEqualOrMoreThan100()) {
-            if(this.shippingPrice){
-                this.subTotal = this.subTotal.plus(this.shippingPrice.getAmount())
-            }
-        }
-
-    }
-    
-    private isSubTotalPriceNotEqualOrMoreThan100():boolean{
-        return (this.subTotal.getAmount() >= 100) === false
     }
 
     cancelThisCheckout(){
@@ -246,7 +199,6 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         }
     }
 
-    getSubTotal = () => this.subTotal
     getUserUuid = () => this.userUuid
     getAddress  = () => this.address
     getPeymentMethod = () => this.paymentMethod
