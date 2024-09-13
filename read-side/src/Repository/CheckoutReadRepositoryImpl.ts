@@ -10,7 +10,6 @@ import NullCheckoutItemQueryModel from '../Model/NullCheckoutItemQuery';
 interface MongoCheckoutDocument {
     _id: string,
     customerUuid: string,
-    subTotal: number,
     state: string,
     shippingPrice: number,
     peymentMethod: string,
@@ -27,6 +26,18 @@ interface MongoCheckoutItemDocument {
     createdAt: Date,
     updatedAt: Date
 }
+interface MongoCheckoutDocumentAggregate {
+    _id: string,
+    customerUuid: string,
+    subTotal?: number,
+    state: string,
+    shippingPrice: number,
+    peymentMethod: string,
+    items?:MongoCheckoutItemDocument[]
+    createdAt: Date
+    updatedAt: Date
+}
+
 @Injectable()
 export default class CheckoutReadRepositoryImpl implements CheckoutReadRepository{
     
@@ -48,19 +59,7 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
         })
 
     }
-    async updateSubTotalByUuid(uuid: string, subTotal:number){
-        await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOneAndUpdate(
-            {
-                _id: (uuid)
-            }, 
-            {
-                $set: {
-                    subTotal:subTotal,
-                    updatedAt: new Date        
-                }
-        })
-
-    }
+    
     async updateStateByUuid(uuid: string, state: string): Promise<void> {
         await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOneAndUpdate(
             {
@@ -78,7 +77,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
         await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").insertOne({
             _id: checkout.uuid,
             customerUuid: checkout.customerUuid,
-            subTotal: checkout.subTotal,
             state: checkout.checkoutState,
             shippingPrice: checkout.shippingPrice,
             peymentMethod: checkout.peymentMethod,
@@ -106,7 +104,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             }, 
             {
                 $set: {
-                    subTotal: checkout.subTotal,
                     state: checkout.checkoutState,
                     shippingPrice: checkout.shippingPrice,
                     peymentMethod: checkout.peymentMethod,
@@ -120,7 +117,53 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
         })
     }
     async findOneByUuidAndCustomerUuid(checkoutUuid: string, customerUuid: string): Promise<QueryModel> {
-        const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
+        
+        const pipeline = [
+            {
+                $match: {
+                    _id: checkoutUuid,
+                    customerUuid: customerUuid
+                }
+            },
+            {
+              $lookup: {
+                from: 'checkout_items', // Birleştirilecek koleksiyon
+                localField: '_id', // checkout koleksiyonundaki alan
+                foreignField: 'checkoutUuid', // checkout_items koleksiyonundaki eşleşecek alan
+                as: 'items', // Birleştirme sonucu oluşturulacak alan
+              },
+            },
+            {
+              $addFields: {
+                subTotal: {
+                  // Her bir item için quantity * price hesaplayıp topla
+                  $sum: {
+                    $map: {
+                      input: '$items',
+                      as: 'item',
+                      in: { $multiply: ['$$item.quantity', '$$item.basePrice'] }, // Ara toplam hesaplama
+                    },
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                customerUuid: 1,
+                subTotal: 1,
+                state: 1,
+                shippingPrice: 1,
+                peymentMethod: 1,
+                items: 1, // items alanı
+                createdAt: 1,
+                updatedAt: 1,
+              },
+            },
+          ];
+          const result = (await this.mongoClient.collection("checkouts").aggregate<MongoCheckoutDocumentAggregate>(pipeline).toArray()).at(0)
+        
+        /*const checkoutDocument = await this.mongoClient.collection<MongoCheckoutDocument>("checkouts").findOne(
             {
                 _id: (checkoutUuid),
                 customerUuid: customerUuid
@@ -141,17 +184,17 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                                                     productUuid:item.productUuid,
                                                     updatedDate:item.updatedAt
                                                 }))
-                                                .toArray()
+                                                .toArray()*/
         return CheckoutQueryModel.valueOf({
-            uuid: checkoutDocument._id.toString(),
-            customerUuid: checkoutDocument.customerUuid,
-            checkoutItemDocument: checkoutItems,
-            checkoutState: checkoutDocument.state,
-            createdDate: checkoutDocument.createdAt,
-            peymentMethod: checkoutDocument.peymentMethod,
-            shippingPrice: checkoutDocument.shippingPrice,
-            subTotal: checkoutDocument.subTotal,
-            updatedDate: checkoutDocument.updatedAt
+            uuid: result._id.toString(),
+            customerUuid: result.customerUuid,
+            checkoutItemDocument: result.items,
+            checkoutState: result.state,
+            createdDate: result.createdAt,
+            peymentMethod: result.peymentMethod,
+            shippingPrice: result.shippingPrice,
+            subTotal: result.subTotal,
+            updatedDate: result.updatedAt
         })
     }
     async findOneCheckoutItemByUuid(uuid:string) {
@@ -188,7 +231,7 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                 createdDate: checkoutDocument.createdAt,
                 peymentMethod: checkoutDocument.peymentMethod,
                 shippingPrice: checkoutDocument.shippingPrice,
-                subTotal: checkoutDocument.subTotal,
+                //subTotal: checkoutDocument.subTotal,
                 updatedDate: checkoutDocument.updatedAt
             })
     
@@ -223,7 +266,7 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             createdDate: checkoutDocument.createdAt,
             peymentMethod: checkoutDocument.peymentMethod,
             shippingPrice: checkoutDocument.shippingPrice,
-            subTotal: checkoutDocument.subTotal,
+            //subTotal: checkoutDocument.subTotal,
             updatedDate: checkoutDocument.updatedAt
         })
 

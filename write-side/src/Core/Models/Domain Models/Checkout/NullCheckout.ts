@@ -38,21 +38,14 @@ export default class NullCheckout implements CheckoutInterface {
     takeOutSameItems(itemUuid: CheckoutItemID): void {
         throw new NullObjectException
     }
-    updateItemPrices(itemUuid: ProductID, newPrices: Money): void {
-        throw new NullObjectException
-    }
-    calculateSubTotal(): void {
-        throw new NullObjectException
-    }
+   
     cancelThisCheckout(): void {
         throw new NullObjectException
     }
     completeThisCheckout(): void {
         throw new NullObjectException
     }
-    getSubTotal(): Money {
-        throw new NullObjectException
-    }
+    
     getUserUuid(): CustomerID {
         throw new NullObjectException
     }

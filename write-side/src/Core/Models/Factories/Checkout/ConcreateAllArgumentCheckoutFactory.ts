@@ -14,7 +14,7 @@ export default class ConcreateAllArgumentCheckoutFactory implements DomainModelF
             const checkoutUuid              = new CheckoutID(constructerValues.checkoutUuid)
             const userUuid                 = new CustomerID(constructerValues.userUuid)
             const checkoutState           = new CheckoutState(constructerValues.checkoutState)
-            const checkoutSubTotal       = new Money(constructerValues.subTotal)
+            
             const checkoutShippingPrice   = new Money(constructerValues.shippingPrice)
             const checkoutAddress          = Address.nullableConstruct(constructerValues.addressName, constructerValues.addressOwnerName, constructerValues.addressOwnerSurname, constructerValues.fullAddressInformation, constructerValues.addressCountry, constructerValues.addressProvince, constructerValues.addressDistrict, constructerValues.addressZipCode)
             const checkoutPeymentMethod     = PeymentMethod.nullableConstruct(constructerValues.peymentMethod)
@@ -22,7 +22,6 @@ export default class ConcreateAllArgumentCheckoutFactory implements DomainModelF
             return Checkout.valueOfAllConstructorArguments(
                 checkoutUuid,
                 userUuid,
-                checkoutSubTotal,
                 checkoutState,
                 constructerValues.createdAt,
                 constructerValues.updatedAt,

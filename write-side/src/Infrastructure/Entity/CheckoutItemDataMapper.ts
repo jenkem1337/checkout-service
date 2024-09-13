@@ -7,22 +7,22 @@ export default class CheckoutItemDataMapper {
     @PrimaryColumn()
     public uuid:string
     
-    @Column()
+    @Column({name: "base_price"})
     public productBasePrice:number
     
-    @Column()
+    @Column({name: "quantity"})
     public productQuantity: number
     
-    @Column()
+    @Column({name:"header"})
     public productHeader:string
     
-    @Column()
+    @Column({name: "product_uuid"})
     public productUuid: string
 
-    @CreateDateColumn()
+    @CreateDateColumn({name:"created_at"})
     public createdDate: Date
     
-    @UpdateDateColumn()
+    @UpdateDateColumn({name: "updated_at"})
     public updatedDate: Date
 
     @ManyToOne(() => CheckoutDataMapper, checkout => checkout.checkoutItems)

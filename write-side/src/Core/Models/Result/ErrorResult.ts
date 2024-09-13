@@ -1,14 +1,14 @@
 import Result from "../../Interfaces/Result";
 
-export default class ErrorResult implements Result<string> {
+export default class ErrorResult<T> implements Result<T> {
     private readonly type = "ERROR"
     constructor(
-        private readonly result: string
+        private readonly result: T
     ){}
     getType(): string {
         return this.type
     }
-    getResult(): string {
+    getResult(): T {
         return this.result
     }
     

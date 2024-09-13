@@ -5,7 +5,7 @@ interface CheckoutQueryModelConstructerParameters {
      
     readonly customerUuid:string
  
-    readonly subTotal:number
+    readonly subTotal?:number
  
     readonly shippingPrice?:number
  
@@ -13,7 +13,7 @@ interface CheckoutQueryModelConstructerParameters {
  
     readonly checkoutState:string
  
-    readonly checkoutItemDocument?: Array<CheckoutItemQueryModel>
+    readonly checkoutItemDocument?: Array<CheckoutItemQueryModel> | Array<object>
  
     readonly createdDate: Date
  
@@ -33,7 +33,7 @@ export default class CheckoutQueryModel implements QueryModel{
  
     public readonly checkoutState:string
  
-    public readonly checkoutItemDocument: Array<CheckoutItemQueryModel>
+    public readonly checkoutItemDocument: Array<CheckoutItemQueryModel> | Array<object>
  
     public readonly createdDate: Date
  
@@ -43,7 +43,7 @@ export default class CheckoutQueryModel implements QueryModel{
     private constructor(prop: CheckoutQueryModelConstructerParameters) {
         this.uuid = prop.uuid
         this.customerUuid = prop.customerUuid
-        this.subTotal = prop.subTotal
+        this.subTotal = prop.subTotal ?? null
         this.shippingPrice = prop.shippingPrice ?? 0
         this.peymentMethod = prop.peymentMethod ?? null
         this.checkoutState = prop.checkoutState

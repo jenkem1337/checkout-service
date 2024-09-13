@@ -78,31 +78,31 @@ describe('Checkout Repository', () => {
 
     it('should be save an instance of Checkout when called saveChanges', () => {
         expect(
-            () => checkoutRepository.saveChanges(new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
+            () => checkoutRepository.saveChanges(new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
         ).toBeTruthy()
     })
     it('should retrieve NullCheckout when given absent uuid', async () => {
-        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
+        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
         let checkoutAggregate: NullCheckout = await  checkoutRepository.findOneByUuid(randomUUID())
         expect(checkoutAggregate.isNull()).toBe(true)
 
     })
     it('should retrieve Checkout Aggregate when called findOneByUuid', async () => {
         const uuid = randomUUID()
-        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
+        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
         let checkoutAggregate = await  checkoutRepository.findOneByUuid(uuid)
         expect(checkoutAggregate.isNull()).toBe(false)
     })
     it('should should retrieve Checkout Aggregate when called findOneByUuidAndCustomerUuid', async () => {
         const uuid = randomUUID()
         const customerUuid = randomUUID()
-        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(uuid), new CustomerID(customerUuid), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
+        await checkoutRepository.saveChanges(new Checkout(new CheckoutID(uuid), new CustomerID(customerUuid),  new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
         let checkoutAggregate = await  checkoutRepository.findOneByUuidAndCustomerUuid(uuid, customerUuid)
         expect(checkoutAggregate.isNull()).toBe(false)
     })
     it('should retrieve Checkout Aggregate with Items when called findOneByUuid', async () => {
         const uuid = randomUUID()
-        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()),  new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(randomUUID()), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(120), new ProductQuantity(2), new Date, new Date))
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(randomUUID()), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 2"), new Money(50), new ProductQuantity(3), new Date, new Date))
 
@@ -111,12 +111,12 @@ describe('Checkout Repository', () => {
         let checkout_ = await checkoutRepository.findOneByUuid(uuid)
 
         expect( checkout_.getCheckoutItems().size).toBe(2)
-        expect(checkout_.getSubTotal().getAmount()).toBe(390)
+        
     })
     it('should retrieve Checkout Aggregate with an Item when deleted an item from aggregate', async () => {
         const uuid = randomUUID()
         const itemUuid = randomUUID()
-        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(120), new ProductQuantity(1), new Date, new Date))
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(randomUUID()), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 2"), new Money(50), new ProductQuantity(3), new Date, new Date))
 
@@ -137,7 +137,7 @@ describe('Checkout Repository', () => {
     it('should retrieve CheckoutItem from Checkout Aggregate when called findOneByUuid', async () => {
         const uuid = randomUUID()
         const itemUuid = randomUUID()
-        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date)
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(120), new ProductQuantity(1), new Date, new Date))
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(randomUUID()), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 2"), new Money(50), new ProductQuantity(3), new Date, new Date))
 
@@ -153,39 +153,39 @@ describe('Checkout Repository', () => {
     it('should return correct sub total when shipping price added and actual sub total under 100', async () => {
         const uuid = randomUUID()
         const itemUuid = randomUUID()
-        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(50), new ProductQuantity(1), new Date, new Date))
         _checkout.setShippingPrice(() => new Money(20))
         await checkoutRepository.saveChanges(_checkout)
         
         let checkout_= await checkoutRepository.findOneByUuid(uuid)
-        expect(checkout_.getSubTotal().getAmount()).toBe(70)
+        
     })
     it('should return correct sub total when shipping price added and sub total amount more than 100', async () => {
         const uuid = randomUUID()
         const itemUuid = randomUUID()
-        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new Money(0), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
+        const _checkout = new Checkout(new CheckoutID(uuid), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date)
         _checkout.addAnItem(new CheckoutItem(new CheckoutItemID(itemUuid), _checkout.getUuid(), new ProductID(randomUUID()), new ProductHeader("Product 1"), new Money(101), new ProductQuantity(1), new Date, new Date))
         _checkout.setShippingPrice(() => new Money(20))
         await checkoutRepository.saveChanges(_checkout)
         
         let checkout_= await checkoutRepository.findOneByUuid(uuid)
-        expect(checkout_.getSubTotal().getAmount()).toBe(101)
+        
     })
     it('should return Checkout Aggregate Array when called findManyByUuidA', async () => {
         const customerUuid = randomUUID()
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid), new Money(190), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid), new Money(110), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid),  new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid),  new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(customerUuid),  new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
 
         const checkoutDomainModelArr = await checkoutRepository.findManyByCustomerUuid(customerUuid)
 
         expect(checkoutDomainModelArr.length).toBe(3)
     })
     it('should return NullCheckout when absent customer uuid', async () => {
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new Money(100), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new Money(190), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
-        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new Money(110), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
+        await checkoutRepository.saveChanges( new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED), new Date, new Date) )
         
         const checkoutDomainModelArr =  await checkoutRepository.findManyByCustomerUuid(randomUUID())
         for(let checkout of checkoutDomainModelArr){
