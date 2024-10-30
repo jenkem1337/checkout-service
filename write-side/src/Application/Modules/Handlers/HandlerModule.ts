@@ -19,6 +19,8 @@ import ItemQuantityDecreasedEventHandler from 'src/Core/Services/Events/EventHan
 import TakeOutSameItemsFromCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/TakeOutSameItemsFromCheckoutCommandHandler';
 import WriteRepositoryFactoryModule from '../RepositoryModule/WriteCheckoutRepositoryFactory';
 import { AlsModule } from '../AlsModule';
+import CompleteCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CompleteCheckoutCommandHandler';
+import CheckoutCompletedEventHandler from 'src/Core/Services/Events/EventHandlers/CheckoutCompletedEventHandler';
 const CommandHandlers = [ 
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
@@ -26,7 +28,8 @@ const CommandHandlers = [
     CancelCheckoutCommandHandler,
     TakeOutAnItemFromCheckoutCommandHandler,
     TakeOutOneMoreThanItemCommandHandler,
-    TakeOutSameItemsFromCheckoutCommandHandler
+    TakeOutSameItemsFromCheckoutCommandHandler,
+    CompleteCheckoutCommandHandler
 ]
 const EventHandlers = [
     CheckoutCreatedEventHandler,
@@ -35,7 +38,8 @@ const EventHandlers = [
     ItemQuantityIncreasedEventHandler,
     AnItemDeletedEventHandler,
     ItemDeletedEventHandler,
-    ItemQuantityDecreasedEventHandler
+    ItemQuantityDecreasedEventHandler,
+    CheckoutCompletedEventHandler
 ]
 @Module({
     imports: [
@@ -60,6 +64,21 @@ const EventHandlers = [
                 },
               }),
             },
+            {
+              name: "ORDER_SAGA",
+              useFactory: async () => ({
+                transport: Transport.KAFKA,
+                options: {
+                  client: {
+                    clientId: "order-saga",
+                    brokers: [`${process.env.ORDER_SAGA_QUEUE_HOST}:${process.env.ORDER_SAGA_QUEUE_PORT}`]
+                  },
+                  consumer: {
+                    groupId: "order-saga-consumer"
+                  }
+                }
+              })
+            }
           ]),
           ],
     providers: [
