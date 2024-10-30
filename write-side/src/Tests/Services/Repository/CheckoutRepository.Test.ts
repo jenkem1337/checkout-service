@@ -21,6 +21,7 @@ import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemD
 import DomainModelFactoryContext, { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
 import NullableAllArgumentCheckoutFactory from '../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory';
 import NullableCheckoutItemFactory from '../../../Core/Models/Factories/CheckoutItem/NullableCheckoutItemFactory';
+import CheckoutInterface from 'src/Core/Models/Domain Models/Checkout/CheckoutInterface';
 
 
 
@@ -83,7 +84,7 @@ describe('Checkout Repository', () => {
     })
     it('should retrieve NullCheckout when given absent uuid', async () => {
         await checkoutRepository.saveChanges(new Checkout(new CheckoutID(randomUUID()), new CustomerID(randomUUID()), new CheckoutState(CheckoutStates.CHECKOUT_CREATED), new Date, new Date))
-        let checkoutAggregate: NullCheckout = await  checkoutRepository.findOneByUuid(randomUUID())
+        let checkoutAggregate: CheckoutInterface = await  checkoutRepository.findOneByUuid(randomUUID())
         expect(checkoutAggregate.isNull()).toBe(true)
 
     })
