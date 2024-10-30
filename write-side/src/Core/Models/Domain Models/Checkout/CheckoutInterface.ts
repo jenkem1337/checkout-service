@@ -9,6 +9,19 @@ import PeymentMethod from '../../ValueObjects/PeymentMethod';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import ProductID from '../../ValueObjects/ProductID';
 import CheckoutState from '../../ValueObjects/CheckoutState';
+export interface CheckoutDetail {
+    paymentMethod:string,
+    paymentDetail:object
+    addressName:string
+    addressOwnerName:string
+    addressOwnerSurname:string
+    fullAddressInformation:string
+    addressCountry:string
+    addressProvince:string
+    addressDistrict:string
+    addressZipCode:string
+}
+
 export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
     setShippingAddress(address:() => Address):void
     setPeymentMethod(peymentMethod: () => PeymentMethod):void
@@ -21,7 +34,7 @@ export default interface CheckoutInterface extends EntityInterface<CheckoutID>{
 
     
     cancelThisCheckout():void
-    completeThisCheckout():void
+    completeThisCheckout(address:CheckoutDetail):void
     isCheckoutCancelled():void
    
     getUserUuid():CustomerID
