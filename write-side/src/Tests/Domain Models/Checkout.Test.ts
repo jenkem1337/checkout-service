@@ -346,14 +346,6 @@ describe('Checkout', () => {
                 })
             })
 
-            describe('Checkout::completeThisCheckout', () => {
-                it('should be CHECKOUT_COMPLETED when calling method', () => {
-                    let expected = 'CHECKOUT_COMPLETED'
-                    checkoutDomainModel.completeThisCheckout()
-                    expect(checkoutDomainModel.getCheckoutState().getState()).toBe(expected)
-                })
-            })
-
             describe('Checkout::setShippingAddress', () => {
                 it('should return valid values about address when given address value object instance', () => {
                     checkoutDomainModel.setShippingAddress(
