@@ -16,7 +16,7 @@ export default abstract class BaseUUIDValueObject extends ValueObject {
         }
         this.uuid = uuid
     }
-    getUuid(){
+    getUuid():string{
         return this.uuid
     }
     equals(obj: Object): boolean {
