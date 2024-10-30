@@ -8,6 +8,7 @@ import DeleteSameItemsDto from './DTOs/DeleteSameItems';
 import CheckoutService from '../Service/CheckoutService';
 import NotFoundBaseExceptionFilter from "../ExcepitonFilters/NotFoundExceptionFilter";
 import InvalidOperationExceptionFilter from "../ExcepitonFilters/InvalidOperationExceptionFilter";
+import CompleteCheckoutDto from "./DTOs/CompleteCheckoutDto";
 
 @Controller("/api/v1/checkout")
 @UseFilters(NotFoundBaseExceptionFilter, InvalidOperationExceptionFilter)
@@ -66,6 +67,13 @@ export default class CheckoutController {
       dto.customerUuid = req.user.customerUUID
       return await this.checkoutService.deleteItemOneMoreThan(dto)
 
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("/complete")
+    async completeCheckout(@Body() dto: CompleteCheckoutDto, @Request() req:any) {
+      dto.userUuid = req.user.CustomerID
+      return await this.checkoutService.completeCheckout(dto)
     }
 
 }
