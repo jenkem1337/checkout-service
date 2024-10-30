@@ -10,7 +10,7 @@ import CheckoutItemNotFoundException from '../../../Exceptions/CheckoutItemNotFo
 import ItemDeleted from "./Events/ItemDeleted";
 import AnItemDeleted from "./Events/AnItemDeleted";
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
-import CheckoutInterface from './CheckoutInterface';
+import CheckoutInterface, { CheckoutDetail } from './CheckoutInterface';
 import ProductID from '../../ValueObjects/ProductID';
 import CheckoutItemPricesUpdated from "./Events/CheckoutItemsPriceUpdated";
 import ItemQuantityIncreased from './Events/ItemQuantityIncreased';
@@ -26,7 +26,8 @@ import ShippingPriceAdded from "./Events/ShippingPriceAdded";
 import { randomUUID } from "crypto";
 import CheckoutAllreadyCancelledException from '../../../Exceptions/CheckoutAllreadyCancelledException';
 import AnItemAdded from "./Events/AnItemAdded";
-
+import CreditCart from "./PeymentContext/CreditCard";
+import PaymentContext from "./PeymentContext/PeymentContext";
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
     private address: Address
@@ -188,9 +189,30 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         this.apply(new CheckoutCancelled(this.getUuid()))
     }
 
-    completeThisCheckout(){
+    completeThisCheckout(detail:CheckoutDetail){
         this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED)
-        this.apply(new CheckoutCompleted(this.getUuid()))
+        this.address = Address.notNullableConstruct(
+            detail.addressName,
+            detail.addressOwnerName, 
+            detail.addressOwnerSurname, 
+            detail.fullAddressInformation, 
+            detail.addressCountry,
+            detail.addressProvince, 
+            detail.addressDistrict, 
+            detail.addressZipCode
+        )
+
+        const paymentContext = new PaymentContext()
+        const paymentStrategy = paymentContext.getPaymentStrategy(detail.paymentMethod, detail.paymentDetail)
+        
+        this.apply(new CheckoutCompleted(
+                this.getUuid().getUuid(),
+                this.getUserUuid().getUuid(),
+                detail.paymentMethod,
+                paymentStrategy,
+                this.address,
+            )
+        )
     }
 
     isCheckoutCancelled(){
