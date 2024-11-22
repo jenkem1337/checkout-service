@@ -121,4 +121,16 @@ export default class CheckoutProjection {
         
         await this.idempotentMessageRepository.setMessageId(event.id)
     }
+
+    @EventPattern("checkout-completed")
+    async checkoutCompleted(@Payload() event:any) {
+        if(await this.idempotentMessageRepository.isMessageExist(event.id)){
+            console.log("This message allready computed")
+            return
+        }
+
+
+
+        await this.idempotentMessageRepository.setMessageId(event.id) 
+    }
 }
