@@ -1,38 +1,26 @@
 import AggregateRootEntity from "../../AggregateRootEntity";
 import CheckoutID from "../../ValueObjects/CheckoutID";
 import CustomerID from '../../ValueObjects/CustomerID';
-import Address from '../../ValueObjects/Address';
-import Money from '../../ValueObjects/Money';
-import PeymentMethod from '../../ValueObjects/PeymentMethod';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import CheckoutItemNotFoundException from '../../../Exceptions/CheckoutItemNotFoundException';
 import ItemDeleted from "./Events/ItemDeleted";
 import AnItemDeleted from "./Events/AnItemDeleted";
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
-import CheckoutInterface, { CheckoutDetail } from './CheckoutInterface';
-import ProductID from '../../ValueObjects/ProductID';
-import CheckoutItemPricesUpdated from "./Events/CheckoutItemsPriceUpdated";
+import CheckoutInterface from './CheckoutInterface';
 import ItemQuantityIncreased from './Events/ItemQuantityIncreased';
-import NullObjectException from '../../../Exceptions/NullObjectException';
 import ItemDeletedAsQuantity from './Events/ItemDeletedAsQuantity';
 import CheckoutState, { CheckoutStates } from '../../ValueObjects/CheckoutState';
 import CheckoutCancelled from './Events/CheckoutCancelled';
 import CheckoutCompleted from './Events/CheckoutCompleted';
 import CheckoutCreated from './Events/CheckoutCreated';
-import ShippingAddressAdded from './Events/ShippingAddressAdded';
-import PeymentMethodAdded from "./Events/PeymentMehodAdded";
-import ShippingPriceAdded from "./Events/ShippingPriceAdded";
+
 import { randomUUID } from "crypto";
 import CheckoutAllreadyCancelledException from '../../../Exceptions/CheckoutAllreadyCancelledException';
 import AnItemAdded from "./Events/AnItemAdded";
-import CreditCart from "./PeymentContext/CreditCard";
-import PaymentContext from "./PeymentContext/PeymentContext";
+import CheckoutAllreadyCompletedException from "src/Core/Exceptions/CheckoutAllreadyCompletedException";
 export default class Checkout extends AggregateRootEntity<CheckoutID> implements CheckoutInterface {
     private userUuid: CustomerID
-    private address: Address
-    private shippingPrice: Money
-    private paymentMethod: PeymentMethod
     private checkoutState: CheckoutState
     private checkoutItems: Map<string, CheckoutItemInterface>
 
@@ -43,24 +31,17 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
         createdAt: Date,
         updatedAt: Date,
         checkoutItems?:Map<string, CheckoutItemInterface>,
-        shippingAddress?: Address,
-        paymentMethod?: PeymentMethod,
-        shippingPrice?: Money,
 
 
         ){
             super(uuid, createdAt, updatedAt)
             this.userUuid = userUuid
             this.checkoutState = checkoutState
-            this.checkoutItems = checkoutItems ?? new Map<string, CheckoutItemInterface>(),
-            this.address = shippingAddress
-            this.paymentMethod = paymentMethod
-            this.shippingPrice = shippingPrice
-
+            this.checkoutItems = checkoutItems ?? new Map<string, CheckoutItemInterface>()
         }
 
-    static valueOfAllConstructorArguments(uuid: CheckoutID, userUuid: CustomerID, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date, checkoutItems?:Map<string, CheckoutItemInterface>, shippingAddress?: Address, paymentMethod?: PeymentMethod, shippingPrice?: Money,){
-        return new Checkout(uuid, userUuid,checkoutState,createdAt,updatedAt,checkoutItems, shippingAddress, paymentMethod, shippingPrice)
+    static valueOfAllConstructorArguments(uuid: CheckoutID, userUuid: CustomerID, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date, checkoutItems?:Map<string, CheckoutItemInterface>){
+        return new Checkout(uuid, userUuid,checkoutState,createdAt,updatedAt,checkoutItems)
     }
     
     static valueOfOnlyRequiredArguments(uuid: CheckoutID, userUuid: CustomerID, checkoutState:CheckoutState, createdAt: Date, updatedAt: Date,){
@@ -76,19 +57,10 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
                 checkout.getUpdatedAt()))
         return checkout
     }
-    setShippingAddress(address: () => Address) {
-        this.address = address()
-        this.apply(new ShippingAddressAdded(this.getUuid(), this.address))
-    }
-    setPeymentMethod(peymentMethod: () => PeymentMethod){
-        this.paymentMethod = peymentMethod()
-        this.apply(new PeymentMethodAdded(this.getUuid(), this.paymentMethod))
-    }
-    setShippingPrice(shippingPrice: () => Money) {
-        this.shippingPrice = shippingPrice()
-        this.apply(new ShippingPriceAdded(this.getUuid(), this.shippingPrice))
-    }
+    
     addAnItem(item:CheckoutItemInterface): void{
+        this.ifCheckoutCompletedOrCanceledThrowException()
+
         let itemDomainModel:CheckoutItemInterface = item
         if(this.isItemExistInList(item)) {
             itemDomainModel = this.checkoutItems.get(itemDomainModel.getUuid().getUuid()) 
@@ -109,6 +81,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     addItemOneMoreThan(itemUuid: CheckoutItemID,quantity:ProductQuantity){
+        this.ifCheckoutCompletedOrCanceledThrowException()
+
         if(this.isNotItemExistInList(itemUuid)){
             throw new CheckoutItemNotFoundException()
         }
@@ -125,6 +99,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     takeOutAnItem(checkoutItemEntityUuid: CheckoutItemID) {
+        this.ifCheckoutCompletedOrCanceledThrowException()
+
         if(this.isNotItemExistInList(checkoutItemEntityUuid)){
             throw new CheckoutItemNotFoundException()
         }
@@ -144,6 +120,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     takeOutOneMoreThanItem(itemUuid: CheckoutItemID, itemQuantity: ProductQuantity){
+        this.ifCheckoutCompletedOrCanceledThrowException()
+
         if(this.isNotItemExistInList(itemUuid)){
             throw new CheckoutItemNotFoundException()
         }
@@ -162,6 +140,8 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     takeOutSameItems(itemUuid:CheckoutItemID){
+        this.ifCheckoutCompletedOrCanceledThrowException()
+
         if(this.isNotItemExistInList(itemUuid)){
             throw new CheckoutItemNotFoundException()
         }
@@ -185,46 +165,41 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     cancelThisCheckout(){
+        this.isCheckoutCompleted()
+        
         this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_CANCELLED)
         this.apply(new CheckoutCancelled(this.getUuid()))
     }
 
-    completeThisCheckout(detail:CheckoutDetail){
-        this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED)
-        this.address = Address.notNullableConstruct(
-            detail.addressName,
-            detail.addressOwnerName, 
-            detail.addressOwnerSurname, 
-            detail.fullAddressInformation, 
-            detail.addressCountry,
-            detail.addressProvince, 
-            detail.addressDistrict, 
-            detail.addressZipCode
-        )
+    completeThisCheckout(){
+        this.isCheckoutCancelled()
 
-        const paymentContext = new PaymentContext()
-        const paymentStrategy = paymentContext.getPaymentStrategy(detail.paymentMethod, detail.paymentDetail)
+        this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED)
         
         this.apply(new CheckoutCompleted(
                 this.getUuid().getUuid(),
                 this.getUserUuid().getUuid(),
-                detail.paymentMethod,
-                paymentStrategy,
-                this.address,
+                this.getCheckoutState().getState()
             )
         )
     }
 
-    isCheckoutCancelled(){
+    private isCheckoutCancelled(){
         if(this.checkoutState.getState() === CheckoutStates.CHECKOUT_CANCELLED){
             throw new CheckoutAllreadyCancelledException()
         }
     }
+    private isCheckoutCompleted(){
+        if(this.checkoutState.getState() === CheckoutStates.CHECKOUT_COMPLETED){
+            throw new CheckoutAllreadyCompletedException()
+        }
+    }
 
+    private ifCheckoutCompletedOrCanceledThrowException() {
+        this.isCheckoutCancelled()
+        this.isCheckoutCompleted()
+    }
     getUserUuid = () => this.userUuid
-    getAddress  = () => this.address
-    getPeymentMethod = () => this.paymentMethod
-    getShippingPrice = () => this.shippingPrice
     getCheckoutState = () => this.checkoutState
     getCheckoutItems = ():Map<string, CheckoutItemInterface> => this.checkoutItems
 }

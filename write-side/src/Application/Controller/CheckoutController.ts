@@ -24,16 +24,18 @@ export default class CheckoutController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post("/item")
-    async addAnItemToCheckout(@Request() req:any, @Body() dto: AddAnCheckoutItemDto){
+    @Post("/item/:checkoutUuid")
+    async addAnItemToCheckout(@Request() req:any, @Param("checkoutUuid") checkoutUuid:any, @Body() dto: AddAnCheckoutItemDto){
       dto.customerUuid = req.user.customerUUID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.addAnItemToCheckout(dto)
 }
     
     @UseGuards(JwtAuthGuard)
-    @Post("/items")
-    async addItemOneMoreThanToCheckout(@Body() dto: AddOneMoreThanItemDto, @Request() req:any){
+    @Post("/items/:checkoutUuid")
+    async addItemOneMoreThanToCheckout(@Body() dto: AddOneMoreThanItemDto,@Param("checkoutUuid") checkoutUuid:any, @Request() req:any){
       dto.customerUuid = req.user.customerUUID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.addOneMoreThanItemToCheckout(dto)
 
     }
@@ -46,33 +48,37 @@ export default class CheckoutController {
 
     }
     @UseGuards(JwtAuthGuard)
-    @Delete("/item")
-    async deleteAnItemFromCheckout(@Body() dto: DeleteAnItemDto, @Request() req:any){
+    @Delete("/item/:checkoutUuid")
+    async deleteAnItemFromCheckout(@Body() dto: DeleteAnItemDto, @Param("checkoutUuid") checkoutUuid:any,@Request() req:any){
       dto.customerUuid = req.user.customerUUID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.deleteAnItemFromCheckout(dto)
 
     }  
     
     @UseGuards(JwtAuthGuard)
-    @Delete("/same-items")
-    async deleteAllSameItemsFromCheckoutByUuid(@Body() dto:DeleteSameItemsDto, @Request() req:any){
+    @Delete("/same-items/:checkoutUuid")
+    async deleteAllSameItemsFromCheckoutByUuid(@Body() dto:DeleteSameItemsDto, @Param("checkoutUuid") checkoutUuid:any,@Request() req:any){
       dto.customerUuid = req.user.customerUUID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.deleteSameItems(dto)
 
     }
 
     @UseGuards(JwtAuthGuard)
-    @Delete("/items")
-    async deleteItemsOneMoreThanFromCheckoutByUuid(@Body() dto: DeleteItemOneMoreThanDto, @Request() req:any){
+    @Delete("/items/:checkoutUuid")
+    async deleteItemsOneMoreThanFromCheckoutByUuid(@Body() dto: DeleteItemOneMoreThanDto, @Param("checkoutUuid") checkoutUuid:any, @Request() req:any){
       dto.customerUuid = req.user.customerUUID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.deleteItemOneMoreThan(dto)
 
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post("/complete")
-    async completeCheckout(@Body() dto: CompleteCheckoutDto, @Request() req:any) {
+    @Post("/complete/:checkoutUuid")
+    async completeCheckout(@Body() dto: CompleteCheckoutDto, @Param("checkoutUuid") checkoutUuid:any, @Request() req:any) {
       dto.userUuid = req.user.CustomerID
+      dto.checkoutUuid = checkoutUuid
       return await this.checkoutService.completeCheckout(dto)
     }
 
