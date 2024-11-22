@@ -118,9 +118,6 @@ export default class CheckoutService {
                 new CompleteCheckoutCommand(
                     dto.userUuid,
                     dto.checkoutUuid,
-                    dto.peymentMethod,
-                    dto.peymentDetail,
-                    dto.orderAddress
                 )
             )
         })

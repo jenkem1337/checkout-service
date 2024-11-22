@@ -25,9 +25,7 @@ export default class AddItemOneMoreThanCommandHandler implements ICommandHandler
         const checkoutDomainModel = await checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid) 
         
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
-        
-        checkoutDomainModel.isCheckoutCancelled()
-        
+                
         checkoutDomainModel.addItemOneMoreThan(
             new CheckoutItemID(command.checkoutItemUuid), 
             new ProductQuantity(command.quantity)

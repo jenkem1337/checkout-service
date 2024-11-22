@@ -3,7 +3,6 @@ import CheckoutItemDataMapper from "../../Entity/CheckoutItemDataMapper";
 import Checkout from "../../../Core/Models/Domain Models/Checkout/Checkout";
 import CheckoutDataMapper from '../../Entity/CheckoutDataMapper';
 import CheckoutInterface from '../../../Core/Models/Domain Models/Checkout/CheckoutInterface';
-import NullCheckout from '../../../Core/Models/Domain Models/Checkout/NullCheckout';
 import CheckoutAggregateMapperStrategy from '../../../Core/Interfaces/CheckoutAggregateStrategy';
 import { IDomainModelFactoryContext } from '../../../Core/Models/Factories/DomainModelFactoryContext';
 import NullableAllArgumentCheckoutFactory from "../../../Core/Models/Factories/Checkout/NullableAllArgumentCheckoutFactory";
@@ -31,8 +30,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
         const checkoutDataMapper = new CheckoutDataMapper(
             checkout.getUuid().getUuid(),
             checkout.getUserUuid().getUuid(),
-            checkout.getShippingPrice() ? checkout.getShippingPrice().getAmount() : 0 ,
-            checkout.getPeymentMethod() ? checkout.getPeymentMethod().getPeymentMethod() : null,
             checkout.getCheckoutState().getState(),
         )
         checkoutItemDataMapper.forEach(item => {
@@ -52,8 +49,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
                                                                                 createdAt: _checkoutDataMapper.createdDate,
                                                                                 updatedAt: _checkoutDataMapper.updatedDate,
                                                                                 userUuid: _checkoutDataMapper.customerUuid,
-                                                                                peymentMethod: _checkoutDataMapper.peymentMethod,
-                                                                                shippingPrice: _checkoutDataMapper.shippingPrice,
                                                                                 checkoutItems: new Map<string, CheckoutItemInterface>(_checkoutDataMapper.checkoutItems.map(item => {
                                                                                     return [
                                                                                         item.uuid,
@@ -88,8 +83,6 @@ export default class WriteCheckoutAggregateMapper implements CheckoutAggregateMa
                                                                                     createdAt: _checkout.createdDate,
                                                                                     updatedAt: _checkout.updatedDate,
                                                                                     userUuid: _checkout.customerUuid,
-                                                                                    peymentMethod: _checkout.peymentMethod,
-                                                                                    shippingPrice: _checkout.shippingPrice,
                                                                                     checkoutItems: new Map<string, CheckoutItemInterface>(_checkout.checkoutItems.map(item => {
                                                                                         return [
                                                                                             item.uuid,

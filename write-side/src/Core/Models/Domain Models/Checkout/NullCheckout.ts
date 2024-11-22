@@ -1,26 +1,13 @@
-import Address from '../../ValueObjects/Address';
 import CheckoutID from '../../ValueObjects/CheckoutID';
 import CheckoutItemID from '../../ValueObjects/CheckoutItemID';
 import CheckoutState from '../../ValueObjects/CheckoutState';
 import CustomerID from '../../ValueObjects/CustomerID';
-import Money from '../../ValueObjects/Money';
-import PeymentMethod from '../../ValueObjects/PeymentMethod';
-import ProductID from '../../ValueObjects/ProductID';
 import ProductQuantity from '../../ValueObjects/ProductQuantity';
 import CheckoutInterface from './CheckoutInterface';
 import CheckoutItemInterface from './CheckoutItemInterface';
 import NullObjectException from '../../../Exceptions/NullObjectException';
 export default class NullCheckout implements CheckoutInterface {
     isCheckoutCancelled(): void {
-        throw new NullObjectException
-    }
-    setPeymentMethod(peymentMethod: () => PeymentMethod): void {
-        throw new NullObjectException
-    }
-    setShippingPrice(shippingPrice: () => Money): void {
-        throw new NullObjectException
-    }
-    setShippingAddress(address: () => Address): void {
         throw new NullObjectException
     }
     addAnItem(item: CheckoutItemInterface): void {
@@ -49,15 +36,7 @@ export default class NullCheckout implements CheckoutInterface {
     getUserUuid(): CustomerID {
         throw new NullObjectException
     }
-    getAddress(): Address {
-        throw new NullObjectException
-    }
-    getShippingPrice(): Money {
-        throw new NullObjectException
-    }
-    getPeymentMethod(): PeymentMethod {
-        throw new NullObjectException
-    }
+    
     getCheckoutState(): CheckoutState {
         throw new NullObjectException
     }

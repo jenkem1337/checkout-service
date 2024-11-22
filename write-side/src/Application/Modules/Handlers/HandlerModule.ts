@@ -21,6 +21,7 @@ import WriteRepositoryFactoryModule from '../RepositoryModule/WriteCheckoutRepos
 import { AlsModule } from '../AlsModule';
 import CompleteCheckoutCommandHandler from 'src/Core/Services/Commands/CommandHandlers/CompleteCheckoutCommandHandler';
 import CheckoutCompletedEventHandler from 'src/Core/Services/Events/EventHandlers/CheckoutCompletedEventHandler';
+import { HttpModule } from '@nestjs/axios';
 const CommandHandlers = [ 
     AddAnItemToCartCommadHandler,
     AddItemOneMoreThanCommandHandler,
@@ -48,6 +49,7 @@ const EventHandlers = [
         WriteRepositoryFactoryModule,
         DomainModelFactoryModule, 
         CqrsModule,
+        HttpModule,
         ClientsModule.registerAsync([
             {
               name: 'CHECKOUT_PROJECTION_SERVICE',
@@ -64,21 +66,6 @@ const EventHandlers = [
                 },
               }),
             },
-            {
-              name: "ORDER_SAGA",
-              useFactory: async () => ({
-                transport: Transport.KAFKA,
-                options: {
-                  client: {
-                    clientId: "order-saga",
-                    brokers: [`${process.env.ORDER_SAGA_QUEUE_HOST}:${process.env.ORDER_SAGA_QUEUE_PORT}`]
-                  },
-                  consumer: {
-                    groupId: "order-saga-consumer"
-                  }
-                }
-              })
-            }
           ]),
           ],
     providers: [

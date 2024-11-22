@@ -11,8 +11,6 @@ interface MongoCheckoutDocument {
     _id: string,
     customerUuid: string,
     state: string,
-    shippingPrice: number,
-    peymentMethod: string,
     createdAt: Date
     updatedAt: Date
 }
@@ -31,8 +29,6 @@ interface MongoCheckoutDocumentAggregate {
     customerUuid: string,
     subTotal?: number,
     state: string,
-    shippingPrice: number,
-    peymentMethod: string,
     items?:MongoCheckoutItemDocument[]
     createdAt: Date
     updatedAt: Date
@@ -78,8 +74,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             _id: checkout.uuid,
             customerUuid: checkout.customerUuid,
             state: checkout.checkoutState,
-            shippingPrice: checkout.shippingPrice,
-            peymentMethod: checkout.peymentMethod,
             createdAt: checkout.createdDate,
             updatedAt: checkout.updatedDate
         })
@@ -105,8 +99,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             {
                 $set: {
                     state: checkout.checkoutState,
-                    shippingPrice: checkout.shippingPrice,
-                    peymentMethod: checkout.peymentMethod,
                     updatedAt: checkout.updatedDate        
                 }
         })
@@ -153,8 +145,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                 customerUuid: 1,
                 subTotal: 1,
                 state: 1,
-                shippingPrice: 1,
-                peymentMethod: 1,
                 items: 1, // items alanı
                 createdAt: 1,
                 updatedAt: 1,
@@ -191,8 +181,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             checkoutItemDocument: result.items,
             checkoutState: result.state,
             createdDate: result.createdAt,
-            peymentMethod: result.peymentMethod,
-            shippingPrice: result.shippingPrice,
             subTotal: result.subTotal,
             updatedDate: result.updatedAt
         })
@@ -229,8 +217,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
                 customerUuid: checkoutDocument.customerUuid,
                 checkoutState: checkoutDocument.state,
                 createdDate: checkoutDocument.createdAt,
-                peymentMethod: checkoutDocument.peymentMethod,
-                shippingPrice: checkoutDocument.shippingPrice,
                 //subTotal: checkoutDocument.subTotal,
                 updatedDate: checkoutDocument.updatedAt
             })
@@ -264,8 +250,6 @@ export default class CheckoutReadRepositoryImpl implements CheckoutReadRepositor
             checkoutItemDocument: checkoutItems,
             checkoutState: checkoutDocument.state,
             createdDate: checkoutDocument.createdAt,
-            peymentMethod: checkoutDocument.peymentMethod,
-            shippingPrice: checkoutDocument.shippingPrice,
             //subTotal: checkoutDocument.subTotal,
             updatedDate: checkoutDocument.updatedAt
         })

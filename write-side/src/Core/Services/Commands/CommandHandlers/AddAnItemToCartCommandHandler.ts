@@ -25,10 +25,7 @@ export default class AddAnItemToCartCommadHandler implements ICommandHandler<Add
             const checkoutWriteRepository = this.checkoutRepositoryFactory.createCheckoutRepository()
             const checkoutDomainModel = await checkoutWriteRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
-            if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
-            //if checkout cancelled it will throw exception
-            checkoutDomainModel.isCheckoutCancelled()
-            
+            if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()            
     
             const checkoutItem = this.domainModelFactoryContext
                                                         .setFactoryMethod(ConcreateCheckoutItemFactory.name)

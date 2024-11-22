@@ -5,7 +5,6 @@ import { DataSource } from 'typeorm';
 import CheckoutDataMapper from '../../../Infrastructure/Entity/CheckoutDataMapper';
 import CheckoutItemDataMapper from '../../../Infrastructure/Entity/CheckoutItemDataMapper';
 import { Scope } from '@nestjs/common';
-import { PeymentMethodEnum } from '../../../Core/Models/ValueObjects/PeymentMethod';
 describe('Checkout ORM Test', () => {
     let testDataSource: DataSource
     beforeEach(async () => {
@@ -39,7 +38,7 @@ describe('Checkout ORM Test', () => {
 
     it('should return an instance of Checkout data model when save and get', async () => {
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED)
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), CheckoutStates.CHECKOUT_CREATED)
         await testDataSource.manager.save(checkoutDataMapper)
         const checkoutFromDb = await testDataSource.manager.findOne(CheckoutDataMapper, {
             where: {
@@ -54,7 +53,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]
@@ -78,7 +77,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]
@@ -105,7 +104,7 @@ describe('Checkout ORM Test', () => {
         const checkoutItem1 = new CheckoutItemDataMapper(randomUUID(), 40, 1, 'Product 1', randomUUID())
         const checkoutItem2 = new CheckoutItemDataMapper(randomUUID(), 60, 1, 'Product 2', randomUUID())
         const checkoutUuid = randomUUID()
-        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), 0, PeymentMethodEnum.CREDIT_CART, CheckoutStates.CHECKOUT_CREATED, 
+        const checkoutDataMapper = new CheckoutDataMapper(checkoutUuid, randomUUID(), CheckoutStates.CHECKOUT_CREATED, 
             [
                 checkoutItem1, checkoutItem2
             ]

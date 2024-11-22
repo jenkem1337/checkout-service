@@ -2,19 +2,14 @@ import CheckoutID from '../../Core/Models/ValueObjects/CheckoutID';
 import Checkout from '../../Core/Models/Domain Models/Checkout/Checkout';
 import { randomUUID } from 'crypto';
 import CustomerID from '../../Core/Models/ValueObjects/CustomerID';
-import Address from '../../Core/Models/ValueObjects/Address';
-import Money from '../../Core/Models/ValueObjects/Money';
-import PeymentMethod, { PeymentMethodEnum } from '../../Core/Models/ValueObjects/PeymentMethod';
 import CheckoutState from '../../Core/Models/ValueObjects/CheckoutState';
 import { CheckoutStates } from '../../Core/Models/ValueObjects/CheckoutState';
 import CheckoutItemInterface from '../../Core/Models/Domain Models/Checkout/CheckoutItemInterface';
 import CheckoutInterface from '../../Core/Models/Domain Models/Checkout/CheckoutInterface';
 import NullPropertyException from '../../Core/Exceptions/NullPropertyException';
 import CheckoutItemID from '../../Core/Models/ValueObjects/CheckoutItemID';
-import ProductID from '../../Core/Models/ValueObjects/ProductID';
 import ProductQuantity from '../../Core/Models/ValueObjects/ProductQuantity';
 import CheckoutItemNotFoundException from '../../Core/Exceptions/CheckoutItemNotFoundException';
-import NegativeNumberException from '../../Core/Exceptions/NegativeNumberException';
 import ConcreteCheckoutFactory from '../../Core/Models/Factories/Checkout/ConcreteCheckoutFactory';
 import CheckoutConstructorParamaters from '../../Core/Models/Factories/Checkout/CheckoutConstructorParameters';
 import NullableCheckoutFactory from '../../Core/Models/Factories/Checkout/NullableCheckoutFactory';
@@ -56,16 +51,10 @@ describe('Checkout', () => {
                 new Date,
                 new Date,
                 new Map<string, CheckoutItemInterface>,
-                Address.notNullableConstruct('Home','John','Doe','Deneme deneme deneme', 'Turkey','Istanbul','Kadikoy', '34734'),
-                PeymentMethod.notNullableConstruct('CREDIT_CART'),
-                new Money(18),
             )
             expect(checkout).toBeTruthy()
-            expect(checkout.getAddress().getAddressCountry()).toBe('Turkey')
             expect(checkout.getCheckoutItems()).toBeInstanceOf(Map<string, CheckoutItemInterface>)
             expect(checkout.getCheckoutState().getState()).toBe('CHECKOUT_CREATED')
-            expect(checkout.getPeymentMethod().getPeymentMethod()).toBe('CREDIT_CART')
-            expect(checkout.getShippingPrice().getAmount()).toBe(18)
             
         })
         it('should return true when given without optional parameters', () => {
@@ -346,37 +335,7 @@ describe('Checkout', () => {
                 })
             })
 
-            describe('Checkout::setShippingAddress', () => {
-                it('should return valid values about address when given address value object instance', () => {
-                    checkoutDomainModel.setShippingAddress(
-                        () => Address.notNullableConstruct('Home', 'John','Doe','Example Example Example', 'Turkey', 'Istanbul', 'Bakirkoy', '34147')
-                    )
-                    let shippingAddress = checkoutDomainModel.getAddress()
-                    expect(shippingAddress.getAddressName()).toBe('Home')
-                    expect(shippingAddress.getAddressOwnerName()).toBe('John')
-                    expect(shippingAddress.getAddressOwnerSurname()).toBe('Doe')
-                    expect(shippingAddress.getFullAddressInformation()).toBe('Example Example Example')
-                    expect(shippingAddress.getAddressCountry()).toBe('Turkey')
-                    expect(shippingAddress.getAddressProvince()).toBe('Istanbul')
-                    expect(shippingAddress.getAddressDistrict()).toBe('Bakirkoy')
-                    expect(shippingAddress.getAddressZipCode()).toBe('34147')
-                })
-            })
-            describe('Checkout::setPeymentMethod', () => {
-                it('should return valid values about peyment method when given peyment method value object instance', () => {
-                    checkoutDomainModel.setPeymentMethod(() => PeymentMethod.notNullableConstruct(PeymentMethodEnum.CREDIT_CART))
-                    let peymentMethod = checkoutDomainModel.getPeymentMethod()
-                    expect(peymentMethod.getPeymentMethod()).toBe('CREDIT_CART')
-                })
-            })
-
-            describe('Checkout::setShippingPrice', () => {
-                it('should return valid values about shipping price when given money value object instance', () => {
-                    checkoutDomainModel.setShippingPrice(() => new Money(8))
-                    let shippingPrice = checkoutDomainModel.getShippingPrice()
-                    expect(shippingPrice.getAmount()).toBe(8)
-                })
-            })
+           
         })
     })
 })

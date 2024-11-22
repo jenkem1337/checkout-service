@@ -10,12 +10,6 @@ export default class CheckoutDataMapper {
     @Column({name: "customer_uuid"})
     public customerUuid:string
 
-    @Column({name:"shipping_price",default: 0})
-    public shippingPrice:number
-
-    @Column({name:"peyment_method",default: null})
-    public peymentMethod:string
-
     @Column({name:"state"})
     public checkoutState:string
 
@@ -30,16 +24,14 @@ export default class CheckoutDataMapper {
     })
     public checkoutItems: CheckoutItemDataMapper[]
 
-    constructor(uuid?:string, customerUuid?:string, shippingPrice?:number, peymentMethod?:string, checkoutState?:string, checkoutItems?:CheckoutItemDataMapper[]) {
+    constructor(uuid?:string, customerUuid?:string, checkoutState?:string, checkoutItems?:CheckoutItemDataMapper[]) {
         this.uuid = uuid
         this.customerUuid = customerUuid
-        this.shippingPrice = shippingPrice
-        this.peymentMethod = peymentMethod
         this.checkoutState = checkoutState
         this.checkoutItems = checkoutItems
     }
 
     static createNull() {
-        return new CheckoutDataMapper(null, null, null, null, null, [CheckoutItemDataMapper.createNull()])
+        return new CheckoutDataMapper(null, null, null, [CheckoutItemDataMapper.createNull()])
     }
 }

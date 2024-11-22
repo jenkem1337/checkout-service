@@ -27,7 +27,6 @@ export default class TakeOutAnItemFromCheckoutCommandHandler implements ICommand
         const checkoutDomainModel = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
 
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
-        checkoutDomainModel.isCheckoutCancelled()
         
         checkoutDomainModel.takeOutAnItem(new CheckoutItemID(command.checkoutItemUuid))
         

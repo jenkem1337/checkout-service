@@ -4,17 +4,7 @@ export default interface CheckoutConstructorParamaters {
     checkoutUuid?:string
     userUuid?:string
     checkoutState?:string
-    shippingPrice?:number
-    peymentMethod?:string
     checkoutItems?: Map<string, CheckoutItemInterface>
-    addressName?:string,
-    addressOwnerName?:string,
-    addressOwnerSurname?:string,
-    fullAddressInformation?:string,
-    addressCountry?:string,
-    addressProvince?:string,
-    addressDistrict?:string,
-    addressZipCode?:string
     createdAt?:Date
     updatedAt?:Date
 

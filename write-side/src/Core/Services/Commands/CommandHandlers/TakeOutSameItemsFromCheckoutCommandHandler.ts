@@ -22,7 +22,6 @@ export default class TakeOutSameItemsFromCheckoutCommandHandler implements IComm
         const checkoutDomainModel = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
-        checkoutDomainModel.isCheckoutCancelled()
         
         checkoutDomainModel.takeOutSameItems(
             new CheckoutItemID(command.checkoutItemUuid),

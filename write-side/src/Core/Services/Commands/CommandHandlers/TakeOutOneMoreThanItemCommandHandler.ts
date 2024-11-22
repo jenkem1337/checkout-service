@@ -22,7 +22,6 @@ export default class TakeOutOneMoreThanItemCommandHandler implements ICommandHan
         const checkoutDomainModel = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkoutDomainModel.isNull()) throw new CheckoutNotFound()
-        checkoutDomainModel.isCheckoutCancelled()
         
         checkoutDomainModel.takeOutOneMoreThanItem(
             new CheckoutItemID(command.checkoutItemUuid),

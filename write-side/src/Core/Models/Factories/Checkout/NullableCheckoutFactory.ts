@@ -4,7 +4,6 @@ import NullCheckout from "../../Domain Models/Checkout/NullCheckout"
 import CheckoutID from "../../ValueObjects/CheckoutID"
 import CheckoutState from "../../ValueObjects/CheckoutState"
 import CustomerID from "../../ValueObjects/CustomerID"
-import Money from "../../ValueObjects/Money"
 import { DomainModelFactory } from "../DomainModelFactory"
 import CheckoutConstructorParamaters from "./CheckoutConstructorParameters"
 

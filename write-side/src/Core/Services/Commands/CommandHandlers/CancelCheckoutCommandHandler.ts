@@ -20,7 +20,6 @@ export default class CancelCheckoutCommandHandler implements ICommandHandler<Can
         const checkout = await checkoutRepository.findOneByUuidAndCustomerUuid(command.checkoutUuid, command.customerUuid)
         
         if(checkout.isNull()) throw new CheckoutNotFound()
-        checkout.isCheckoutCancelled()
         
         const publishableCheckout = this.eventPublisher.mergeObjectContext(checkout as Checkout)
         
