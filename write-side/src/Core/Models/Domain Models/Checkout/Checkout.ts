@@ -172,7 +172,7 @@ export default class Checkout extends AggregateRootEntity<CheckoutID> implements
     }
 
     completeThisCheckout(){
-        this.isCheckoutCancelled()
+        this.ifCheckoutCompletedOrCanceledThrowException()
 
         this.checkoutState = new CheckoutState(CheckoutStates.CHECKOUT_COMPLETED)
         
