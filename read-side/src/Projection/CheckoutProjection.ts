@@ -129,7 +129,7 @@ export default class CheckoutProjection {
             return
         }
 
-
+        await this.chekcoutReadRepository.updateStateByUuid(event.checkoutUuid, event.state)
 
         await this.idempotentMessageRepository.setMessageId(event.id) 
     }
