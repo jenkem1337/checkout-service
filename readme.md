@@ -2,7 +2,7 @@
 
 2 - Work as like microservice.
 
-3 - It is communicate with my e-commarce PHP app via HTTP.
+3 - It is communicate with my [e-commarce PHP project](https://github.com/jenkem1337/e-commarce) app via HTTP.
 
 4 - Write database is Postgres and read database is Mongo. Sync with Apache Kafka
 
