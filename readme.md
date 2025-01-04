@@ -35,4 +35,4 @@ The following technologies and tools are used in this project:
 
 The high-level architecture diagram below illustrates the separation of the write and read models, along with the event-driven communication flow:
 
-![High-Level Architecture](checkout-service.png)
+![High-Level Architecture](checkout-service.jpg)
