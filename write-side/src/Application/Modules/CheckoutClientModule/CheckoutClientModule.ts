@@ -12,14 +12,18 @@ import TransactionManagerFactoryModule from "../RepositoryModule/TransactionMana
 import CheckoutController from "../../Controller/CheckoutController";
 import { HttpModule } from "@nestjs/axios";
 import { ConfigModule } from "@nestjs/config";
-
+import { resolve } from "path";
 
 @Module({
     controllers:[CheckoutController],
     providers: [CheckoutService, JwtStrategy],
     imports:[
         ConfigModule.forRoot({
-            envFilePath: [".env"]
+            envFilePath: [
+              process.env.NODE_ENV === 'docker'
+              ? `${process.cwd()}/.env.docker`
+              : `${process.cwd()}/.env`
+            ],
         }),
         JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
         PassportModule,

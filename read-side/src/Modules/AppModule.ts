@@ -11,9 +11,13 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: [".env"]
-    }),
-    JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
+      envFilePath: [
+        process.env.NODE_ENV === 'docker'
+        ? `${process.cwd()}/.env.docker`
+        : `${process.cwd()}/.env`
+      ],
+}),
+JwtModule.register({secret: process.env.JWT_SECRET_TOKEN}),
     PassportModule,
     MongoModule
   ],
